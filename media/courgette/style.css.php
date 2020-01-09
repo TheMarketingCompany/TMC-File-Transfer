@@ -106,12 +106,12 @@ table a:focus {
 }
 
 input[type="submit"] {
-  background: #0D9CB2;
+  background: #f5f5f5;
   border: 0;
   padding: 0.4em 2.2em;
   font-size: 1.1em;
   color: #FFF;
-  border-bottom: 5px solid #085B69;
+  border-bottom: 5px solid #cfc8c8;
   cursor: pointer;
   margin: 10px;
 }
@@ -130,8 +130,8 @@ input[type="submit"]:hover,
 input[type="submit"]:focus {
   border: 0;
   position: relative;
-  background: #085B69;
-  border-bottom: 5px solid #0D9CB2;
+  background: #cfc8c8;
+  border-bottom: 5px solid #f5f5f5;
   margin-bottom: 15px;
 }
 
