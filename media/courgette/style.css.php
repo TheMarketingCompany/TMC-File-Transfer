@@ -107,6 +107,7 @@ table a:focus {
 
 input[type="submit"] {
   background: #f5f5f5;
+  border: 0;
   padding: 0.4em 2.2em;
   font-size: 1.1em;
   color: #c9a116;
@@ -139,7 +140,7 @@ select { width: 100%; }
 }
 
 #upload fieldset:hover {
-  border-color: #663D1C;
+  border-color: #c9a116;
 }
 
 #upload > form {
@@ -173,12 +174,12 @@ select { width: 100%; }
 #copyright {
   text-align: center;
   font-size: 0.8em;
-  color: #795548;
+  color: #fff;
   margin: 3em auto;
 }
 
 #copyright a {
-  color: #795548;
+  color: #fff;
   text-decoration: none;
 }
 
@@ -223,7 +224,7 @@ select { width: 100%; }
 .info,
 .error {
   text-align: center;
-  color: #795548;
+  color: #fff;
   padding-left: 3em;
 }
 
@@ -238,13 +239,13 @@ select { width: 100%; }
 
 #upload_finished a {
   text-decoration: none;
-  color: #795548;
+  color: #fff;
 }
 
 #uploading a {
   font-weight: bold;
   text-decoration: none;
-  color: #795548;
+  color: #fff;
 }
 
 #uploaded_percentage {
@@ -282,7 +283,7 @@ select { width: 100%; }
 
 textarea[readonly="readonly"] {
   border: 0;
-  color: #795548;
+  color: #fff;
   font-family: Arial, sans-serif;
   background: none;
   margin: auto;
@@ -292,14 +293,14 @@ textarea[readonly="readonly"] {
 textarea[readonly="readonly"] + p,
 textarea[readonly="readonly"] + p + p {
   text-align: center;
-  color: #795548;
+  color: #fff;
 }
 
 textarea[readonly="readonly"] + p a,
 textarea[readonly="readonly"] + p + p a {
   font-weight: bold;
   text-decoration: none;
-  color: #795548;
+  color: #fff;
 }
 
 textarea[readonly="readonly"] + p a:hover,
