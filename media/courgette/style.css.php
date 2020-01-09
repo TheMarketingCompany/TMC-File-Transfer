@@ -110,7 +110,7 @@ input[type="submit"] {
   border: 0;
   padding: 0.4em 2.2em;
   font-size: 1.1em;
-  color: #FFF;
+  color: #c9a116;
   cursor: pointer;
   margin: 10px;
 }
