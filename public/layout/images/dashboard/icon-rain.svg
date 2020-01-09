@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="26px" viewBox="0 0 32 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Dashboard-/-Default" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-1154.000000, -941.000000)">
+        <g id="widget-/-weather-map" transform="translate(841.000000, 861.000000)" fill="#0078D7" fill-rule="nonzero">
+            <g id="infobox-/-weather" transform="translate(289.000000, 67.000000)">
+                <g id="Group" transform="translate(24.000000, 12.000000)">
+                    <path d="M26,7 C25.498,7 25.013,7.069 24.546,7.185 C23.365,3.592 19.988,0.995 16,0.995 C12.012,0.995 8.635,3.592 7.454,7.185 C6.987,7.069 6.502,7 6,7 C2.686,7 0,9.686 0,13 C0,16.314 2.686,19 6,19 L7.007,19 L7.835,17 L6,17 C3.794,17 2,15.206 2,13 C2,10.794 3.794,9 6,9 C7.212,9 8.287,9.553 9.021,10.408 C9.013,10.27 9,10.134 9,9.995 C9,6.129 12.134,2.995 16,2.995 C19.866,2.995 23,6.129 23,9.995 C23,10.134 22.987,10.27 22.979,10.408 C23.713,9.553 24.788,9 26,9 C28.206,9 30,10.794 30,13 C30,15.206 28.206,17 26,17 L22.989,17 L22.672,17.765 L22.16,19 L26,19 C29.314,19 32,16.314 32,13 C32,9.686 29.314,7 26,7 Z" id="Shape"></path>
+                    <polygon id="Shape" points="10 17 6.686 25 8.851 25 12.165 17"></polygon>
+                    <polygon id="Shape" points="15.345 25 17.51 25 20.824 17 18.659 17"></polygon>
+                    <polygon id="Shape" points="14.33 17 10.187 27 12.352 27 16.494 17"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

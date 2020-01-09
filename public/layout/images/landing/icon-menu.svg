@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="33px" height="15px" viewBox="0 0 33 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>icon-menu</title>
+    <desc>Created with Sketch.</desc>
+    <g id="🚀-Template-Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="landing-/-mobile" transform="translate(-319.000000, -50.000000)" fill="#FFFFFF">
+            <g id="topbar" transform="translate(18.000000, 32.000000)">
+                <path d="M301,33 L334,33 L334,30.5 L301,30.5 L301,33 L301,33 Z M301,26.75 L334,26.75 L334,24.25 L301,24.25 L301,26.75 L301,26.75 Z M301,18 L301,20.5 L334,20.5 L334,18 L301,18 L301,18 Z" id="icon-menu"></path>
+            </g>
+        </g>
+    </g>
+</svg>

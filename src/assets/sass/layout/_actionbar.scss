@@ -1,0 +1,56 @@
+.layout-actionbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+	background-color: $actionBarBgColor;
+	padding: 10px 25px;
+    position: relative;
+	box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+
+    .layout-breadcrumb {
+        color: $textSecondaryColor;
+    }
+
+	.layout-actions {
+		padding: 0;
+
+		ul {
+            margin: 0;
+			padding: 0;
+			list-style: none;
+			display: inline-block;
+
+			> li {
+                display: inline-block;
+
+				> button {
+					position: relative;
+					margin-left: 5px;
+					background-color: $actionItemBgColor;
+					color: $actionItemIconColor;
+					font-size: 15px;
+					width: 36px;
+					height: 36px;
+					cursor: pointer;
+					border-radius: 50%;
+					border: 1px solid $actionBarBgColor;
+					transition: background-color $transitionDuration;
+
+					.icon{
+						position: absolute;
+						top: 50%;
+						left: 50%;
+						width:16px;
+						margin-top: -0.5em;
+						margin-left: -0.5em;
+                        font-size: 1.25em;
+					}
+
+					&:hover {
+						background-color: $actionItemHoverBgColor;
+					}
+				}
+			}
+		}
+	}
+}

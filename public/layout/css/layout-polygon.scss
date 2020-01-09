@@ -1,0 +1,33 @@
+$primaryLighterColor:#B3E5FC;
+$primaryColor:#0288D1;
+$primaryDarkerColor:#01579B;
+$primaryTextColor:#ffffff;
+
+/* background */
+$backgroundImage:'polygon.jpg';
+
+/* horizontal menu */
+$horizontalMenuItemBgColor: rgba(0, 0, 0, 0.6);
+$horizontalMenuItemTextColor: rgba(255,255,255,0.72);
+$horizontalMenuItemHoverBgColor: rgba(0, 0, 0, 0.8);
+$horizontalMenuItemHoverTextColor: rgba(255,255,255,1);
+
+/* topbar */
+$topbarItemBgColor:rgba(0, 0, 0, 0.5);
+$topbarItemTextColor:rgba(255,255,255,0.72);
+$topbarItemHoverBgColor:rgba(0, 0, 0, 0.7);
+$topbarUserProfileTextColor:rgba(0,0,0,0.7);
+
+/* overlay menu */
+$overlayMenuItemHoverBgColor:$primaryLighterColor;
+$overlayMenuItemActiveTextColor:$primaryDarkerColor;
+
+/* overlay menu button */
+$overlayMenuButtonColor:$primaryDarkerColor;
+$overlayMenuButtonHoverBgColor:$primaryLighterColor;
+
+//footer
+$footerTextColor:rgba(255,255,255,0.7);
+$footerTextHoverColor:rgba(255,255,255,1);
+
+@import '../../../src/assets/sass/layout/_layout';
