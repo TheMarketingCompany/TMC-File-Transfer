@@ -80,7 +80,7 @@ fieldset {
   margin: 0 auto;
   border-radius: 8px;
   width: 20em;
-  border: 7px dashed #e3e3e3;
+  border: 7px dashed #a3a3a3;
   min-height: 15em;
   min-width: 30em;
   position: relative;
