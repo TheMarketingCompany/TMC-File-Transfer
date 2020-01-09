@@ -71,7 +71,7 @@ h1 a {
 
 h2 {
   text-align: center;
-  color: #ffffff;
+  color: #000;
 }
 
 fieldset {
@@ -88,7 +88,7 @@ fieldset {
 
 legend {
   padding: 0.5em 1em;
-  background: #ffffff;
+  background: #000;
   color: #9c9c9c;
   font-size: 1.2em;
   display: block;
