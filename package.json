@@ -1,0 +1,36 @@
+{
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.616.0",
+    "@aws-sdk/lib-storage": "^3.616.0",
+    "@aws-sdk/s3-request-presigner": "^3.616.0",
+    "@coreui/coreui": "^5.1.0",
+    "@coreui/vue": "^5.1.0",
+    "@popperjs/core": "^2.11.8",
+    "@tailwindcss/typography": "^0.5.13",
+    "aws4fetch": "^1.0.18",
+    "sha.js": "^2.4.11",
+    "vite-plugin-mkcert": "^1.17.5",
+    "vue": "^3.4.32",
+    "vue-clipboard3": "^2.0.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "autoprefixer": "^10.4.19",
+    "naive-ui": "^2.39.0",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4",
+    "vue-tsc": "^2.0.26"
+  }
+}
