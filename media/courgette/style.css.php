@@ -131,7 +131,6 @@ input[type="submit"]:focus {
   border: 0;
   position: relative;
   background: #cfc8c8;
-  border-bottom: 5px solid #f5f5f5;
   margin-bottom: 15px;
 }
 
