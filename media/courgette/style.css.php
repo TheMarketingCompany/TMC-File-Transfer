@@ -47,7 +47,7 @@ header('Content-type: text/css');
    ========================================================================== */
 
 body {
-  background: #808a87;
+  background: #555756;
   font-family: Arial, sans-serif;
   margin: 0;
   line-height: 1.5;
@@ -88,7 +88,7 @@ fieldset {
 
 legend {
   padding: 0.5em 1em;
-  background: #808a87;
+  background: #555756;
   color: #663D1C;
   font-size: 1.2em;
   display: block;
