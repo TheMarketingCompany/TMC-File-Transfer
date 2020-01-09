@@ -105,17 +105,6 @@ table a:focus {
   text-decoration: none;
 }
 
-input[type="submit"] {
-  background: #f5f5f5;
-  border: 0;
-  padding: 0.4em 2.2em;
-  font-size: 1.1em;
-  color: #FFF;
-  border-bottom: 5px solid #cfc8c8;
-  cursor: pointer;
-  margin: 10px;
-}
-
 select,
 input[type="text"],
 input[type="password"] {
