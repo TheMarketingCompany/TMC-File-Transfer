@@ -107,7 +107,6 @@ table a:focus {
 
 input[type="submit"] {
   background: #f5f5f5;
-  border: 0;
   padding: 0.4em 2.2em;
   font-size: 1.1em;
   color: #c9a116;
