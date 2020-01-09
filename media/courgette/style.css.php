@@ -51,6 +51,7 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   line-height: 1.5;
+  color: #fff;
 }
 
 #content {
@@ -97,7 +98,7 @@ legend {
 }
 
 table a {
-  color: #000;
+  color: #fff;
 }
 
 table a:hover,
