@@ -47,7 +47,7 @@ header('Content-type: text/css');
    ========================================================================== */
 
 body {
-  background: #ffffff;
+  background: #efebe9;
   font-family: Arial, sans-serif;
   margin: 0;
   line-height: 1.5;
@@ -71,7 +71,7 @@ h1 a {
 
 h2 {
   text-align: center;
-  color: #000;
+  color: #795548;
 }
 
 fieldset {
@@ -80,7 +80,7 @@ fieldset {
   margin: 0 auto;
   border-radius: 8px;
   width: 20em;
-  border: 7px dashed #bfbfbf;
+  border: 7px dashed #bcaaa4;
   min-height: 15em;
   min-width: 30em;
   position: relative;
@@ -88,8 +88,8 @@ fieldset {
 
 legend {
   padding: 0.5em 1em;
-  background: #000;
-  color: #9c9c9c;
+  background: #efebe9;
+  color: #663D1C;
   font-size: 1.2em;
   display: block;
   min-width: 8em;
@@ -97,7 +97,7 @@ legend {
 }
 
 table a {
-  color: #ffffff;
+  color: #000;
 }
 
 table a:hover,
@@ -149,7 +149,7 @@ input[type="submit"]:focus {
 }
 
 #upload fieldset:hover {
-  border-color: #9c9c9c;
+  border-color: #663D1C;
 }
 
 #upload > form {
@@ -183,12 +183,12 @@ input[type="submit"]:focus {
 #copyright {
   text-align: center;
   font-size: 0.8em;
-  color: #ffffff;
+  color: #795548;
   margin: 3em auto;
 }
 
 #copyright a {
-  color: #ffffff;
+  color: #795548;
   text-decoration: none;
 }
 
@@ -233,7 +233,7 @@ input[type="submit"]:focus {
 .info,
 .error {
   text-align: center;
-  color: #ffffff;
+  color: #795548;
   padding-left: 3em;
 }
 
@@ -248,13 +248,13 @@ input[type="submit"]:focus {
 
 #upload_finished a {
   text-decoration: none;
-  color: #ffffff;
+  color: #795548;
 }
 
 #uploading a {
   font-weight: bold;
   text-decoration: none;
-  color: #ffffff;
+  color: #795548;
 }
 
 #uploaded_percentage {
@@ -292,7 +292,7 @@ input[type="submit"]:focus {
 
 textarea[readonly="readonly"] {
   border: 0;
-  color: #ffffff;
+  color: #795548;
   font-family: Arial, sans-serif;
   background: none;
   margin: auto;
@@ -302,14 +302,14 @@ textarea[readonly="readonly"] {
 textarea[readonly="readonly"] + p,
 textarea[readonly="readonly"] + p + p {
   text-align: center;
-  color: #ffffff;
+  color: #795548;
 }
 
 textarea[readonly="readonly"] + p a,
 textarea[readonly="readonly"] + p + p a {
   font-weight: bold;
   text-decoration: none;
-  color: #ffffff;
+  color: #795548;
 }
 
 textarea[readonly="readonly"] + p a:hover,
@@ -327,7 +327,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 #install + fieldset {
   width: auto;
   max-width: 50em;
-  border: 7px dashed #bfbfbf;
+  border: 7px dashed #bcaaa4;
 }
 
 #install table,
@@ -348,7 +348,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 
 #install table form:nth-child(odd),
 #install + fieldset tr:nth-child(odd) {
-  background: #bfbfbf;
+  background: #bcaaa4;
 }
 
 #install fieldset > form {
@@ -376,7 +376,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 #install + fieldset td:first-child input[type="submit"] {
   background: none;
   padding: 0;
-  color: #ffffff;
+  color: #000;
   font-weight: bold;
   border-bottom: 0;
 }
@@ -394,7 +394,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 #admin + fieldset {
   width: auto;
   max-width: 60em;
-  border: 7px dashed #bfbfbf;
+  border: 7px dashed #bcaaa4;
 }
 
 #admin table,
@@ -417,7 +417,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 
 #admin table form:nth-child(odd),
 #admin + fieldset tr:nth-child(odd) {
-  background: #bfbfbf;
+  background: #bcaaa4;
 }
 
 #admin fieldset > form {
@@ -445,7 +445,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 #admin + fieldset td:first-child input[type="submit"] {
   background: none;
   padding: 0;
-  color: #ffffff;
+  color: #000;
   font-weight: bold;
   border-bottom: 0;
 }
