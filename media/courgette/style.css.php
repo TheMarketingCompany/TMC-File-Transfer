@@ -97,7 +97,7 @@ legend {
 }
 
 table a {
-  color: #000;
+  color: #ffffff;
 }
 
 table a:hover,
@@ -376,7 +376,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 #install + fieldset td:first-child input[type="submit"] {
   background: none;
   padding: 0;
-  color: #000;
+  color: #ffffff;
   font-weight: bold;
   border-bottom: 0;
 }
@@ -445,7 +445,7 @@ textarea[readonly="readonly"] + p + p a:focus {
 #admin + fieldset td:first-child input[type="submit"] {
   background: none;
   padding: 0;
-  color: #000;
+  color: #ffffff;
   font-weight: bold;
   border-bottom: 0;
 }
