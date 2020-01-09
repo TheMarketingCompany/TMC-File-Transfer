@@ -129,7 +129,7 @@ function show_link (reference, delete_code, crypt_key, date)
     document.getElementById('uploading').style.display = 'none';
     document.getElementById('upload').style.display = 'none';
     document.getElementById('upload_finished').style.display = '';
-    document.title = "100% - <?php echo empty($cfg['title']) ? 'Jirafeau' : $cfg['title']; ?>";
+    document.title = "100% - <?php echo empty($cfg['title']) ? 'TMC File Transfer' : $cfg['title']; ?>";
 
     // Download page
     var download_link_href = 'f.php?h=' + reference;
