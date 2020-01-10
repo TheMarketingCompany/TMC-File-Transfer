@@ -111,28 +111,6 @@ else {
     </p>
     </div>
 
-    <?php if ($cfg['preview'] == true) {
-    ?>
-    <div id="upload_finished_preview">
-    <p>
-        <a id="preview_link" href=""><?php echo t('VIEW_LINK') ?></a>
-    </p><p>
-        <code id=preview_link_text></code>
-        <button id="preview_link_button">&#128203;</button>
-    </p>
-    </div>
-    <?php
-} ?>
-
-    <div id="upload_direct_download">
-    <p>
-        <a id="direct_link" href=""><?php echo t('DIRECT_DL') ?></a>
-    </p><p>
-        <code id=direct_link_text></code>
-        <button id="direct_link_button">&#128203;</button>
-    </p>
-    </div>
-
     <div id="upload_delete">
     <p>
         <a id="delete_link" href=""><?php echo t('DELETE_LINK') ?></a>
