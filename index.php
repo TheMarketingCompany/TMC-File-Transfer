@@ -106,8 +106,8 @@ else {
         <a id="upload_link" href="">Please send the following link to the recipient:</a>
         <a id="upload_link_email" href=""><img id="upload_image_email"/></a>
     </p><p>
-        <code id=upload_link_text></code>
-        <button id="upload_link_button">Copy to clipboard</button>
+        <code id=upload_link_text></code><br>
+        <button id="upload_link_button">copy to clipboard</button>
     </p>
     </div>
 
@@ -115,8 +115,8 @@ else {
     <p>
         <a id="delete_link" href=""><?php echo t('DELETE_LINK') ?></a>
     </p><p>
-        <code id=delete_link_text></code>
-        <button id="delete_link_button">Copy to clipboard</button>
+        <code id=delete_link_text></code><br>
+        <button id="delete_link_button">copy to clipboard</button>
     </p>
     </div>
 
