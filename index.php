@@ -103,7 +103,7 @@ else {
 
     <div id="upload_finished_download_page">
     <p>
-        <a id="upload_link" href=""><?php echo t('DL_PAGE') ?></a>
+        <a id="upload_link" href="">Please send the following link to the recipient:</a>
         <a id="upload_link_email" href=""><img id="upload_image_email"/></a>
     </p><p>
         <code id=upload_link_text></code>
