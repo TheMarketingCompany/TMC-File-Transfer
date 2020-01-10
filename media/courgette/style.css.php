@@ -464,8 +464,11 @@ textarea[readonly="readonly"] + p + p a:focus {
 
 /* ------------------------- */
 
-#upload_finished code {
-	font-weight: bold;
-	font-size: 20px;
-	margin-bottom: 40px;
+#upload_link_text {
+    font-weight: bold;
+    font-size: 20px;
+    display: inline-block;
+    margin-bottom: 120px;
+    background-color: grey;
+    padding: 10px 15px;
 }

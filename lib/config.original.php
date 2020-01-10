@@ -38,7 +38,7 @@ $cfg['var_root'] = '';
  * and offer a matching language, and use »en« if it is not available.
  * Forcing to a specific lang lightly reduce lang computation.
  */
-$cfg['lang'] = 'auto';
+$cfg['lang'] = 'en';
 
 /* Select a theme - see media folder for available themes
  */
