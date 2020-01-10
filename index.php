@@ -104,10 +104,10 @@ else {
     <div id="upload_finished_download_page">
     <p>
         <a id="upload_link" href="">Please send the following link to the recipient:</a>
-        <a id="upload_link_email" href=""><img id="upload_image_email"/></a>
     </p><p>
         <code id=upload_link_text></code><br>
-        <button id="upload_link_button">copy to clipboard</button>
+        <button id="upload_link_button">copy to clipboard</button><br>
+		<a id="upload_link_email" href="">compose email with link</a>
     </p>
     </div>
 
