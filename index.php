@@ -106,7 +106,7 @@ else {
         <a id="upload_link" href="">Please send the following link to the recipient:</a>
     </p><p>
         <code id=upload_link_text></code><br>
-		<button><a style="font-color: #000" id="upload_link_email" href="">compose email with link</a></button>&nbsp;
+		<button><a style="color: #000; text-decoration: none;" id="upload_link_email" href="">compose email with link</a></button>&nbsp;
         <button id="upload_link_button">copy to clipboard</button>
     </p>
     </div>
