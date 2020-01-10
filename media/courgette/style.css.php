@@ -462,7 +462,7 @@ textarea[readonly="readonly"] + p + p a:focus {
   padding-bottom: 10px;
 }
 
--------------------------
+// ------------------------- 
 
 #upload_finished code {
 	font-weight: bold;
