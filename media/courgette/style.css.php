@@ -466,5 +466,6 @@ textarea[readonly="readonly"] + p + p a:focus {
 
 #upload_link_text {
 	font-weight: bold;
-	font-size: 11;
+	font-size: 20px;
+	margin-bottom: 40px;
 }
