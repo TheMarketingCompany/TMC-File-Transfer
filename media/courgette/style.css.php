@@ -471,6 +471,6 @@ textarea[readonly="readonly"] + p + p a:focus {
     background-color: grey;
     padding: 10px 15px;
 }
-#upload_link_text {
+#upload_link_button {
     margin-bottom: 120px;
 }
