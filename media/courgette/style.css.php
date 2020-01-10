@@ -469,6 +469,7 @@ textarea[readonly="readonly"] + p + p a:focus {
     font-size: 20px;
     display: inline-block;
     background-color: grey;
+	margin-bottom: 4px;
     padding: 10px 15px;
 }
 #upload_link_button {
