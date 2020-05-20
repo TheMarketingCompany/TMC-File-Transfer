@@ -13,6 +13,8 @@
             echo '<a href="tos.php" target="_blank" rel="noopener noreferrer">' . t('TOS') . '</a>';
             echo ' <span>|</span> ';
             echo '<a href="https://tmc.jetzt/impressum" target="_blank" rel="noopener noreferrer">' . Imprint . '</a>';
+            echo ' <span>|</span> ';
+            echo '<a href="https://tmc.jetzt/datenschutz" target="_blank" rel="noopener noreferrer">' . PRIVACY POLICY . '</a>';
         }
         ?>
     </p>
