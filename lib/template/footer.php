@@ -15,10 +15,6 @@
             echo '<a href="https://tmc.jetzt/impressum" target="_blank" rel="noopener noreferrer">' . Imprint . '</a>';
         }
         ?>
-        <?php
-          echo t('<span>|</span>') .
-          '  .;
-        ?>
     </p>
 </div>
 </div>
