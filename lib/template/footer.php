@@ -11,11 +11,13 @@
         if (false === empty($cfg['installation_done'])) {
             echo ' <span>|</span> ';
             echo '<a href="tos.php" target="_blank" rel="noopener noreferrer">' . t('TOS') . '</a>';
+            echo ' <span>|</span> ';
+            echo '<a href="https://tmc.jetzt/impressum" target="_blank" rel="noopener noreferrer">' . Imprint . '</a>';
         }
         ?>
         <?php
           echo t('<span>|</span>') .
-          ' <a href="https://tmc.jetzt/impressum" target="_blank" rel="noopener noreferrer">' . Imprint . '</a>' .;
+          '  .;
         ?>
     </p>
 </div>
