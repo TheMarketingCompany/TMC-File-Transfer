@@ -13,6 +13,10 @@
             echo '<a href="tos.php" target="_blank" rel="noopener noreferrer">' . t('TOS') . '</a>';
         }
         ?>
+        <?php
+          echo t('<span>|</span>') .
+          ' <a href="https://tmc.jetzt/impressum" target="_blank" rel="noopener noreferrer">' . Imprint . '</a>' .;
+        ?>
     </p>
 </div>
 </div>
