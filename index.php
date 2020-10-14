@@ -400,13 +400,7 @@ $diskspace[used]  = $diskspace[total] - $diskspace[free];
 $dirsize = dirsize($cfg[path.to.dir]); 
 
 
-    
-echo "Total Space on Hard Disk is ";   print give_size_formated($diskspace[total], r, c) ."<br />"; 
-echo "Total Free Disk Space is ";      print give_size_formated($diskspace[free], r, c)  ."<br />"; 
-echo "Total Space Used on Disk is ";   print give_size_formated($diskspace[used], r, c)  ."<br />"; 
 
-$size = dirsize('./'); 
-if ($size < 0) echo 'ERROR! Bad path!'; 
-else echo 'Total Space of this Dir is ' . give_size_formated($size, r, c); 
+echo "<div style='position: absolute;right: 0px;bottom: 0px;opacity: 0.2;'>Usage " . round($diskspace[used] / $diskspace[total] * 100,2) . "% Used Space:" . give_size_formated(dirsize('./'), r, c)  . "</div>"; 
 
 ?> 
