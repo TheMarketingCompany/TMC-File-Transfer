@@ -284,3 +284,129 @@ else {
 // @license-end
 </script>
 <?php require(JIRAFEAU_ROOT . 'lib/template/footer.php'); ?>
+
+<?php 
+
+$cfg[path.to.dir] = ".";    // . ist das aktuelle Verzeichnis 
+
+/* 
+zu give_size_formated(): 
+
+give_size_formated('stringinbytes', [c|f|r], [c|d]); 
+
+- Das erste Argument gibt die Bytes an. 
+
+- Das zweite Argument "kürtzt" die Kommastellen 
+     c: macht das Gleiche wie ceil(); 
+     f: macht das Gleiche wie floor(); 
+     r: macht das Gleiche wie round(); 
+      
+- Das dritte Argument ändert das Trennzeichen in der Ausgabe: 
+     c: es wird ein Komma gesetzt 
+     d: es wird ein Punkt gesetzt      
+
+*/ 
+
+
+error_reporting(0); 
+
+function dirsize($directory) 
+   { 
+    if (!is_dir($directory)) return -1; 
+     
+    $size = 0; 
+     
+    if ($DIR = opendir($directory)) 
+       { 
+        while (($dirfile = readdir($DIR)) !== false) 
+           { 
+            if (is_link($directory.'/'.$dirfile) || $dirfile == '.' || $dirfile == '..') 
+                continue; 
+
+                 
+            if (is_file($directory.'/'.$dirfile)) 
+               $size += filesize($directory.'/'.$dirfile); 
+
+            else if (is_dir($directory.'/'.$dirfile)) 
+               { 
+                $dirSize = dirsize($directory.'/'.$dirfile); 
+                if ($dirSize >= 0) $size += $dirSize; 
+                else return -1; 
+               } 
+           } 
+        closedir($DIR); 
+       } 
+    return $size; 
+   }    
+
+
+function give_size_formated($str1, $str2, $str3) 
+   { 
+    $kb = "1024"; 
+    $mb = $kb * "1024"; 
+    $gb = $mb * "1024"; 
+    $tb = $gb * "1024"; 
+
+    if ($str1 < $kb) 
+       { 
+        $output[1] = $str1; 
+        $output[2] = "Byte"; 
+       } 
+        
+    elseif ($str1 < $mb) 
+       { 
+        $output[1] = $str1 / $kb; 
+        $output[2] = "KB"; 
+       } 
+        
+    elseif ($str1 < $gb) 
+       { 
+        $output[1] = $str1 / $mb; 
+        $output[2] = "MB"; 
+       } 
+        
+    elseif ($str1 < $tb) 
+       { 
+        $output[1] = $str1 / $gb; 
+        $output[2] = "GB"; 
+       } 
+
+
+    if ($str2 == "c") 
+       { $output[1] = ceil($output[1]); } 
+        
+    elseif ($str2 == "f") 
+       { $output[1] = floor($output[1]); } 
+        
+    elseif ($str2 == "r") 
+       { $output[1] = round($output[1], 3); } 
+
+
+    if ($str3 == "c") 
+       { $output[1] = str_replace(".", ",", $output[1]); } 
+     
+    elseif ($str3 == "d") 
+       { $output[1] = str_replace(",", ".", $output[1]); } 
+
+
+    $output[0] = $output[1]." ".$output[2]; 
+    return $output[0]; 
+   } 
+
+
+$diskspace[total] = disk_total_space($cfg[path.to.dir]); 
+$diskspace[free]  = disk_free_space($cfg[path.to.dir]); 
+$diskspace[used]  = $diskspace[total] - $diskspace[free]; 
+$dirsize = dirsize($cfg[path.to.dir]); 
+
+
+    
+echo "Total Space on Hard Disk is ";   print give_size_formated($diskspace[total], r, c) ."<br />"; 
+echo "Total Free Disk Space is ";      print give_size_formated($diskspace[free], r, c)  ."<br />"; 
+echo "Total Space Used on Disk is ";   print give_size_formated($diskspace[used], r, c)  ."<br />"; 
+
+$size = dirsize('./'); 
+if ($size < 0) echo 'ERROR! Bad path!'; 
+else echo 'Total Space of this Dir is ' . give_size_formated($size, r, c); 
+
+?> 
