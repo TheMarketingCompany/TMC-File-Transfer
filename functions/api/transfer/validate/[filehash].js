@@ -6,14 +6,18 @@ export async function onRequestPost({request, params, env}) {
     if (fileInfo.options.passwordEnabled) {
         if (fileInfo.options.passwordHash === pw.passwordHash) {
 
-            const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
+            try {
+                const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
 
-            const signedDownloadUrl = await fetch(env.workerUrl + '/sign?file=' + fileName)
+                const signedDownloadUrl = await fetch(env.workerUrl + '/sign?file=' + fileName)
 
-            const data = await signedDownloadUrl.json()
+                const data = await signedDownloadUrl.json()
 
 
-            return new Response(JSON.stringify(data), {status: 200})
+                return new Response(JSON.stringify(data), {status: 200})
+            } catch (e) {
+                return new Response(e, {status: 501})
+            }
         } else {
             return new Response(null, {status: 401})
         }
