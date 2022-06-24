@@ -1,7 +1,7 @@
 export async function onRequestPost({request, params, env}) {
     const pw = await request.json()
 
-    const fileInfo = await env.transfer.get(params.filehash)
+    const fileInfo = JSON.parse(await env.transfer.get(params.filehash))
 
     if (fileInfo.options.passwordHash === pw.passwordHash) {
 
