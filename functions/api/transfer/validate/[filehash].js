@@ -7,22 +7,18 @@ export async function onRequestPost({request, params, env}) {
     const fileInfo = await env.transfer.get(params.filehash)
 
     if (fileInfo.options.passwordHash === pw.passwordHash) {
-        const s3client = new S3({
-            endpoint: 'https://' + env.endpoint + '.r2.cloudflarestorage.com',
-            accessKeyId: env.accessKeyId,
-            secretAccessKey: env.secretAccessKey,
-            s3ForcePathStyle: true,
-            signatureVersion: 'v4'
-        })
 
-        const url = s3client.getSignedUrl('getObject', {
-            Bucket: 'transfer',
-            Key: params.filehash + '.' + fileInfo.filename.split('.').pop(),
-            Expires: 3600
-        })
-        return new Response(JSON.stringify({signedDownload: url}), {status: 200})
+        const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
+
+        const signedDownloadUrl = await fetch(env.workerUrl + '/' + fileName)
+
+        return new Response(JSON.stringify({signedDownload: signedDownloadUrl.url}), {status: 200})
+    } else if (fileInfo.options.passwordEnabled === false) {
+        const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
+
+        const signedDownloadUrl = await fetch(env.workerUrl + '/' + fileName)
+        return new Response(JSON.stringify({signedDownload: signedDownloadUrl.url}), {status: 200})
     } else {
-
         return new Response(null, {status: 401})
     }
 

@@ -57,6 +57,7 @@ export default {
         if (res.data.passwordEnabled === true) {
           this.context = 'password'
         } else {
+          this.validatePassword()
           this.context = 'download'
         }
       }).catch(err => {
