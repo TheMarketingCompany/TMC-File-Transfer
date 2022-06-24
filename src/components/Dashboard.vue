@@ -8,7 +8,6 @@
         <FileUpload
             @upload="onUpload"
             :multiple="false"
-            accept="image/*"
             @select="filesSelected"
             :showUploadButton="false"
             :showCancelButton="false"
