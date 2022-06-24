@@ -9,8 +9,10 @@ export async function onRequestPost({request, params, env}) {
 
         const signedDownloadUrl = await fetch(env.workerUrl + '/sign?file=' + fileName)
 
+        const data = await signedDownloadUrl.json()
 
-        return new Response(JSON.stringify(await fetch(env.workerUrl + '/sign?file=' + fileName)), {status: 200})
+
+        return new Response(data, {status: 200})
     } else if (fileInfo.options.passwordEnabled === false) {
         const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
 
