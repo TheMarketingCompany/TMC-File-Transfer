@@ -12,7 +12,7 @@ export async function onRequestPost({request, params, env}) {
         const data = await signedDownloadUrl.json()
 
 
-        return new Response(data, {status: 200})
+        return new Response(JSON.stringify(data), {status: 200})
     } else if (fileInfo.options.passwordEnabled === false) {
         const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
 
