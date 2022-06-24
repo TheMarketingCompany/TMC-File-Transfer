@@ -3,24 +3,26 @@ export async function onRequestPost({request, params, env}) {
 
     const fileInfo = JSON.parse(await env.transfer.get(params.filehash))
 
+    if (fileInfo.options.passwordEnabled) {
+        if (fileInfo.options.passwordHash === pw.passwordHash) {
 
-    if (fileInfo.options.passwordHash === pw.passwordHash) {
+            const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
 
-        const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
+            const signedDownloadUrl = await fetch(env.workerUrl + '/sign?file=' + fileName)
 
-        const signedDownloadUrl = await fetch(env.workerUrl + '/sign?file=' + fileName)
-
-        const data = await signedDownloadUrl.json()
+            const data = await signedDownloadUrl.json()
 
 
-        return new Response(JSON.stringify(data), {status: 200})
-    } else if (fileInfo.options.passwordEnabled === false) {
+            return new Response(JSON.stringify(data), {status: 200})
+        } else {
+            return new Response(null, {status: 401})
+        }
+    } else {
         const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
 
         const signedDownloadUrl = await fetch(env.workerUrl + '/' + fileName)
         return new Response(JSON.stringify({signedDownload: signedDownloadUrl.url}), {status: 200})
-    } else {
-        return new Response(null, {status: 401})
     }
+
 
 }
