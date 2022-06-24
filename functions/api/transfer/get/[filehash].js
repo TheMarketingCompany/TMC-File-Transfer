@@ -4,9 +4,9 @@ export async function onRequestGet({request, env, params}) {
     return new Response(JSON.stringify({
         filename: data.filename,
         options: {
-            lifetime: data.lifetime,
-            otd: data.otd,
-            passwordEnabled: data.passwordEnabled
+            lifetime: data.options.lifetime,
+            otd: data.options.otd,
+            passwordEnabled: data.options.passwordEnabled
         }
     }));
 }
