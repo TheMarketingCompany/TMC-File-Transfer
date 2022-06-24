@@ -15,7 +15,7 @@
       </div>
       <div class="card" v-else-if="context==='download'">
         <h5>Download</h5>
-
+        <Button @click="downloadFile">Download</Button>
       </div>
       <div class="card" v-else-if="context==='error'">
         <h5>
@@ -47,10 +47,14 @@ export default {
     return {
       context: 'validating',
       contextText: '',
-      password: ''
+      password: '',
+      downloadLink: ''
     }
   },
   methods: {
+    downloadFile() {
+      window.open(this.downloadLink, '_blank')
+    },
     validateFile(file) {
       axios.get('/api/transfer/get/' + file).then(res => {
         const data = JSON.parse(JSON.stringify(res.data))
@@ -74,6 +78,8 @@ export default {
       axios.post('/api/transfer/validate/' + this.file, {
         passwordHash: sha('sha256').update(this.password).digest('hex')
       }).then(res => {
+        this.context = 'download'
+        this.downloadLink = res.data.url
         console.log(res.data)
       }).catch(err => {
         console.log(err)
