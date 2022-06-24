@@ -1,5 +1,5 @@
 export async function onRequestGet({request, env, params}) {
-    const data = await env.transfer.get(params.filehash)
+    const data = JSON.parse(await env.transfer.get(params.filehash))
 
     return new Response(JSON.stringify({
         filename: data.filename,
