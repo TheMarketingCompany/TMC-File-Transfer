@@ -33,7 +33,7 @@
         </div>
 
         <div class="flex-row mt-5">
-          <Button @click="upload">Upload</Button>
+          <Button @click="preUpload">Upload</Button>
         </div>
 
       </div>
@@ -45,7 +45,7 @@
 <script>
 
 import axios from "axios";
-
+const sha = require('sha.js')
 const S3 = require('aws-sdk/clients/s3')
 
 export default {
@@ -89,6 +89,16 @@ export default {
         })
       })
     },
+
+    preUpload() {
+      axios.post('http://localhost:8788/api/transfer/create/' + this.selectedFile.name, {
+        otd: this.onetimeDownload,
+        lifetime: this.timeLimit,
+        passwordEnabled: this.passwordEnabled,
+        passwordHash: sha('sha256').update(this.password).digest('hex')
+      })
+    },
+
     upload() {
       const presignedUploadUrl = this.s3.getSignedUrl('putObject', {
         Bucket: 'transfer',
