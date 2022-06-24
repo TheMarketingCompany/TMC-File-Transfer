@@ -53,7 +53,7 @@ export default {
   methods: {
     validateFile(file) {
       axios.get('/api/transfer/get/' + file).then(res => {
-        const data = JSON.parse(res.data)
+        const data = JSON.parse(JSON.stringify(res.data))
 
         if (data.passwordEnabled === true) {
           this.context = 'password'
