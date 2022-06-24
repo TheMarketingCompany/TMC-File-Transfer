@@ -10,7 +10,8 @@
       </div>
       <div class="card" v-else-if="context==='password'">
         <h5>password</h5>
-
+        <Password v-model="password"/>
+        <Button @click="validatePassword">Validate</Button>
       </div>
       <div class="card" v-else-if="context==='download'">
         <h5>Download</h5>
@@ -29,12 +30,14 @@
 
 <script>
 import axios from "axios";
+const sha = require('sha.js')
 
 export default {
   mounted() {
-    console.log(this.$route.query.file)
-    if (this.$route.query.file !== '' && this.$route.query.file !== undefined) {
-      this.validateFile(this.$route.query.file)
+    this.file = this.$route.query.file
+
+    if (this.file !== '' && this.file !== undefined) {
+      this.validateFile(this.file)
     } else {
       this.context = 'error'
       this.contextText = 'No file identifier provided'
@@ -43,7 +46,8 @@ export default {
   data() {
     return {
       context: 'validating',
-      contextText: ''
+      contextText: '',
+      password: ''
     }
   },
   methods: {
@@ -59,6 +63,15 @@ export default {
         console.log(err)
         this.context = 'error'
         this.contextText = err.message
+      })
+    },
+    validatePassword() {
+      axios.post('/api/transfer/validate/' + this.file, {
+        passwordHash: sha('sha256').update(this.password).digest('hex')
+      }).then(res => {
+        console.log(res.data)
+      }).catch(err => {
+        console.log(err)
       })
     }
   }

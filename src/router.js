@@ -4,11 +4,14 @@ const routes = [
 	{
 		path: '/',
 		name: 'dashboard',
-		meta: {
-			breadcrumb: [{parent:'Dashboard', label:''}]
-		},
 		exact: true,
 		component: () => import('./components/Dashboard.vue')
+	},
+	{
+		path: '/dl',
+		name: 'download',
+		exact: true,
+		component: () => import('./components/Download.vue')
 	},
 ];
 
