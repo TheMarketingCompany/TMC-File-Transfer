@@ -8,6 +8,7 @@
         <FileUpload
             @upload="onUpload"
             :multiple="false"
+            :maxFileSize="99000000"
             @select="filesSelected"
             :showUploadButton="false"
             :showCancelButton="false"
