@@ -91,7 +91,7 @@ export default {
     },
 
     preUpload() {
-      axios.post('http://localhost:8788/api/transfer/create/' + this.selectedFile.name, {
+      axios.post('/api/transfer/create/' + this.selectedFile.name, {
         otd: this.onetimeDownload,
         lifetime: this.timeLimit,
         passwordEnabled: this.passwordEnabled,
