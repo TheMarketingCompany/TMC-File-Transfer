@@ -1,5 +1,5 @@
 <template>
-  <div class="grid dashboard">
+  <div class="grid dashboard" :class="loading ? 'blur' : ''">
 
     <div class="col-12 lg:col-12">
       <div class="card donut ">
@@ -40,6 +40,19 @@
     </div>
 
   </div>
+
+  <div v-if="loading">
+
+      <div class="loader-wrapper">
+        <div class="loader"></div>
+        <ProgressBar :value="uploadProgress" class="custProg">
+          {{uploadProgress}}%
+        </ProgressBar>
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+      </div>
+
+  </div>
 </template>
 
 <script>
@@ -51,11 +64,14 @@ const S3 = require('aws-sdk/clients/s3')
 export default {
   data() {
     return {
+      loading: false,
       s3: null,
       selectedFile: undefined,
       onetimeDownload: false,
       passwordEnabled: false,
       password: '',
+      filename: '',
+      uploadProgress: 0,
       timeLimit: '1 week',
       timeOptions: [
         '1 day',
@@ -91,35 +107,64 @@ export default {
     },
 
     preUpload() {
+      this.loading = true
       axios.post('/api/transfer/create/' + this.selectedFile.name, {
         otd: this.onetimeDownload,
         lifetime: this.timeLimit,
         passwordEnabled: this.passwordEnabled,
         passwordHash: sha('sha256').update(this.password).digest('hex')
+      }).then(res => {
+        this.filename = res.data.fileId
+
+        this.upload()
+      }).catch(err => {
+        console.log(err)
+        this.loading = false
       })
     },
 
     upload() {
       const presignedUploadUrl = this.s3.getSignedUrl('putObject', {
         Bucket: 'transfer',
-        Key: this.selectedFile.name,
+        Key: this.filename + '.' + this.selectedFile.name.split('.').pop(),
         Expires: 21600
       })
 
       axios.put('https://bucket.tmc.jetzt/' + presignedUploadUrl, this.selectedFile, {
         onUploadProgress: (event) => {
-          console.log((event.loaded / (event.total/100)) + '% loaded')
+          this.uploadProgress = (event.loaded / (event.total/100))
+          console.log(this.uploadProgress + '% loaded')
         }
       }).then(res => {
         console.log(res)
       }).catch(err => {
         console.log(err)
+        this.loading = false
       })
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss">
+.loader-wrapper .loader-section {
+  opacity: 0;
+  width: 50%;
+}
 
+.blur {
+  filter: blur(4px);
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.custProg {
+  display: block;
+  margin-top: 35%;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
 </style>
