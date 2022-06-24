@@ -56,7 +56,7 @@ export default {
         const data = JSON.parse(JSON.stringify(res.data))
         console.log(data)
 
-        if (data.passwordEnabled === true) {
+        if (data.options.passwordEnabled === true) {
           console.log('password enabled')
           this.context = 'password'
           console.log('this.context => ' + this.context)
