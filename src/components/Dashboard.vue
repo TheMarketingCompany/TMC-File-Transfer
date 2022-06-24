@@ -35,6 +35,10 @@
           <Button @click="preUpload">Upload</Button>
         </div>
 
+        <div v-if="uploadFinished" class="flex-row mt-5" @click="copyClipboard">
+          <Button>Copy download link to clipboard</Button>
+        </div>
+
       </div>
     </div>
 
@@ -71,6 +75,7 @@ export default {
       password: '',
       filename: '',
       uploadProgress: 0,
+      uploadFinished: false,
       timeLimit: '1 week',
       timeOptions: [
         '1 day',
@@ -91,7 +96,11 @@ export default {
       this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000});
     },
     filesSelected(event) {
+      this.uploadFinished = false
       this.selectedFile = event.files[0]
+    },
+    copyClipboard() {
+      navigator.clipboard.writeText('https://uploads.tmc.jetzt/#/dl?file=' + this.filename)
     },
     getAccessKeys() {
       axios.get('/api/auth').then(res => {
@@ -136,6 +145,7 @@ export default {
         }
       }).then(res => {
         this.loading = false
+        this.uploadFinished = true
         console.log(res)
       }).catch(err => {
         console.log(err)
