@@ -12,10 +12,9 @@ export async function onRequestPost({request, params, env}) {
 
     }
 
-    options.timeout = timeout
-
     await env.transfer.put(uuid, JSON.stringify({
         filename: filename,
+        timeout: timeout,
         options: options
     }))
     return new Response(JSON.stringify({fileId: uuid}))
