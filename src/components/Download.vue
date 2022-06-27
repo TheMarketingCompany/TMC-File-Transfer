@@ -66,6 +66,7 @@ export default {
       }).catch(err => {
         console.log(err)
         this.context = 'error'
+        console.log(err)
         this.contextText = err.message
       })
     },
