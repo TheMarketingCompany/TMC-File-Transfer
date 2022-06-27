@@ -64,7 +64,6 @@ export default {
           this.validatePassword()
         }
       }).catch(err => {
-        console.log(err.response)
         this.context = 'error'
         if (err.response.status === 404) {
 
