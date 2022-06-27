@@ -13,10 +13,6 @@
         <Password v-model="password"/>
         <Button @click="validatePassword">Validate</Button>
       </div>
-      <div class="card" v-else-if="context==='download'">
-        <h5>Download</h5>
-        <Button @click="downloadFile">Download</Button>
-      </div>
       <div class="card" v-else-if="context==='error'">
         <h5>
           <img src="https://cdn.discordapp.com/emojis/867743530754375682.webp?size=96&quality=lossless">
@@ -66,7 +62,6 @@ export default {
           console.log('this.context => ' + this.context)
         } else {
           this.validatePassword()
-          this.context = 'download'
         }
       }).catch(err => {
         console.log(err)
@@ -78,9 +73,7 @@ export default {
       axios.post('/api/transfer/validate/' + this.file, {
         passwordHash: sha('sha256').update(this.password).digest('hex')
       }).then(res => {
-        this.context = 'download'
-        this.downloadLink = res.data.url
-        console.log(res.data)
+        window.open(res.data.url, '_blank')
       }).catch(err => {
         console.log(err)
       })
