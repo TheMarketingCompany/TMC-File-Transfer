@@ -80,6 +80,13 @@ export default {
         window.open(res.data.url, '_blank')
       }).catch(err => {
         console.log(err)
+        this.context = 'error'
+        if (err.response.status === 404) {
+
+          this.contextText = 'File not found'
+        } else {
+          this.contextText = err.message
+        }
       })
     }
   }
