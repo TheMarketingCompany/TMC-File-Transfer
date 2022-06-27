@@ -1,6 +1,9 @@
 <template>
   <div class="grid">
     <div class="col-12">
+      <div v-if="otdWarning">
+        <span style="color: red">Warning, this file will self-destruct after being read</span>
+      </div>
       <div v-if="context==='validating'">
         <div class="loader-wrapper">
           <div class="loader"></div>
@@ -13,11 +16,15 @@
         <Password v-model="password"/>
         <Button @click="validatePassword">Validate</Button>
       </div>
+      <div class="card" v-else-if="context==='download'">
+        <h5>Download</h5>
+        <Button @click="downloadFile">Download</Button>
+      </div>
       <div class="card" v-else-if="context==='error'">
         <h5>
           <img src="https://cdn.discordapp.com/emojis/867743530754375682.webp?size=96&quality=lossless">
         </h5>
-        <p>{{contextText}}</p>
+        <p>{{ contextText }}</p>
 
       </div>
     </div>
@@ -26,6 +33,7 @@
 
 <script>
 import axios from "axios";
+
 const sha = require('sha.js')
 
 export default {
@@ -42,6 +50,7 @@ export default {
   data() {
     return {
       context: 'validating',
+      otdWarning: false,
       contextText: '',
       password: '',
       downloadLink: ''
@@ -49,19 +58,24 @@ export default {
   },
   methods: {
     downloadFile() {
-      window.open(this.downloadLink, '_blank')
+      this.validatePassword()
     },
     validateFile(file) {
       axios.get('/api/transfer/get/' + file).then(res => {
         const data = JSON.parse(JSON.stringify(res.data))
         console.log(data)
 
+        if (data.options.otd === true) {
+          this.otdWarning = true
+        }
+
         if (data.options.passwordEnabled === true) {
+
           console.log('password enabled')
           this.context = 'password'
           console.log('this.context => ' + this.context)
         } else {
-          this.validatePassword()
+          this.context = 'download'
         }
       }).catch(err => {
         this.context = 'error'
