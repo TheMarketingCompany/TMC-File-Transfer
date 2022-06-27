@@ -80,7 +80,7 @@ export default {
       }).catch(err => {
         this.context = 'error'
         if (err.response.status === 404) {
-
+          this.otdWarning = false
           this.contextText = 'File not found'
         } else {
           this.contextText = err.message
@@ -96,7 +96,7 @@ export default {
         console.log(err)
         this.context = 'error'
         if (err.response.status === 404) {
-
+          this.otdWarning = false
           this.contextText = 'File not found'
         } else {
           this.contextText = err.message
