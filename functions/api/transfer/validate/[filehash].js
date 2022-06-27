@@ -3,6 +3,8 @@ export async function onRequestPost({request, params, env}) {
 
     const fileInfo = JSON.parse(await env.transfer.get(params.filehash))
 
+    if (fileInfo.options.otd === true && fileInfo.downloadCount > 0) return new Response(null, {status: 404, statusText: 'file not found'})
+
     if (fileInfo.options.passwordEnabled) {
         if (fileInfo.options.passwordHash === pw.passwordHash) {
 
