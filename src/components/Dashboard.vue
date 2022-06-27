@@ -90,9 +90,6 @@ export default {
     this.getAccessKeys()
   },
   methods: {
-    menuToggle(event) {
-      this.$refs.menu.toggle(event);
-    },
     onUpload() {
       this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000});
     },
