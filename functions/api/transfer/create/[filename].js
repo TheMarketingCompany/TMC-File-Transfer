@@ -8,7 +8,7 @@ export async function onRequestPost({request, params, env}) {
 
     switch(options.lifetime) {
         case "1 week":
-            timeout = currentDate.getDate() + 14
+            timeout = (Math.round(+new Date() / 1000)) + 604800 // 604800 => 1 week
 
     }
 
