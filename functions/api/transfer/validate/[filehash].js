@@ -27,7 +27,8 @@ export async function onRequestPost({request, params, env}) {
         const fileName = params.filehash + '.' + fileInfo.filename.split('.').pop()
 
         const signedDownloadUrl = await fetch(env.workerUrl + '/sign?file=' + fileName)
-        return new Response(JSON.stringify({signedDownload: signedDownloadUrl.url}), {status: 200})
+        const data = await signedDownloadUrl.json()
+        return new Response(JSON.stringify(data), {status: 200})
     }
 
 
