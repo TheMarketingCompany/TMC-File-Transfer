@@ -66,8 +66,11 @@ export default {
       }).catch(err => {
         console.log(err)
         this.context = 'error'
-        console.log(err)
-        this.contextText = err.message
+        if (err.response.status === 404) {
+          this.contextText = 'File not found'
+        } else {
+          this.contextText = err.message
+        }
       })
     },
     validatePassword() {
