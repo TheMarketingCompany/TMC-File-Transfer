@@ -24,6 +24,7 @@ export async function onRequestPost({request, params, env}) {
     await env.transfer.put(uuid, JSON.stringify({
         filename: filename,
         timeout: timeout,
+        downloadCount: 0,
         options: options
     }))
     return new Response(JSON.stringify({fileId: uuid}))
