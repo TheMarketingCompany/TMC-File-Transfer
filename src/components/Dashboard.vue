@@ -146,12 +146,13 @@ export default {
           console.log(chunk)
           try {
 
-            await axios.put('https://bucket.tmc.jetzt/upload', {
+            const req = await axios.put('https://bucket.tmc.jetzt/upload', {
               UploadId: res.data.uploadId,
               PartNumber: index + 1,
               data: chunk.data,
               filename: this.filename
             })
+            console.log(req)
           } catch (e) {
             console.log(e)
           }
