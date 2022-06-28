@@ -89,7 +89,7 @@ export default {
   },
   components: {},
   mounted() {
-    //this.getAccessKeys()
+    this.getAccessKeys()
   },
   methods: {
     onUpload() {
