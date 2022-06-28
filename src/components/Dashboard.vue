@@ -8,7 +8,6 @@
         <FileUpload
             @upload="onUpload"
             :multiple="false"
-            :maxFileSize="99000000"
             @select="filesSelected"
             :showUploadButton="false"
             :showCancelButton="false"
@@ -47,14 +46,14 @@
 
   <div v-if="loading">
 
-      <div class="loader-wrapper">
-        <div class="loader"></div>
-        <ProgressBar :value="uploadProgress" class="custProg">
-          {{uploadProgress}}%
-        </ProgressBar>
-        <div class="loader-section section-left"></div>
-        <div class="loader-section section-right"></div>
-      </div>
+    <div class="loader-wrapper">
+      <div class="loader"></div>
+      <ProgressBar :value="uploadProgress" class="custProg">
+        {{ uploadProgress }}%
+      </ProgressBar>
+      <div class="loader-section section-left"></div>
+      <div class="loader-section section-right"></div>
+    </div>
 
   </div>
 </template>
@@ -62,6 +61,7 @@
 <script>
 
 import axios from "axios";
+
 const sha = require('sha.js')
 const S3 = require('aws-sdk/clients/s3')
 
@@ -82,12 +82,14 @@ export default {
         '1 day',
         '1 week',
         '1 month'
-      ]
+      ],
+      multipartChunks: [],
+      presignedUrls: []
     }
   },
   components: {},
   mounted() {
-    this.getAccessKeys()
+    //this.getAccessKeys()
   },
   methods: {
     onUpload() {
@@ -96,6 +98,7 @@ export default {
     filesSelected(event) {
       this.uploadFinished = false
       this.selectedFile = event.files[0]
+      this.splitFile()
     },
     copyClipboard() {
       navigator.clipboard.writeText('https://uploads.tmc.jetzt/#/dl?file=' + this.filename)
@@ -131,10 +134,57 @@ export default {
 
     initiateMultipart() {
       axios.post('/api/transfer/create/multipart/' + this.filename).then(res => {
-        console.log(res.data)
+
+        console.log(res.data.multipartId)
+
+        this.splitFile()
+
+        this.multipartChunks.forEach((chunk, index) => {
+          const ok = this.s3.getSignedUrl('uploadPart', {
+            Bucket: 'transfer',
+            Key: this.filename + '.' + this.selectedFile.name.split('.').pop(),
+            UploadId: res.data.multipartId,
+            PartNumber: index + 1
+          })
+
+          console.log(ok)
+          this.presignedUrls.push({
+            url: ok,
+            data: chunk.data
+          })
+
+          console.log(this.presignedUrls)
+        })
       }).catch(err => {
         console.log(err)
       })
+    },
+
+    splitFile() {
+      let chunks = []
+      var chunkSize = 95000000; // 95MB
+      var fileSize = this.selectedFile.size;
+      var chunkCount = Math.ceil(fileSize/chunkSize);
+      var chunk = 0;
+
+      console.log('file size..',fileSize);
+      console.log('chunks...',chunkCount);
+
+      while (chunk < chunkCount) {
+        var offset = chunk*chunkSize;
+        console.log('current chunk..', chunk);
+        //console.log('offset...', chunk*chunkSize);
+        //console.log('file blob from offset...', offset)
+        //console.log(this.selectedFile.slice(offset,chunkSize));
+        chunks.push({
+          chunkNumber: chunk,
+          data: this.selectedFile.slice(offset,offset + chunkSize)
+        })
+        chunk++;
+      }
+
+      console.log(chunks)
+      this.multipartChunks = chunks
     },
 
     upload() {
@@ -146,7 +196,7 @@ export default {
 
       axios.put('https://bucket.tmc.jetzt/' + presignedUploadUrl, this.selectedFile, {
         onUploadProgress: (event) => {
-          this.uploadProgress = (event.loaded / (event.total/100))
+          this.uploadProgress = (event.loaded / (event.total / 100))
           console.log(this.uploadProgress + '% loaded')
         }
       }).then(res => {
