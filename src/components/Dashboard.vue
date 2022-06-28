@@ -171,7 +171,8 @@ export default {
       let failed = false
 
       for (const pre of this.presignedUrls) {
-        const response = await axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data)
+        console.log(pre)
+        /*const response = await axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data)
         console.log(response.data)
         parts.push({
           ETag: response.data.etag,
@@ -196,7 +197,7 @@ export default {
           MultipartUpload: {
             Parts: parts
           }
-        })
+        })*/
       }
     },
 
