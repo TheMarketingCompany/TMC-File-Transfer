@@ -192,7 +192,7 @@ export default {
           console.log(err)
         })
       } else {
-        this.s3.completeMultipartUpload({
+        const test2 = this.s3.completeMultipartUpload({
           Bucket: 'transfer',
           Key: this.filename,
           UploadId: this.multiId,
@@ -200,6 +200,8 @@ export default {
             Parts: test
           }
         })
+
+        console.log(test2)
       }
     },
 
