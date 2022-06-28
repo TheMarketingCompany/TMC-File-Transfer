@@ -150,8 +150,8 @@ export default {
               data: chunk.data,
               filename: this.filename
             })
-            console.log(response.data)
-            console.log(JSON.parse(JSON.stringify(response.data)))
+            console.log(response.data.ETag)
+            console.log(response.data.PartNumber)
           } catch (e) {
             console.log(e)
           }
