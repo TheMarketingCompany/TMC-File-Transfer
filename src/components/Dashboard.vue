@@ -140,10 +140,10 @@ export default {
 
         this.multiId = res.data.uploadId
 
-        this.splitFile()
-
         for (const chunk of this.multipartChunks) {
           const index = this.multipartChunks.indexOf(chunk);
+          console.log(index)
+          console.log(chunk)
           try {
 
             await axios.put('https://bucket.tmc.jetzt/upload', {
