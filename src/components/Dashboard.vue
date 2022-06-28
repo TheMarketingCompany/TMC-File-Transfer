@@ -147,17 +147,14 @@ export default {
           const index = this.multipartChunks.indexOf(chunk);
           try {
 
-            const response = await axios.put('https://bucket.tmc.jetzt/upload', {
-              UploadId: res.data.uploadId,
-              PartNumber: index + 1,
-              data: chunk.data,
-              filename: this.filename
-            })
+            const response = await axios.put('https://bucket.tmc.jetzt/upload?uploadId=' + res.data.uploadId
+                + '&PartNumber=' + (index + 1)
+                + '&filename=' + this.filename, chunk.data)
             console.log(response.data.ETag)
             console.log(response.data.PartNumber)
 
             multis.push({
-              ETag: response.data.ETag.replace('"', ''),
+              ETag: response.data.ETag,
               PartNumber: response.data.PartNumber
             })
           } catch (e) {
