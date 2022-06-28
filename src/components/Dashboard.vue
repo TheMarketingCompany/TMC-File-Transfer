@@ -134,7 +134,7 @@ export default {
     },
 
     initiateMultipart() {
-      axios.post('/api/transfer/create/multipart/' + this.filename).then(async res => {
+      axios.post('/api/transfer/create/multipart/' + this.filename).then(res => {
 
         console.log(res.data.uploadId)
 
@@ -142,21 +142,8 @@ export default {
 
         this.splitFile()
 
-        for (const chunk of this.multipartChunks) {
-          const index = this.multipartChunks.indexOf(chunk);
-          try {
-
-            await axios.put('https://bucket.tmc.jetzt/upload', {
-              UploadId: res.data.uploadId,
-              PartNumber: index + 1,
-              data: chunk.data,
-              filename: this.filename
-            })
-          } catch (e) {
-            console.log(e)
-          }
-
-          /*const ok = this.s3.getSignedUrl('uploadPart', {
+        this.multipartChunks.forEach((chunk, index) => {
+          const ok = this.s3.getSignedUrl('uploadPart', {
             Bucket: 'transfer',
             Key: this.filename + '.' + this.selectedFile.name.split('.').pop(),
             UploadId: res.data.uploadId,
@@ -172,26 +159,39 @@ export default {
 
           console.log(this.presignedUrls)
 
-          this.uploadMultipartParts()*/
-        }
+        })
+
+
+        this.uploadMultipartParts()
       }).catch(err => {
         console.log(err)
       })
     },
 
-    async uploadMultipartParts() {
-      //const parts = []
-      //let failed = false
+    uploadMultipartParts() {
+      const parts = []
+      let failed = false
 
-      for (const pre of this.presignedUrls) {
-        console.log(pre)
-        /*const response = await axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data)
-        console.log(response.data)
-        parts.push({
-          ETag: response.data.etag,
-          PartNumber: this.presignedUrls.indexOf(pre) + 1
+      this.presignedUrls.forEach(pre => {
+        axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data, {
+          onUploadProgress: (event) => {
+            this.uploadProgress = (event.loaded / (event.total / 100))
+            console.log(this.uploadProgress + '% loaded')
+          }
+        }).then(res => {
+          parts.push({
+            ETag: res.data.etag,
+            PartNumber: pre.chunkNumber
+          })
+          this.loading = false
+          this.uploadFinished = true
+          console.log(res)
+        }).catch(err => {
+          console.log(err)
+          failed = true
+          this.loading = false
         })
-      }
+      })
 
       if (failed === true) {
         this.s3.abortMultipartUpload({
@@ -210,7 +210,7 @@ export default {
           MultipartUpload: {
             Parts: parts
           }
-        })*/
+        })
       }
     },
 
