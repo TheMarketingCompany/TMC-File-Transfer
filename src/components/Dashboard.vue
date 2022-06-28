@@ -84,7 +84,8 @@ export default {
         '1 month'
       ],
       multipartChunks: [],
-      presignedUrls: []
+      presignedUrls: [],
+      multiId: ''
     }
   },
   components: {},
@@ -137,6 +138,8 @@ export default {
 
         console.log(res.data.uploadId)
 
+        this.multiId = res.data.uploadId
+
         this.splitFile()
 
         this.multipartChunks.forEach((chunk, index) => {
@@ -150,35 +153,83 @@ export default {
           console.log(ok)
           this.presignedUrls.push({
             url: ok,
-            data: chunk.data
+            data: chunk.data,
+            chunkNumber: chunk.chunkNumber
           })
 
           console.log(this.presignedUrls)
+
+          this.uploadMultipartParts()
         })
       }).catch(err => {
         console.log(err)
       })
     },
 
+    uploadMultipartParts() {
+      const parts = []
+      let failed = false
+      this.presignedUrls.forEach(pre => {
+        axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data, {
+          onUploadProgress: (event) => {
+            this.uploadProgress = (event.loaded / (event.total / 100))
+            console.log(this.uploadProgress + '% loaded')
+          }
+        }).then(res => {
+          parts.push({
+            ETag: res.data.etag,
+            PartNumber: pre.chunkNumber
+          })
+          this.loading = false
+          this.uploadFinished = true
+          console.log(res)
+        }).catch(err => {
+          console.log(err)
+          failed = true
+          this.loading = false
+        })
+      })
+
+      if (failed === true) {
+        this.s3.abortMultipartUpload({
+          Bucket: 'transfer',
+          Key: this.filename,
+          UploadId: this.multiId
+        }, err => {
+          console.log('failed aborting multipart upload => ' + this.multiId)
+          console.log(err)
+        })
+      } else {
+        this.s3.completeMultipartUpload({
+          Bucket: 'transfer',
+          Key: this.filename,
+          UploadId: this.multiId,
+          MultipartUpload: {
+            Parts: parts
+          }
+        })
+      }
+    },
+
     splitFile() {
       let chunks = []
       var chunkSize = 95000000; // 95MB
       var fileSize = this.selectedFile.size;
-      var chunkCount = Math.ceil(fileSize/chunkSize);
+      var chunkCount = Math.ceil(fileSize / chunkSize);
       var chunk = 0;
 
-      console.log('file size..',fileSize);
-      console.log('chunks...',chunkCount);
+      console.log('file size..', fileSize);
+      console.log('chunks...', chunkCount);
 
       while (chunk < chunkCount) {
-        var offset = chunk*chunkSize;
+        var offset = chunk * chunkSize;
         console.log('current chunk..', chunk);
         //console.log('offset...', chunk*chunkSize);
         //console.log('file blob from offset...', offset)
         //console.log(this.selectedFile.slice(offset,chunkSize));
         chunks.push({
           chunkNumber: chunk,
-          data: this.selectedFile.slice(offset,offset + chunkSize)
+          data: this.selectedFile.slice(offset, offset + chunkSize)
         })
         chunk++;
       }
