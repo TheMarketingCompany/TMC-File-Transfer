@@ -157,7 +157,7 @@ export default {
             console.log(response.data.PartNumber)
 
             multis.push({
-              ETag: response.data.ETag,
+              ETag: response.data.ETag.replace('"', ''),
               PartNumber: response.data.PartNumber
             })
           } catch (e) {
