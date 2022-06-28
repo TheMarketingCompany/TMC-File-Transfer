@@ -133,6 +133,7 @@ export default {
     },
 
     initiateMultipart() {
+      const self = this
       axios.post('/api/transfer/create/multipart/' + this.filename).then(res => {
 
         console.log(res.data.multipartId)
@@ -140,7 +141,7 @@ export default {
         this.splitFile()
 
         this.multipartChunks.forEach((chunk, index) => {
-          const ok = this.s3.getSignedUrl('uploadPart', {
+          const ok = self.s3.getSignedUrl('uploadPart', {
             Bucket: 'transfer',
             Key: this.filename + '.' + this.selectedFile.name.split('.').pop(),
             UploadId: res.data.multipartId,
