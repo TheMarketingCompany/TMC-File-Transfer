@@ -121,11 +121,19 @@ export default {
         passwordHash: sha('sha256').update(this.password).digest('hex')
       }).then(res => {
         this.filename = res.data.fileId
-
-        this.upload()
+        this.initiateMultipart()
+        //this.upload()
       }).catch(err => {
         console.log(err)
         this.loading = false
+      })
+    },
+
+    initiateMultipart() {
+      axios.post('/api/transfer/create/multipart/' + this.filename).then(res => {
+        console.log(res.data)
+      }).catch(err => {
+        console.log(err)
       })
     },
 
