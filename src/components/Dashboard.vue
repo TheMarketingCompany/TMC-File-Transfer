@@ -142,18 +142,15 @@ export default {
 
         for (const chunk of this.multipartChunks) {
           const index = this.multipartChunks.indexOf(chunk);
-          console.log(index)
-          console.log(chunk)
           try {
 
-            const partialData = await axios.put('https://bucket.tmc.jetzt/upload', {
+            const response = await axios.put('https://bucket.tmc.jetzt/upload', {
               UploadId: res.data.uploadId,
               PartNumber: index + 1,
               data: chunk.data,
               filename: this.filename
             })
-            console.log('partialData')
-            console.log(partialData)
+            console.log(JSON.parse(response.data))
           } catch (e) {
             console.log(e)
           }
