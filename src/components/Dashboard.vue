@@ -167,8 +167,8 @@ export default {
     },
 
     async uploadMultipartParts() {
-      const parts = []
-      let failed = false
+      //const parts = []
+      //let failed = false
 
       for (const pre of this.presignedUrls) {
         console.log(pre)
