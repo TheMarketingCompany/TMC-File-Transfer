@@ -140,6 +140,9 @@ export default {
 
         this.multiId = res.data.uploadId
 
+        let multiError = false
+        const multis = []
+
         for (const chunk of this.multipartChunks) {
           const index = this.multipartChunks.indexOf(chunk);
           try {
@@ -152,27 +155,32 @@ export default {
             })
             console.log(response.data.ETag)
             console.log(response.data.PartNumber)
+
+            multis.push({
+              ETag: response.data.ETag,
+              PartNumber: response.data.PartNumber
+            })
           } catch (e) {
+            multiError = true
             console.log(e)
           }
+        }
 
-          /*const ok = this.s3.getSignedUrl('uploadPart', {
-            Bucket: 'transfer',
-            Key: this.filename + '.' + this.selectedFile.name.split('.').pop(),
-            UploadId: res.data.uploadId,
-            PartNumber: index + 1
+        if (multiError === true) {
+          // abort multipart upload
+        } else {
+          // finish multipart upload
+
+          axios.post('https://bucket.tmc.jetzt/upload', {
+            filename: this.filename,
+            parts: multis,
+            uploadId: this.multiId
+          }).then(res => {
+            console.log('success')
+            console.log(res.data)
+          }).catch(err => {
+            console.log(err)
           })
-
-          console.log(ok)
-          this.presignedUrls.push({
-            url: ok,
-            data: chunk.data,
-            chunkNumber: chunk.chunkNumber
-          })
-
-          console.log(this.presignedUrls)
-
-          this.uploadMultipartParts()*/
         }
       }).catch(err => {
         console.log(err)
