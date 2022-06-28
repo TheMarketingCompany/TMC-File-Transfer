@@ -166,29 +166,21 @@ export default {
       })
     },
 
-    uploadMultipartParts() {
-      const parts = []
+    async uploadMultipartParts() {
+      //const parts = []
       let failed = false
+
+      const promises = []
       this.presignedUrls.forEach(pre => {
-        axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data, {
-          onUploadProgress: (event) => {
-            this.uploadProgress = (event.loaded / (event.total / 100))
-            console.log(this.uploadProgress + '% loaded')
-          }
-        }).then(res => {
-          parts.push({
-            ETag: res.data.etag,
-            PartNumber: pre.chunkNumber
-          })
-          this.loading = false
-          this.uploadFinished = true
-          console.log(res)
-        }).catch(err => {
-          console.log(err)
-          failed = true
-          this.loading = false
-        })
+        promises.push(
+            axios.put('https://bucket.tmc.jetzt/' + pre.url, pre.data))
       })
+      const resParts = await Promise.all(promises)
+
+      const test = resParts.map((part, index) => ({
+        ETag: part.etag,
+        PartNumber: index + 1
+      }))
 
       if (failed === true) {
         this.s3.abortMultipartUpload({
@@ -205,7 +197,7 @@ export default {
           Key: this.filename,
           UploadId: this.multiId,
           MultipartUpload: {
-            Parts: parts
+            Parts: test
           }
         })
       }
