@@ -152,7 +152,11 @@ export default {
             const response = await axios.put('https://bucket.tmc.jetzt/upload?' +
                 'UploadId=' + res.data.uploadId +
                 '&PartNumber=' + index + 1 +
-                '&filename=' + this.filename, fd)
+                '&filename=' + this.filename, fd, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              }
+            })
             console.log(response.data.ETag)
             console.log(response.data.PartNumber)
 
