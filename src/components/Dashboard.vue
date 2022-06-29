@@ -150,7 +150,8 @@ export default {
             const response = await axios.put('https://bucket.tmc.jetzt/upload', {
               UploadId: res.data.uploadId,
               PartNumber: index + 1,
-              data: chunk.data,
+              //data: chunk.data,
+              data: 'chunk.data',
               filename: this.filename
             })
             console.log(response.data.ETag)
