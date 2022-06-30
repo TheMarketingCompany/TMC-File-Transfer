@@ -112,7 +112,7 @@ export default {
       this.splitFile()
     },
     copyClipboard() {
-      navigator.clipboard.writeText('https://uploads.tmc.jetzt/#/dl?file=' + this.filename)
+      navigator.clipboard.writeText(window.location.origin + '/dl?file=' + this.filename)
     },
     getAccessKeys() {
       axios.get('/api/auth').then(res => {
