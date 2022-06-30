@@ -4,7 +4,7 @@ const routes = [
 	{
 		path: '/',
 		name: 'nope',
-		redirect: 'db'
+		redirect: 'dl'
 	},
 	{
 		path: '/db',

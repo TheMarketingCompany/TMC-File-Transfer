@@ -1,26 +1,33 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <div v-if="otdWarning">
+
+      <Toolbar>
+
+        <template #end>
+          <Button label="Upload" icon="pi pi-upload" class="p-button-success" @click="openUpload"/>
+        </template>
+      </Toolbar>
+      <div v-if="otdWarning" class="mt-5">
         <span style="color: red">Warning, this file will self-destruct after being read</span>
       </div>
-      <div v-if="context==='validating'">
+      <div v-if="context==='validating'" class="mt-5">
         <div class="loader-wrapper">
           <div class="loader"></div>
           <div class="loader-section section-left"></div>
           <div class="loader-section section-right"></div>
         </div>
       </div>
-      <div class="card" v-else-if="context==='password'">
+      <div class="card mt-5" v-else-if="context==='password'">
         <h5>password</h5>
         <Password v-model="password"/>
         <Button @click="validatePassword">Validate</Button>
       </div>
-      <div class="card" v-else-if="context==='download'">
+      <div class="card mt-5" v-else-if="context==='download'">
         <h5>Download</h5>
         <Button @click="downloadFile">Download</Button>
       </div>
-      <div class="card" v-else-if="context==='error'">
+      <div class="card mt-5" v-else-if="context==='error'">
         <h5>
           <img src="https://cdn.discordapp.com/emojis/867743530754375682.webp?size=96&quality=lossless">
         </h5>
@@ -102,6 +109,9 @@ export default {
           this.contextText = err.message
         }
       })
+    },
+    openUpload() {
+      this.$router.push('db')
     }
   }
 }
