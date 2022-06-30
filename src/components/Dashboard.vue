@@ -200,6 +200,9 @@ export default {
             parts: multis,
             uploadId: this.multiId
           }).then(res => {
+            this.chunkProgress = 0
+            this.uploadProgress = 0
+            this.loading = false
             console.log('success')
             console.log(res.data)
           }).catch(err => {
