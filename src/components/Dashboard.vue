@@ -48,14 +48,18 @@
 
     <div class="loader-wrapper">
       <div class="loader"></div>
-      Total Progress
-      <ProgressBar :value="chunkProgress" class="custProg">
-        {{ uploadProgress }}%
-      </ProgressBar>
-      Partial Progress
-      <ProgressBar :value="uploadProgress" class="custProg">
-        {{ uploadProgress }}%
-      </ProgressBar>
+      <div class="custProg1">
+        Total progress
+        <ProgressBar :value="chunkProgress">
+          {{ Math.round(chunkProgress) }}%
+        </ProgressBar>
+      </div>
+      <div class="custProg2">
+        Chunk progress
+        <ProgressBar :value="uploadProgress">
+          {{ uploadProgress }}%
+        </ProgressBar>
+      </div>
       <div class="loader-section section-left"></div>
       <div class="loader-section section-right"></div>
     </div>
@@ -73,7 +77,7 @@ const S3 = require('aws-sdk/clients/s3')
 export default {
   data() {
     return {
-      loading: false,
+      loading: true,
       s3: null,
       selectedFile: undefined,
       onetimeDownload: false,
@@ -272,9 +276,17 @@ export default {
   height: 100%;
 }
 
-.custProg {
+.custProg1 {
   display: block;
   margin-top: 35%;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+.custProg2 {
+  display: block;
+  margin-top: 2%;
   position: relative;
   margin-left: auto;
   margin-right: auto;
