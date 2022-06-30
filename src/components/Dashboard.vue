@@ -260,7 +260,7 @@ export default {
     }
   },
   computed: {
-    totalProgress: () => {
+    totalProgress() {
       let temp = 0
       this.multipartChunks.forEach(chunk => {
         temp += chunk.uploadProgress
