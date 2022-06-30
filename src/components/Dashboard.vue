@@ -154,6 +154,7 @@ export default {
         const multis = []
 
         let currentChunkNum = 0
+        let temp = 100/this.multipartChunks.length
 
         for (const chunk of this.multipartChunks) {
           console.log(this.chunkProgress)
@@ -171,9 +172,8 @@ export default {
             const response = await axios.put('https://bucket.tmc.jetzt/upload', data, {
               onUploadProgress: (chunkProgress) => {
                 console.log(chunkProgress)
-                let temp = 100/this.multipartChunks.length
 
-                this.chunkProgress = (temp * (currentChunkNum - 1)) + ((100/chunkProgress.total) * chunkProgress.loaded)
+                this.chunkProgress = (temp * (currentChunkNum - 1)) + (((100/chunkProgress.total) * chunkProgress.loaded) - temp * (currentChunkNum - 1)))
                 this.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
               }
             })
