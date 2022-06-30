@@ -173,7 +173,7 @@ export default {
               onUploadProgress: (chunkProgress) => {
                 console.log(chunkProgress)
 
-                this.chunkProgress = (temp * (currentChunkNum - 1)) + (((100/chunkProgress.total) * chunkProgress.loaded) - temp * (currentChunkNum - 1)))
+                this.chunkProgress = (temp * (currentChunkNum - 1)) + (((100/chunkProgress.total) * chunkProgress.loaded) - temp * (currentChunkNum - 1))
                 this.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
               }
             })
