@@ -169,6 +169,7 @@ export default {
               onUploadProgress: (chunkProgress) => {
                 console.log(chunkProgress)
                 chunk.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
+                this.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
               }
             })
             console.log(response.data.ETag)
