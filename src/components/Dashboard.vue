@@ -186,10 +186,17 @@ export default {
         }
 
         if (multiError === true) {
-          // abort multipart upload
+          axios.delete('https://bucket.tmc.jetzt/upload', {
+            data: {
+              UploadId: this.multiId,
+              filename: this.filename
+            }
+          }).then(res => {
+            console.log(res)
+          }).catch(err => {
+            console.log(err)
+          })
         } else {
-          // finish multipart upload
-
           axios.post('https://bucket.tmc.jetzt/upload', {
             filename: this.filename,
             parts: multis,
