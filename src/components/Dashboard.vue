@@ -199,7 +199,6 @@ export default {
             this.uploadProgress = 0
             this.loading = false
             this.uploadFinished = true
-            axios.get('')
             console.log('success')
             console.log(res.data)
           }).catch(err => {
