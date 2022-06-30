@@ -77,7 +77,7 @@ const S3 = require('aws-sdk/clients/s3')
 export default {
   data() {
     return {
-      loading: true,
+      loading: false,
       s3: null,
       selectedFile: undefined,
       onetimeDownload: false,
