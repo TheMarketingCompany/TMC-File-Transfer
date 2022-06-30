@@ -168,8 +168,8 @@ export default {
             const response = await axios.put('https://bucket.tmc.jetzt/upload', data, {
               onUploadProgress: (chunkProgress) => {
                 console.log(chunkProgress)
-                chunk.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
-                this.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
+                chunk.uploadProgress = (100 / chunkProgress.total) * chunkProgress.loaded
+                this.uploadProgress = (100 / chunkProgress.total) * chunkProgress.loaded
               }
             })
             console.log(response.data.ETag)
@@ -198,6 +198,8 @@ export default {
             this.chunkProgress = 0
             this.uploadProgress = 0
             this.loading = false
+            this.uploadFinished = true
+            axios.get('')
             console.log('success')
             console.log(res.data)
           }).catch(err => {
@@ -223,9 +225,6 @@ export default {
       while (chunk < chunkCount) {
         var offset = chunk * chunkSize;
         console.log('current chunk..', chunk);
-        //console.log('offset...', chunk*chunkSize);
-        //console.log('file blob from offset...', offset)
-        //console.log(this.selectedFile.slice(offset,chunkSize));
         chunks.push({
           chunkNumber: chunk,
           data: this.selectedFile.slice(offset, offset + chunkSize),
@@ -238,27 +237,6 @@ export default {
       this.multipartChunks = chunks
     },
 
-    upload() {
-      const presignedUploadUrl = this.s3.getSignedUrl('putObject', {
-        Bucket: 'transfer',
-        Key: this.filename + '.' + this.selectedFile.name.split('.').pop(),
-        Expires: 21600
-      })
-
-      axios.put('https://bucket.tmc.jetzt/' + presignedUploadUrl, this.selectedFile, {
-        onUploadProgress: (event) => {
-          this.uploadProgress = (event.loaded / (event.total / 100))
-          console.log(this.uploadProgress + '% loaded')
-        }
-      }).then(res => {
-        this.loading = false
-        this.uploadFinished = true
-        console.log(res)
-      }).catch(err => {
-        console.log(err)
-        this.loading = false
-      })
-    }
   },
   computed: {
     totalProgress() {
@@ -295,6 +273,7 @@ export default {
   margin-right: auto;
   width: 50%;
 }
+
 .custProg2 {
   display: block;
   margin-top: 2%;
