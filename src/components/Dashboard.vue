@@ -153,13 +153,9 @@ export default {
         let multiError = false
         const multis = []
 
-
-        let currentChunkNum = 0
-
         for (const chunk of this.multipartChunks) {
           console.log(this.chunkProgress)
 
-          currentChunkNum += 1
           const index = this.multipartChunks.indexOf(chunk);
           try {
             let data = new FormData()
