@@ -174,6 +174,7 @@ export default {
             const response = await axios.put('https://bucket.tmc.jetzt/upload', data, {
               onUploadProgress: (chunkProgress) => {
                 console.log(chunkProgress)
+                this.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
               }
             })
             console.log(response.data.ETag)
