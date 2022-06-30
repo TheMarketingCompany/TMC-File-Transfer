@@ -111,7 +111,12 @@ export default {
       })
     },
     openUpload() {
-      this.$router.push('db')
+      let r = this.$router.resolve({
+        name: 'dashboard', // put your route information in
+        params: this.$route.params, // put your route information in
+        query: this.$route.query // put your route information in
+      });
+      window.location.assign(r.href)
     }
   }
 }
