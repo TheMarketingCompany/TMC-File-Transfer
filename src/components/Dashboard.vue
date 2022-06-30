@@ -57,7 +57,7 @@
       <div class="custProg2">
         Chunk progress
         <ProgressBar :value="uploadProgress">
-          {{ uploadProgress }}%
+          {{ Math.round(uploadProgress) }}%
         </ProgressBar>
       </div>
       <div class="loader-section section-left"></div>
@@ -158,10 +158,6 @@ export default {
         let currentChunkNum = 0
 
         for (const chunk of this.multipartChunks) {
-          this.chunkProgress = currentChunkNum * multiplier
-          console.log(this.chunkProgress)
-
-          currentChunkNum += 1
           const index = this.multipartChunks.indexOf(chunk);
           try {
             let data = new FormData()
@@ -188,6 +184,10 @@ export default {
             multiError = true
             console.log(e)
           }
+          this.chunkProgress = currentChunkNum * multiplier
+          console.log(this.chunkProgress)
+
+          currentChunkNum += 1
         }
 
         if (multiError === true) {
