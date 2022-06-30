@@ -50,8 +50,8 @@
       <div class="loader"></div>
       <div class="custProg1">
         Total progress
-        <ProgressBar :value="chunkProgress">
-          {{ Math.round(chunkProgress) }}%
+        <ProgressBar :value="uploadProgress / multipartChunks.length">
+          {{ Math.round(uploadProgress / multipartChunks.length) }}%
         </ProgressBar>
       </div>
       <div class="custProg2">
