@@ -146,14 +146,14 @@ export default {
         for (const chunk of this.multipartChunks) {
           const index = this.multipartChunks.indexOf(chunk);
           try {
+            let data = new FormData()
+            data.append('UploadId', res.data.uploadId)
+            data.append('PartNumber', (index + 1).toString())
+            data.append('chunk', chunk.data)
+            data.append('filename', this.filename)
 
-            const response = await axios.put('https://bucket.tmc.jetzt/upload', {
-              UploadId: res.data.uploadId,
-              PartNumber: index + 1,
-              //data: chunk.data,
-              data: 'chunk.data',
-              filename: this.filename
-            })
+
+            const response = await axios.put('https://bucket.tmc.jetzt/upload', data)
             console.log(response.data.ETag)
             console.log(response.data.PartNumber)
 
