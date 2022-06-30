@@ -50,8 +50,8 @@
       <div class="loader"></div>
       <div class="custProg1">
         Total progress
-        <ProgressBar :value="chunkProgress">
-          {{ Math.round(chunkProgress) }}%
+        <ProgressBar :value="totalProgress">
+          {{ Math.round(totalProgress) }}%
         </ProgressBar>
       </div>
       <div class="custProg2">
@@ -153,8 +153,8 @@ export default {
         let multiError = false
         const multis = []
 
+
         let currentChunkNum = 0
-        let temp = 100/this.multipartChunks.length
 
         for (const chunk of this.multipartChunks) {
           console.log(this.chunkProgress)
@@ -172,9 +172,7 @@ export default {
             const response = await axios.put('https://bucket.tmc.jetzt/upload', data, {
               onUploadProgress: (chunkProgress) => {
                 console.log(chunkProgress)
-
-                this.chunkProgress = (temp * (currentChunkNum - 1)) + (((100/chunkProgress.total) * chunkProgress.loaded) - temp * (currentChunkNum - 1))
-                this.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
+                chunk.uploadProgress = (100/chunkProgress.total) * chunkProgress.loaded
               }
             })
             console.log(response.data.ETag)
@@ -233,7 +231,8 @@ export default {
         //console.log(this.selectedFile.slice(offset,chunkSize));
         chunks.push({
           chunkNumber: chunk,
-          data: this.selectedFile.slice(offset, offset + chunkSize)
+          data: this.selectedFile.slice(offset, offset + chunkSize),
+          uploadProgress: 0
         })
         chunk++;
       }
@@ -262,6 +261,17 @@ export default {
         console.log(err)
         this.loading = false
       })
+    }
+  },
+  computed: {
+    totalProgress: () => {
+      let temp = 0
+      this.multipartChunks.forEach(chunk => {
+        temp += chunk.uploadProgress
+      })
+
+      temp = temp / this.multipartChunks.length
+      return temp
     }
   }
 }
