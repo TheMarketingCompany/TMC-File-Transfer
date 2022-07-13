@@ -113,7 +113,7 @@ export default {
     copyClipboard() {
       try {
         navigator.clipboard.writeText(window.location.origin + '/dl?file=' + this.filename)
-        this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
+        this.$toast.add({severity: 'success', summary: 'Success', detail: 'Link copied to clipboard successfully', life: 3000});
       } catch (e) {
         this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed copying link to clipboard', life: 3000});
         console.log(e)
@@ -128,6 +128,9 @@ export default {
           s3ForcePathStyle: true,
           signatureVersion: 'v4'
         })
+      }).catch(err => {
+        this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed initializing upload tool', life: 30000});
+        this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
       })
     },
 
@@ -143,6 +146,8 @@ export default {
         this.initiateMultipart()
         //this.upload()
       }).catch(err => {
+        this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed initializing upload', life: 30000});
+        this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
         console.log(err)
         this.loading = false
       })
@@ -181,6 +186,8 @@ export default {
               PartNumber: response.data.PartNumber
             })
           } catch (e) {
+            this.$toast.add({severity: 'error', summary: 'Error', detail: 'Error occured', life: 30000});
+            this.$toast.add({severity: 'error', summary: 'Error', detail: e, life: 30000});
             multiError = true
             console.log(e)
           }
@@ -195,6 +202,8 @@ export default {
           }).then(res => {
             console.log(res)
           }).catch(err => {
+            this.$toast.add({severity: 'error', summary: 'Error', detail: 'Error occured', life: 30000});
+            this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
             console.log(err)
           })
         } else {
@@ -210,10 +219,14 @@ export default {
 
             this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
           }).catch(err => {
+            this.$toast.add({severity: 'error', summary: 'Error', detail: 'Error occured', life: 30000});
+            this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
             console.log(err)
           })
         }
       }).catch(err => {
+        this.$toast.add({severity: 'error', summary: 'Error', detail: 'Error occured', life: 30000});
+        this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
         console.log(err)
       })
     },
