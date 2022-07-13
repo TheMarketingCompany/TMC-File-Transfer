@@ -10,7 +10,7 @@
             :multiple="false"
             @select="filesSelected"
             :showUploadButton="false"
-            :showCancelButton="true"
+            :showCancelButton="false"
             :file-limit="1"
         />
 
