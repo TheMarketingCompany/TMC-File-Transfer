@@ -37,12 +37,10 @@
           <Button @click="preUpload">Upload</Button>
         </div>
 
-        <div v-if="uploadFinished" >
-          <div class="flex-row mt-5" @click="copyClipboard">
-            <Button>Copy download link to clipboard</Button>
-          </div>
+        <div v-if="uploadFinished">
           <div class="flex-row mt-5">
-            <span>{{ downloadLink }}</span>
+            <Button @click="copyClipboard">Copy download link to clipboard</Button>
+            <span class="ml-5">{{ downloadLink }}</span>
           </div>
         </div>
 
