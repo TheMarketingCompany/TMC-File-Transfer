@@ -3,7 +3,7 @@
 
     <div class="col-12 lg:col-12">
       <div class="card donut ">
-        <h5>Upload file(s)</h5>
+        <h5>Select file</h5>
 
         <FileUpload
             @upload="onUpload"
