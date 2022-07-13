@@ -21,6 +21,8 @@
         <router-view/>
       </div>
 
+      <AppFooter/>
+
 
       <div class="layout-mask"></div>
     </div>
@@ -29,6 +31,7 @@
 
 <script>
 import EventBus from './event-bus';
+import AppFooter from "@/AppFooter";
 
 export default {
   props: {
@@ -197,6 +200,7 @@ export default {
     }
   },
   components: {
+    AppFooter
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.getWindowWidth);

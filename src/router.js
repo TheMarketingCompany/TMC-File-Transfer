@@ -18,6 +18,12 @@ const routes = [
 		exact: true,
 		component: () => import('./components/Download.vue')
 	},
+	{
+		path: '/tos',
+		name: 'tos',
+		exact: true,
+		component: () => import('./components/TOS.vue')
+	},
 ];
 
 const router = createRouter({
