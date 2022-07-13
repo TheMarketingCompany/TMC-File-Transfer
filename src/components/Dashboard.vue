@@ -224,7 +224,7 @@ export default {
             this.uploadFinished = true
 
             this.downloadLink = window.location.origin + '/dl?file=' + this.filename
-            this.$refs.fileUpload.fileInput.value = ''
+            this.$refs.fileUpload.clear()
 
             try {
               navigator.clipboard.writeText(window.location.origin + '/dl?file=' + this.filename)
