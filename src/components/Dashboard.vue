@@ -7,11 +7,11 @@
         <h5>Select file</h5>
 
         <FileUpload
-            @upload="onUpload"
+            ref="fileUpload"
             :multiple="false"
             @select="filesSelected"
             :showUploadButton="false"
-            :showCancelButton="false"
+            :showCancelButton="true"
             :file-limit="1"
         />
 
@@ -222,6 +222,14 @@ export default {
             this.loading = false
             this.uploadFinished = true
 
+            this.$refs.fileUpload.fileInput.value = ''
+
+            try {
+              navigator.clipboard.writeText(window.location.origin + '/dl?file=' + this.filename)
+            } catch (e) {
+              this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed copying link to clipboard', life: 3000});
+              console.log(e)
+            }
             this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
           }).catch(err => {
             this.$toast.add({severity: 'error', summary: 'Error', detail: 'Error occured', life: 30000});
