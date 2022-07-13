@@ -1,6 +1,7 @@
 <template>
   <div class="grid dashboard" :class="loading ? 'blur' : ''">
 
+    <Toast/>
     <div class="col-12 lg:col-12">
       <div class="card donut ">
         <h5>Select file</h5>
@@ -42,7 +43,6 @@
 
       </div>
     </div>
-    <Toast/>
 
   </div>
 
@@ -103,10 +103,12 @@ export default {
   components: {},
   mounted() {
     this.getAccessKeys()
+    this.$toast.add({severity: 'success', summary: 'Success', detail: 'test', life: 3000});
   },
   methods: {
     onUpload() {
-      this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000});
+      console.log('upload finished')
+      this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
     },
     filesSelected(event) {
       this.uploadFinished = false
@@ -156,7 +158,6 @@ export default {
         const multis = []
 
         for (const chunk of this.multipartChunks) {
-          console.log(this.chunkProgress)
 
           const index = this.multipartChunks.indexOf(chunk);
           try {
@@ -169,13 +170,10 @@ export default {
 
             const response = await axios.put('https://bucket.tmc.jetzt/upload', data, {
               onUploadProgress: (chunkProgress) => {
-                console.log(chunkProgress)
                 chunk.uploadProgress = (100 / chunkProgress.total) * chunkProgress.loaded
                 this.uploadProgress = (100 / chunkProgress.total) * chunkProgress.loaded
               }
             })
-            console.log(response.data.ETag)
-            console.log(response.data.PartNumber)
 
             multis.push({
               ETag: response.data.ETag,
@@ -203,13 +201,11 @@ export default {
             filename: this.filename,
             parts: multis,
             uploadId: this.multiId
-          }).then(res => {
+          }).then(() => {
             this.chunkProgress = 0
             this.uploadProgress = 0
             this.loading = false
             this.uploadFinished = true
-            console.log('success')
-            console.log(res.data)
           }).catch(err => {
             console.log(err)
           })
