@@ -11,6 +11,7 @@
             @select="filesSelected"
             :showUploadButton="false"
             :showCancelButton="false"
+            :file-limit="1"
         />
 
 
