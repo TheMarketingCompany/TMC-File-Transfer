@@ -95,10 +95,12 @@ export default {
       })
     },
     validatePassword() {
+      var windowReference = window.open();
       axios.post('/api/transfer/validate/' + this.file, {
         passwordHash: sha('sha256').update(this.password).digest('hex')
       }).then(res => {
-        window.open(res.data.url, '_blank')
+        windowReference.location = res.data.url;
+        //window.open(res.data.url, '_blank')
       }).catch(err => {
         console.log(err)
         this.context = 'error'
