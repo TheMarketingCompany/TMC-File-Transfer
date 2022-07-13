@@ -37,8 +37,13 @@
           <Button @click="preUpload">Upload</Button>
         </div>
 
-        <div v-if="uploadFinished" class="flex-row mt-5" @click="copyClipboard">
-          <Button>Copy download link to clipboard</Button>
+        <div v-if="uploadFinished" >
+          <div class="flex-row mt-5" @click="copyClipboard">
+            <Button>Copy download link to clipboard</Button>
+          </div>
+          <div class="flex-row mt-5">
+            <span>{{ window.location.origin + '/dl?file=' + this.filename }}</span>
+          </div>
         </div>
 
       </div>
