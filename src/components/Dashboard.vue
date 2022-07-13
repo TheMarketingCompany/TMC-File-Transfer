@@ -226,12 +226,8 @@ export default {
       var chunkCount = Math.ceil(fileSize / chunkSize);
       var chunk = 0;
 
-      console.log('file size..', fileSize);
-      console.log('chunks...', chunkCount);
-
       while (chunk < chunkCount) {
         var offset = chunk * chunkSize;
-        console.log('current chunk..', chunk);
         chunks.push({
           chunkNumber: chunk,
           data: this.selectedFile.slice(offset, offset + chunkSize),
@@ -240,7 +236,6 @@ export default {
         chunk++;
       }
 
-      console.log(chunks)
       this.multipartChunks = chunks
     },
 
