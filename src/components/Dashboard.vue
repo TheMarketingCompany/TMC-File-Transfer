@@ -103,20 +103,21 @@ export default {
   components: {},
   mounted() {
     this.getAccessKeys()
-    this.$toast.add({severity: 'success', summary: 'Success', detail: 'test', life: 3000});
   },
   methods: {
-    onUpload() {
-      console.log('upload finished')
-      this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
-    },
     filesSelected(event) {
       this.uploadFinished = false
       this.selectedFile = event.files[0]
       this.splitFile()
     },
     copyClipboard() {
-      navigator.clipboard.writeText(window.location.origin + '/dl?file=' + this.filename)
+      try {
+        navigator.clipboard.writeText(window.location.origin + '/dl?file=' + this.filename)
+        this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
+      } catch (e) {
+        this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed copying link to clipboard', life: 3000});
+        console.log(e)
+      }
     },
     getAccessKeys() {
       axios.get('/api/auth').then(res => {
@@ -206,6 +207,8 @@ export default {
             this.uploadProgress = 0
             this.loading = false
             this.uploadFinished = true
+
+            this.$toast.add({severity: 'success', summary: 'Success', detail: 'File Uploaded', life: 3000});
           }).catch(err => {
             console.log(err)
           })
