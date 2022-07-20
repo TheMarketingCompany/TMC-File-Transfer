@@ -109,7 +109,7 @@ export default {
     //this.getAccessKeys()
 
     this.s3 = new S3({
-      endpoint: 'https://s3.eu-central-003.backblazeb2.com',
+      endpoint: 'https://s3.eu-central-003.backblazeb2.com/uploads-tmc',
       accessKeyId: '0036dbddc57d55b0000000002',
       secretAccessKey: 'K0031+M9UR+sPCl98wA+RiL9mZVgpXc',
     })
