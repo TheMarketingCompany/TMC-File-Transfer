@@ -34,7 +34,7 @@
         </div>
 
         <div class="flex-row mt-5">
-          <Button @click="preUpload">Upload</Button>
+          <Button @click="directUpload">Upload</Button>
         </div>
 
         <div v-if="uploadFinished">
@@ -106,7 +106,13 @@ export default {
   },
   components: {},
   mounted() {
-    this.getAccessKeys()
+    //this.getAccessKeys()
+
+    this.s3 = new S3({
+      endpoint: 'https://s3.eu-central-003.backblazeb2.com',
+      accessKeyId: '0036dbddc57d55b0000000002',
+      secretAccessKey: 'K0031+M9UR+sPCl98wA+RiL9mZVgpXc',
+    })
   },
   methods: {
     filesSelected(event) {
@@ -148,7 +154,7 @@ export default {
       }).then(res => {
         this.filename = res.data.fileId
         this.initiateMultipart()
-        //this.upload()
+        //this.directUpload()
       }).catch(err => {
         this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed initializing upload', life: 30000});
         this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
@@ -265,6 +271,23 @@ export default {
       this.multipartChunks = chunks
     },
 
+    directUpload() {
+      // this.fileName
+      this.s3.upload({
+        Bucket: 'uploads-tmc',
+        Key: this.selectedFile.name,
+        Body: this.selectedFile
+      }, (err, data) => {
+        if (err) {
+          console.log(err)
+          return;
+        }
+        console.log(data)
+        console.log('success 😊')
+      }).on('httpUploadProgress', function (progress) {
+        console.log((progress.loaded * 100) / progress.total)
+      });
+    },
   },
   computed: {
     totalProgress() {
