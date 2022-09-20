@@ -153,14 +153,29 @@ export default {
         passwordHash: sha('sha256').update(this.password).digest('hex')
       }).then(res => {
         this.filename = res.data.fileId
-        this.initiateMultipart()
-        //this.directUpload()
+        //this.initiateMultipart()
+        this.upload()
       }).catch(err => {
         this.$toast.add({severity: 'error', summary: 'Error', detail: 'Failed initializing upload', life: 30000});
         this.$toast.add({severity: 'error', summary: 'Error', detail: err, life: 30000});
         console.log(err)
         this.loading = false
       })
+    },
+
+    upload() {
+      const params = {
+        Bucket: 'transfer',
+        Key: 'cat.jpg', // File name you want to save as in S3
+        Body: this.selectedFile
+      };
+
+      this.s3.upload(params, function(err, data) {
+        if (err) {
+          throw err;
+        }
+        console.log(`File uploaded successfully. ${data.Location}`);
+      });
     },
 
     initiateMultipart() {
