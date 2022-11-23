@@ -26,6 +26,7 @@
       </div>
       <div class="card mt-5" v-else-if="context==='download'">
         <h5>Download</h5>
+          <h6>Expires: {{formattedTime}}</h6>
         <Button @click="downloadFile">Download</Button>
       </div>
       <div class="card mt-5" v-else-if="context==='error'">
@@ -79,9 +80,7 @@ export default {
           this.otdWarning = true
         }
 
-        this.expiryDate = data.options.timeout;
-
-          console.warn(moment(data.options.timeout * 1000).from(new Date()))
+        this.expiryDate = data.timeout;
 
         if (data.options.passwordEnabled === true) {
 
