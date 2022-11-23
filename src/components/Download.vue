@@ -10,6 +10,7 @@
       </Toolbar>
       <div v-if="otdWarning" class="mt-5">
         <span style="color: red">Warning, this file will self-destruct after being read</span>
+        <span style="color: red">Warning, this file will self-destruct after being read</span>
       </div>
       <div v-if="context==='validating'" class="mt-5">
         <div class="loader-wrapper">
@@ -25,6 +26,7 @@
       </div>
       <div class="card mt-5" v-else-if="context==='download'">
         <h5>Download</h5>
+          <h6>Expires: {{formattedTime}}</h6>
         <Button @click="downloadFile">Download</Button>
       </div>
       <div class="card mt-5" v-else-if="context==='error'">
@@ -40,6 +42,7 @@
 
 <script>
 import axios from "axios";
+import moment from 'moment';
 
 const sha = require('sha.js')
 
@@ -60,7 +63,8 @@ export default {
       otdWarning: false,
       contextText: '',
       password: '',
-      downloadLink: ''
+      downloadLink: '',
+        expiryDate: undefined
     }
   },
   methods: {
@@ -75,6 +79,8 @@ export default {
         if (data.options.otd === true) {
           this.otdWarning = true
         }
+
+        this.expiryDate = data.options.timeout;
 
         if (data.options.passwordEnabled === true) {
 
@@ -120,7 +126,13 @@ export default {
       });
       window.location.assign(r.href)
     }
-  }
+  },
+    computed: {
+      formattedTime: () => {
+          const dateFromUnix = new Date(this.expiryDate * 1000)
+          return moment(dateFromUnix).from(new Date())
+      }
+    }
 }
 </script>
 
