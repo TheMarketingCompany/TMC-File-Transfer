@@ -42,7 +42,6 @@
 
 <script>
 import axios from 'axios';
-import moment from 'moment';
 
 const sha = require('sha.js');
 
