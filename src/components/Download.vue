@@ -26,7 +26,7 @@
             </div>
             <div class='card mt-5' v-else-if="context==='download'">
                 <h5>Download</h5>
-                <h6 v-if='expiryDate !== undefined'>Expires: {{ expiryDate }}</h6>
+                <h6>Expires in: {{ expiryDate }}</h6>
                 <Button @click='downloadFile'>Download</Button>
             </div>
             <div class='card mt-5' v-else-if="context==='error'">
@@ -34,6 +34,8 @@
                     <img src='https://cdn.discordapp.com/emojis/867743530754375682.webp?size=96&quality=lossless'>
                 </h5>
                 <p>{{ contextText }}</p>
+
+                <h1>{{expiryDate}}</h1>
 
             </div>
         </div>
@@ -67,6 +69,29 @@ export default {
         };
     },
     methods: {
+        getRemainingTime(endTime) {
+            const endDate = new Date(endTime)
+
+            const _second = 1000;
+            const _minute = _second * 60;
+            const _hour = _minute * 60;
+            const _day = _hour * 24;
+
+            const now = new Date();
+
+            const distance = endDate - now;
+
+            if (distance < 0) {
+                return 'Expired'
+            }
+
+            const days = Math.floor(distance / _day);
+            const hours = Math.floor((distance % _day) / _hour);
+            const minutes = Math.floor((distance % _hour) / _minute);
+            const seconds = Math.floor((distance % _minute) / _second);
+
+            return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
+        },
         downloadFile() {
             this.validatePassword();
         },
@@ -79,7 +104,7 @@ export default {
                     this.otdWarning = true;
                 }
 
-                this.expiryDate = new Date(data.timeout * 1000)
+                this.expiryDate = this.getRemainingTime(data.timeout * 1000)
 
                 if (data.options.passwordEnabled === true) {
 
