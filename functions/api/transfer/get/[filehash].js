@@ -28,9 +28,5 @@ function expired(endTime) {
 
     const distance = endDate - now;
 
-    if (distance < 0) {
-        return 'true';
-    } else {
-        return false;
-    }
+    return distance < 0;
 }
