@@ -26,7 +26,7 @@
             </div>
             <div class='card mt-5' v-else-if="context==='download'">
                 <h5>Download</h5>
-                <h6 v-if='expiryDate !== undefined'>Expires: {{ formattedTime }}</h6>
+                <h6 v-if='expiryDate !== undefined'>Expires: {{ expiryDate }}</h6>
                 <Button @click='downloadFile'>Download</Button>
             </div>
             <div class='card mt-5' v-else-if="context==='error'">
