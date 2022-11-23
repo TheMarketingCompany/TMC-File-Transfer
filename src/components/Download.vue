@@ -79,8 +79,7 @@ export default {
                     this.otdWarning = true;
                 }
 
-                const temp = new Date(data.timeout * 1000)
-                this.expiryDate = `${temp.getDay()}.${temp.getMonth()}.${temp.getFullYear()} - ${temp.getHours()}:${temp.getMinutes()}:${temp.getSeconds()}`
+                this.expiryDate = new Date(data.timeout * 1000)
 
                 if (data.options.passwordEnabled === true) {
 
