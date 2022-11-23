@@ -34,5 +34,3 @@ function expired(endTime) {
         return false;
     }
 }
-
-,
