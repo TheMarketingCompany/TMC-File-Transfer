@@ -10,13 +10,13 @@ const routes = [
 		path: '/db',
 		name: 'dashboard',
 		exact: true,
-		component: () => import('./components/Dashboard.vue')
+		component: () => import('./components/DashboardComponent.vue')
 	},
 	{
 		path: '/dl',
 		name: 'download',
 		exact: true,
-		component: () => import('./components/Download.vue')
+		component: () => import('./components/DownloadComponent.vue')
 	},
 	{
 		path: '/tos',
