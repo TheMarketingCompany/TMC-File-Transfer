@@ -10,7 +10,6 @@
             </ToolbarComponent>
             <div v-if='otdWarning' class='mt-5'>
                 <span style='color: red'>Warning, this file will self-destruct after being read</span>
-                <span style='color: red'>Warning, this file will self-destruct after being read</span>
             </div>
             <div v-if="context==='validating'" class='mt-5'>
                 <div class='loader-wrapper'>
