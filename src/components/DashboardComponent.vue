@@ -1,7 +1,7 @@
 <template>
   <div class="grid dashboard" :class="loading ? 'blur' : ''">
 
-    <Toast/>
+    <ToastComponent/>
     <div class="col-12 lg:col-12">
       <div class="card donut ">
         <h5>Select file</h5>
@@ -18,14 +18,14 @@
 
         <div class="flex-row mt-5">
           <label>Onetime download</label>
-          <Checkbox class="ml-2" v-model="onetimeDownload" :binary="true"/>
+          <CheckboxComponent class="ml-2" v-model="onetimeDownload" :binary="true"/>
         </div>
 
         <div class="flex-row mt-5">
           <label>Enable password protection</label>
           <InputSwitch v-model="passwordEnabled"/>
           <p>
-            <Password v-if="passwordEnabled" v-model="password"/>
+            <PasswordComponent v-if="passwordEnabled" v-model="password"/>
           </p>
         </div>
 
@@ -34,12 +34,12 @@
         </div>
 
         <div class="flex-row mt-5">
-          <Button @click="preUpload">Upload</Button>
+          <ButtonComponent @click="preUpload">Upload</ButtonComponent>
         </div>
 
         <div v-if="uploadFinished">
           <div class="flex-row mt-5">
-            <Button @click="copyClipboard">Copy download link to clipboard</Button>
+            <ButtonComponent @click="copyClipboard">Copy download link to clipboard</ButtonComponent>
             <span class="ml-5">{{ downloadLink }}</span>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default {
       multiId: ''
     }
   },
-  components: {},
+  components: {  },
   mounted() {
     this.getAccessKeys()
   },

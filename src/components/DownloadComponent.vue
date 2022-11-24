@@ -2,12 +2,12 @@
     <div class='grid'>
         <div class='col-12'>
 
-            <Toolbar>
+            <ToolbarComponent>
 
                 <template #end>
-                    <Button label='Upload' icon='pi pi-upload' class='p-button-success' @click='openUpload' />
+                    <ButtonComponent label='Upload' icon='pi pi-upload' class='p-button-success' @click='openUpload' />
                 </template>
-            </Toolbar>
+            </ToolbarComponent>
             <div v-if='otdWarning' class='mt-5'>
                 <span style='color: red'>Warning, this file will self-destruct after being read</span>
                 <span style='color: red'>Warning, this file will self-destruct after being read</span>
@@ -21,13 +21,13 @@
             </div>
             <div class='card mt-5' v-else-if="context==='password'">
                 <h5>password</h5>
-                <Password v-model='password' />
-                <Button @click='validatePassword'>Validate</Button>
+                <PasswordComponent v-model='password' />
+                <ButtonComponent @click='validatePassword'>Validate</ButtonComponent>
             </div>
             <div class='card mt-5' v-else-if="context==='download'">
                 <h5>Download</h5>
                 <h6>Expires in: {{ expiryDate }}</h6>
-                <Button @click='downloadFile'>Download</Button>
+                <ButtonComponent @click='downloadFile'>Download</ButtonComponent>
             </div>
             <div class='card mt-5' v-else-if="context==='error'">
                 <h5>
@@ -48,6 +48,7 @@ import axios from 'axios';
 const sha = require('sha.js');
 
 export default {
+    components: {  },
     mounted() {
         this.file = this.$route.query.file;
 
