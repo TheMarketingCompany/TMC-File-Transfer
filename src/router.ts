@@ -10,6 +10,11 @@ import TOS from "./components/TOS.vue";
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
+        name: 'root',
+        redirect: '/dl'
+    },
+    {
+        path: '/dl',
         component: DownloadPage
     },
     {
