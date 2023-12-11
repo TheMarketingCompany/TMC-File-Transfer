@@ -27,9 +27,21 @@ const routes: Array<RouteRecordRaw> = [
     }
 ]
 
+
+
 const router = createRouter({
     history: createWebHistory(),
     routes
 })
+
+// @ts-ignore
+router.beforeEach((to, from, next) => {
+    if (to.path !== window.location.pathname) {
+        console.log('ok')
+        window.location.href = to.fullPath;
+    } else {
+        next();
+    }
+});
 
 export default router;
