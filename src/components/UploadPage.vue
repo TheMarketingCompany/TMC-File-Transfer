@@ -140,7 +140,6 @@ onBeforeMount(() => {
       endpoint: auth.endpoint
     });
 
-    console.log(auth)
   })
 
 
