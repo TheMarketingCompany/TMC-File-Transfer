@@ -1,0 +1,30 @@
+import {createRouter, createWebHistory, RouteRecordRaw} from "vue-router";
+
+// @ts-ignore
+import UploadPage from './components/UploadPage.vue';
+// @ts-ignore
+import DownloadPage from './components/DownloadPage.vue';
+// @ts-ignore
+import TOS from "./components/TOS.vue";
+
+const routes: Array<RouteRecordRaw> = [
+    {
+        path: '/',
+        component: DownloadPage
+    },
+    {
+        path: '/upload',
+        component: UploadPage
+    },
+    {
+        path: '/tos',
+        component: TOS
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes
+})
+
+export default router;

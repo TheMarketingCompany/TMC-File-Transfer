@@ -1,0 +1,3 @@
+name = "r2-testing"
+compatibility_date = "2023-11-23"  # Use a recent date
+compatibility_flags = ["nodejs_compat"]

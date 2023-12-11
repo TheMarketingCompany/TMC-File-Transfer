@@ -1,32 +1,46 @@
 export async function onRequestGet({ request, env, params }) {
-    let data;
-    try {
-        data = JSON.parse(await env.transfer.get(params.filehash));
-        if (!data) return new Response(null, { status: 404, statusText: 'file not found' });
 
-        if (data.options.otd === true && data.downloadCount > 0) return new Response(null, {
-            status: 404,
-            statusText: 'file not found',
-        });
+    let query = 'SELECT * FROM uploads';
 
-        if (expired(data.timeout * 1000) === true) return new Response(null, {
-            status: 404,
-            statusText: 'file not found',
-        });
+    query += ` where fileId = '${params.filehash}'`;
 
-        return new Response(JSON.stringify(data));
-    } catch (e) {
-        return new Response(e, { status: 501 });
+    console.log(query)
+
+    const result = await env.DB.prepare(query).run();
+
+    if (result.success) {
+        console.log(JSON.stringify(result))
+
+        if (result.results.length > 0) {
+            const dataset = result.results[0];
+
+            dataset.options = JSON.parse(dataset.options);
+
+            if (dataset.options.otd === true && dataset.downloadCount > 0) return new Response(null, {
+                status: 404,
+                statusText: 'file not found'
+            });
+
+            if (expired(dataset.timeout * 1000) === true) return new Response(null, {
+                status: 404,
+                statusText: 'file not found'
+            });
+
+            return new Response(JSON.stringify(dataset));
+        }
+        return new Response(JSON.stringify(result));
+    } else {
+        console.log(result)
+        return new Response(null, {
+            status: 500
+        })
     }
-
 }
 
 function expired(endTime) {
     const endDate = new Date(endTime);
-
     const now = new Date();
 
     const distance = endDate - now;
-
     return distance < 0;
 }
