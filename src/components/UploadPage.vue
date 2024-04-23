@@ -147,7 +147,6 @@ onBeforeMount(() => {
 
 const upload = async () => {
   if (!selectedFile.value) {
-    console.log('select file first')
     return;
   }
   const file: File = selectedFile.value;
@@ -158,7 +157,7 @@ const upload = async () => {
     passwordEnabled: passwordEnabled.value,
     passwordHash: await hashWithSHA256(password.value)
   }).then(response => fileId.value = response.data.fileId).catch(err => {
-    console.log(err)
+    console.error(err)
     return;
   })
 
@@ -177,7 +176,7 @@ const upload = async () => {
   })
 
   upload.on('httpUploadProgress', (progress) => {
-    console.log(`Uploaded ${progress.loaded} out of ${progress.total} bytes`);
+    console.info(`Uploaded ${progress.loaded} out of ${progress.total} bytes`);
     // @ts-ignore
     uploadProgress.value = Math.round((progress.loaded / progress.total) * 100);
   });
@@ -186,7 +185,6 @@ const upload = async () => {
 
   try {
     await upload.done();
-    console.log("File uploaded successfully");
     downloadLink.value = window.location.origin + '/?file=' + fileId.value;
     showDownloadModal.value = true;
     uploading.value = false
@@ -195,18 +193,6 @@ const upload = async () => {
     uploading.value = false
 
   }
-
-  /*upload.send((err, data) => {
-    if (err) {
-      console.error('File upload failed', err);
-      selectedFile.value = undefined
-      uploading.value = false;
-    } else {
-      console.log('File uploaded successfully', data);
-      uploading.value = false;
-      selectedFile.value = undefined
-    }
-  });*/
 }
 
 const fileChangedHandler = (event: Event) => {

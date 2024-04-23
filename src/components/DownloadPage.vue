@@ -75,8 +75,6 @@ const downloading = ref(false);
 onMounted(() => {
   file.value = route.query.file;
 
-  console.log(file.value)
-
   if (file.value !== '' && file.value !== undefined) {
     validateFile()
   } else {
@@ -100,8 +98,6 @@ const validatePassword = async () => {
     link.href = url;
     link.setAttribute('download', filename.value);
 
-    console.log(link)
-
     document.body.appendChild(link);
     link.click();
 
@@ -115,7 +111,7 @@ const validatePassword = async () => {
       }
     }, 4000)
   }).catch(err => {
-    console.log(err);
+    console.error(err);
     context.value = 'error';
     if (err.response && err.response.status === 404) {
       otdWarning.value = false;
@@ -139,7 +135,6 @@ const filename = ref<string>('')
 const validateFile = async () => {
   axios.get('/api/transfer/get/' + file.value).then(response => {
     const data = JSON.parse(JSON.stringify(response.data));
-    console.log(data);
 
     if (data.options.otd) {
       otdWarning.value = true;
@@ -150,10 +145,7 @@ const validateFile = async () => {
     filename.value = data.filename;
 
     if (data.options.passwordEnabled) {
-
-      console.log('password enabled');
       context.value = 'password';
-      console.log('this.context => ' + context.value);
     } else {
       context.value = 'download';
     }
