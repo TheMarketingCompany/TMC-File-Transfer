@@ -166,6 +166,9 @@ const upload = async () => {
     Bucket: bucket.value,
     Key: file.name,
     ContentType: file.type,
+    Metadata: {
+      'Content-Disposition': 'attachment; filename=' + file.name
+    },
     Body: file,
   };
 
