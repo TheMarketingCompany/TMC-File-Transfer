@@ -13,8 +13,6 @@ async function generatePresignedUrl(objectKey, endpoint, bucket) {
     const signed = await r2.sign(new Request(url, {
         method: 'GET'
     }), {
-        'Content-Disposition': 'attachment; filename=' + objectKey,
-    }, {
         aws: {
             signQuery: true
         }
