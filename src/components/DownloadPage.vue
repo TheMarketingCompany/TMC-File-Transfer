@@ -100,6 +100,8 @@ const validatePassword = async () => {
     link.href = url;
     link.setAttribute('download', filename.value);
 
+    console.log(link)
+
     document.body.appendChild(link);
     link.click();
 
