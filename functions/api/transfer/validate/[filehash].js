@@ -54,7 +54,7 @@ export async function onRequestPost({ request, env, params }) {
                 if (fileinfo.options.passwordHash === pw.passwordHash) {
                     // correct pw
                     // sign download url
-                    const signedUrl = await generatePresignedUrl(fileinfo.filename, env.endpoint, env.bucket)
+                    const signedUrl = await generatePresignedUrl(fileinfo.fileId, env.endpoint, env.bucket)
 
                     // update dl count + 1
                     await updateDlCount(fileinfo.fileId, fileinfo.downloadCount, env)
@@ -67,7 +67,7 @@ export async function onRequestPost({ request, env, params }) {
                 // no pw
                 // sign download url
                 console.log(env)
-                const signedUrl = await generatePresignedUrl(fileinfo.filename, env.endpoint, env.bucket)
+                const signedUrl = await generatePresignedUrl(fileinfo.fileId, env.endpoint, env.bucket)
 
                 // update dl count + 1
                 await updateDlCount(fileinfo.fileId, fileinfo.downloadCount, env)
