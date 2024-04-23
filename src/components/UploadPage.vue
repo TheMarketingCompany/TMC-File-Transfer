@@ -166,7 +166,7 @@ const upload = async () => {
     Bucket: bucket.value,
     Key: fileId.value,
     ContentType: file.type,
-    'Content-Disposition': 'attachment; filename=' + file.name,
+    ContentDisposition: 'attachment; filename=' + file.name,
     Body: file,
   };
 
