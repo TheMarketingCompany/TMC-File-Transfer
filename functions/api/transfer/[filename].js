@@ -21,8 +21,11 @@ export async function onRequestPost({ request, params, env }){
             break;
     }
 
-    // d1 integration
-    const result = await env.DB.prepare(`insert into uploads (fileId, filename, timeout, downloadCount, options) values (?, ?, ?, ?, ?)`).bind(uuid, filename, timeout, 0, JSON.stringify(options)).run()
+    let unixTimestamp = Math.floor(Date.now() / 1000);
+
+    const result = await env.DB.prepare(`INSERT INTO uploads (fileId, filename, timeout, downloadCount, options, uploadTimestamp) VALUES (?, ?, ?, ?, ?, ?)`)
+        .bind(uuid, filename, timeout, 0, JSON.stringify(options), unixTimestamp)
+        .run();
 
     if (result.success) {
         return new Response(JSON.stringify({
