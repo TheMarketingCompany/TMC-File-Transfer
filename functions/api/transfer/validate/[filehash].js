@@ -9,7 +9,7 @@ async function generatePresignedUrl(objectKey, endpoint, bucket) {
     console.log(url)
 
     url.searchParams.set('X-Amz-Expires', '3600')
-
+//
     const signed = await r2.sign(new Request(url, {
         method: 'GET'
     }), {
