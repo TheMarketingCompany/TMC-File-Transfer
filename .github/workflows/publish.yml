@@ -28,3 +28,9 @@ jobs:
           directory: dist  
           branch: main
           wranglerVersion: '3'
+
+      - name: Cloudflare Worker Deployment
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: "CleanupWorker"
