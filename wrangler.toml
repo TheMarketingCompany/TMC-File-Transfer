@@ -5,4 +5,4 @@ pages_build_output_dir = "./dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "transfer"
-database_id = "f0b16271-5dd6-4bec-9c35-87d9e82b4e7d"
+database_id = "$DATABASE_ID"
