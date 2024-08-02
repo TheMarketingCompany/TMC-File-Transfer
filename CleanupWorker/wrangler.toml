@@ -2,8 +2,6 @@ name = "tmc-file-transfer-cron"
 main = "src/index.js"
 compatibility_date = "2022-06-27"
 
-account_id = ""
-
 d1_databases = [
     { binding = "DB", name = "transfer", database_id = "f0b16271-5dd6-4bec-9c35-87d9e82b4e7d" }
 ]
@@ -11,7 +9,6 @@ d1_databases = [
 [[r2_buckets]]
 binding = 'transferbucket'
 bucket_name = 'transfer'
-preview_bucket_name = 'transfer-dev'
 
 [triggers]
 crons = ["0 0 * * *"]
