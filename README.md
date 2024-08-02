@@ -1,4 +1,4 @@
-![Build](https://github.com/github/docs/actions/workflows/publish.yml/badge.svg)
+![Build](https://github.com/TheMarketingCompany/TMC-File-Transfer/actions/workflows/publish.yml/badge.svg)
 # TMC-File-Transfer
 
 TMC-File-Transfer is an easy-to-install, scalable file transfer solution powered by Cloudflare technology.
