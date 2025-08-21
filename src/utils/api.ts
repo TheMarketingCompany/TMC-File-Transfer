@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@/types';
+import { MultipartUploader } from './multipart-uploader';
 
 export class ApiClient {
   private static readonly BASE_URL = '/api';
@@ -59,16 +60,66 @@ export class ApiClient {
     }
   }
 
-  static async uploadFile(file: File, options: any): Promise<ApiResponse> {
+  static async uploadFile(
+    file: File, 
+    options: any, 
+    onProgress?: (progress: number, stage: string) => void
+  ): Promise<ApiResponse> {
+    // Use chunked upload for large files (>80MB)
+    const shouldUseChunked = MultipartUploader.shouldUseChunkedUpload(file.size);
+    
+    if (shouldUseChunked) {
+      try {
+        const result = await MultipartUploader.upload({
+          filename: file.name,
+          file,
+          uploadOptions: options,
+          onProgress: onProgress || undefined,
+          onError: (error) => console.error('Chunked upload error:', error)
+        });
+
+        if (result.success) {
+          return {
+            success: true,
+            data: {
+              fileId: result.fileId,
+              expiresAt: result.expiresAt,
+              message: 'File uploaded successfully using chunked upload'
+            }
+          };
+        } else {
+          return {
+            success: false,
+            error: {
+              code: 'UPLOAD_ERROR',
+              message: result.error || 'Chunked upload failed'
+            }
+          };
+        }
+      } catch (error) {
+        console.error('Chunked upload failed, falling back to regular upload:', error);
+        // Fall back to regular upload for smaller files or if chunked fails
+      }
+    }
+
+    // Regular upload for smaller files or fallback
     const formData = new FormData();
     formData.append('file', file);
     formData.append('options', JSON.stringify(options));
 
-    return this.makeRequest('/transfer/upload', {
+    onProgress?.(50, 'Uploading file...');
+
+    const result = await this.makeRequest('/transfer/upload', {
       method: 'POST',
       body: formData,
       headers: {}, // Don't set Content-Type for FormData
     });
+
+    if (result.success) {
+      onProgress?.(100, 'Upload completed!');
+    }
+
+    return result;
   }
 
   static async getFileInfo(fileId: string): Promise<ApiResponse> {

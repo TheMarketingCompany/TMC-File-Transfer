@@ -17,15 +17,16 @@ export class SecurityUtils {
     'text/javascript', 'text/html', 'text/css', 'application/json'
   ]);
 
-  private static readonly MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+  // No hardcoded file size limit - this will be checked on server side with configurable limits
   private static readonly DANGEROUS_EXTENSIONS = new Set([
     'exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'app', 'deb', 'pkg', 'dmg'
   ]);
 
-  static validateFile(file: File): { valid: boolean; error?: string } {
-    // Check file size
-    if (file.size > this.MAX_FILE_SIZE) {
-      return { valid: false, error: `File size exceeds ${this.MAX_FILE_SIZE / (1024 * 1024)}MB limit` };
+  static validateFile(file: File, maxFileSize?: number): { valid: boolean; error?: string } {
+    // Check file size if limit is provided (server will always validate)
+    if (maxFileSize && file.size > maxFileSize) {
+      const maxSizeGB = maxFileSize / (1024 * 1024 * 1024);
+      return { valid: false, error: `File size exceeds ${maxSizeGB.toFixed(1)}GB limit` };
     }
 
     // Check MIME type

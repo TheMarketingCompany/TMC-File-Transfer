@@ -7,12 +7,12 @@ pages_build_output_dir = "./dist"
 # Environment variables
 [env.production.vars]
 ENVIRONMENT = "production"
-MAX_FILE_SIZE = "104857600"  # 100MB in bytes
+MAX_FILE_SIZE = "5368709120"  # 5GB in bytes (supports large files via multipart upload)
 ALLOWED_ORIGINS = "https://yourdomain.com"
 
 [env.development.vars]
 ENVIRONMENT = "development"
-MAX_FILE_SIZE = "104857600"
+MAX_FILE_SIZE = "5368709120"  # 5GB in bytes (supports large files via multipart upload)
 ALLOWED_ORIGINS = "*"
 
 # D1 Database binding

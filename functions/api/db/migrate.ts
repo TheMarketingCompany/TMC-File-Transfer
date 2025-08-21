@@ -112,10 +112,26 @@ async function runMigrations(db: D1Database): Promise<void> {
     await markMigrationComplete(db, 'migration_3_indexes');
   }
 
-  // Migration 4: Migrate data from old table if it exists
-  const migration4Applied = await checkMigration(db, 'migration_4_data_migration');
+  // Migration 4: Add multipart upload support
+  const migration4Applied = await checkMigration(db, 'migration_4_multipart_uploads');
   if (!migration4Applied) {
-    console.log('Applying migration 4: Data migration from old table');
+    console.log('Applying migration 4: Multipart upload support');
+    
+    // Add columns for multipart uploads
+    await db.prepare(`ALTER TABLE uploads_v2 ADD COLUMN multipart_upload_id TEXT`).run();
+    await db.prepare(`ALTER TABLE uploads_v2 ADD COLUMN upload_status TEXT DEFAULT 'completed'`).run();
+    
+    // Create index for multipart uploads
+    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_uploads_multipart ON uploads_v2(multipart_upload_id)`).run();
+    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_uploads_status ON uploads_v2(upload_status)`).run();
+    
+    await markMigrationComplete(db, 'migration_4_multipart_uploads');
+  }
+
+  // Migration 5: Migrate data from old table if it exists
+  const migration5Applied = await checkMigration(db, 'migration_5_data_migration');
+  if (!migration5Applied) {
+    console.log('Applying migration 5: Data migration from old table');
     
     try {
       // Check if old table exists and has data
@@ -160,7 +176,7 @@ async function runMigrations(db: D1Database): Promise<void> {
       console.log('Old table does not exist or migration failed:', error instanceof Error ? error.message : 'Unknown error');
     }
     
-    await markMigrationComplete(db, 'migration_4_data_migration');
+    await markMigrationComplete(db, 'migration_5_data_migration');
   }
 
   console.log('All migrations completed successfully');

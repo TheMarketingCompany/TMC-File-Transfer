@@ -8,8 +8,9 @@ A secure, zero-vulnerability file transfer solution built on modern Cloudflare i
 - 🛡️ **Zero Vulnerabilities** - 0 npm audit issues, all legacy dependencies removed
 - 🔒 **Modern Security Stack** - 100% Cloudflare-native with Web Crypto API
 - ⚡ **Ultra-Fast Performance** - 366ms dev startup, 1.37s builds
-- 📦 **Native R2 Storage** - Direct Cloudflare R2 bindings (no AWS SDK)
+- 📦 **Native R2 Storage** - Direct Cloudflare R2 bindings with multipart upload
 - 🛡️ **Advanced Rate Limiting** - DDoS protection and abuse prevention
+- 🚀 **Chunked Upload** - Large files (>80MB) use optimized multipart upload
 - 📱 **Mobile-First Design** - Responsive UI that works everywhere
 - 🎯 **Smart Expiration** - Files automatically deleted after expiration
 - 🔐 **Password Protection** - Web Crypto API hashed passwords
@@ -101,7 +102,7 @@ npx wrangler deploy
 ### Backend (100% Cloudflare Native)
 - **Cloudflare Pages Functions** - Serverless TypeScript functions
 - **Cloudflare D1** - SQLite with prepared statements
-- **Cloudflare R2** - Object storage with native bindings
+- **Cloudflare R2** - Object storage with native multipart upload
 - **Web Crypto API** - Native browser cryptography
 - **Fetch API** - Native HTTP requests (no axios)
 
@@ -162,12 +163,12 @@ npx wrangler deploy
 ```toml
 [env.production.vars]
 ENVIRONMENT = "production"
-MAX_FILE_SIZE = "104857600"  # 100MB
+MAX_FILE_SIZE = "5368709120"  # 5GB (configurable)
 ALLOWED_ORIGINS = "https://yourdomain.com"
 
 [env.development.vars]
 ENVIRONMENT = "development"
-MAX_FILE_SIZE = "104857600"
+MAX_FILE_SIZE = "5368709120"  # 5GB (configurable)
 ALLOWED_ORIGINS = "*"
 ```
 
@@ -253,7 +254,7 @@ npx wrangler d1 execute tmc-file-transfer --command "SELECT * FROM uploads_v2 LI
 - Check bucket name in wrangler.toml
 
 **Files not uploading**:
-- Check file size (100MB limit)
+- Check file size (configurable limit, default 5GB)
 - Verify file type is allowed
 - Check rate limiting (10 uploads/hour per IP)
 

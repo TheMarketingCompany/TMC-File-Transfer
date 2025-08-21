@@ -27,7 +27,7 @@ TMC File Transfer has achieved **zero security vulnerabilities** through complet
 - **Current State**: Comprehensive validation pipeline
 - **Implementation**: 
   - Whitelist-based MIME type validation (15 safe types)
-  - 100MB file size limit with early validation
+  - Configurable file size limits (default 5GB, supports huge files)
   - Extension and content validation
   - Cloudflare R2 native storage (no AWS SDK vulnerabilities)
 
@@ -115,6 +115,7 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 
 ### Storage Security
 - **Native R2 Bindings**: `env.TRANSFER_BUCKET.put()/.get()/.delete()`
+- **Multipart Upload**: Large files (>80MB) use R2 multipart upload
 - **File Isolation**: UUID-based randomized file names
 - **Access Control**: Time-limited download URLs
 - **Automatic Cleanup**: Scheduled worker removes expired files

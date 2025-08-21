@@ -88,18 +88,28 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - `is_one_time` - Boolean for one-time download
 - `upload_timestamp` - Unix timestamp of upload
 - `client_ip` - Uploader's IP address
+- `multipart_upload_id` - R2 multipart upload ID (for large files)
+- `upload_status` - Status: 'completed', 'uploading', 'failed'
 
 **rate_limits table**:
 - `client_key` - IP + endpoint identifier
 - `timestamp` - Request timestamp
 - `action_type` - Type of action (upload/download/validate)
 
-## New API Endpoints
+## API Endpoints
 
-- `POST /api/transfer/upload` - Secure file upload with validation
+### File Operations
+- `POST /api/transfer/upload` - Standard file upload (files ≤80MB)
+- `POST /api/transfer/upload-multipart` - Multipart upload for large files (>80MB)
+  - `?action=initiate` - Start multipart upload
+  - `?action=upload-chunk` - Upload individual chunks (50MB max per chunk)
+  - `?action=complete` - Finalize upload
+  - `?action=abort` - Cancel upload
 - `GET /api/transfer/info/[fileId]` - Get file metadata
 - `POST /api/transfer/validate/[fileId]` - Validate access/password
 - `POST /api/transfer/download/[fileId]` - Download file
+
+### Database
 - `POST /api/db/migrate` - Run database migrations
 
 ## Security Features
@@ -112,7 +122,7 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 ### Core Security Controls
 - Rate limiting per IP address (configurable limits)
 - File type whitelist validation with MIME type checking
-- Maximum file size enforcement (100MB default)
+- Configurable file size limits (5GB default, supports huge files)
 - Secure password hashing with salt using Web Crypto API
 - CSRF protection via proper headers and same-origin policies
 - XSS and injection attack prevention

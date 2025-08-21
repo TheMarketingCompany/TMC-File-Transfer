@@ -4,7 +4,8 @@ type Env = CloudflareEnv;
 
 type UploadOptions = FileUploadRequest;
 
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+// No artificial file size limit - use environment variable or default to 5GB (R2 single upload limit)
+const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB default
 const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
   'application/pdf', 'text/plain', 'text/csv',
@@ -28,8 +29,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return errorResponse('FILE_MISSING', 'File and options are required', 400);
     }
     
+    // Get max file size from environment or use default
+    const maxFileSize = env.MAX_FILE_SIZE ? parseInt(env.MAX_FILE_SIZE, 10) : DEFAULT_MAX_FILE_SIZE;
+    
     // Validate file
-    const fileValidation = validateFile(file);
+    const fileValidation = validateFile(file, maxFileSize);
     if (!fileValidation.valid) {
       return errorResponse('FILE_INVALID', fileValidation.error!, 400);
     }
@@ -129,9 +133,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-function validateFile(file: File): SecurityValidation {
-  if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: `File size exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit` };
+function validateFile(file: File, maxSize: number = DEFAULT_MAX_FILE_SIZE): SecurityValidation {
+  if (file.size > maxSize) {
+    const maxSizeGB = maxSize / (1024 * 1024 * 1024);
+    return { valid: false, error: `File size exceeds ${maxSizeGB}GB limit` };
   }
   
   if (!ALLOWED_MIME_TYPES.has(file.type)) {

@@ -39,7 +39,7 @@
               >
                 Browse Files
               </button>
-              <p class="text-sm text-gray-500 mt-2">Maximum file size: 100MB</p>
+              <p class="text-sm text-gray-500 mt-2">Supports files up to 5GB - large files use optimized chunked upload</p>
             </div>
             
             <div v-else class="space-y-3">
@@ -135,7 +135,7 @@
         <!-- Upload Progress -->
         <div v-else class="text-center space-y-4">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p class="text-lg font-medium text-gray-900">Uploading your file...</p>
+          <p class="text-lg font-medium text-gray-900">{{ uploadStage || 'Uploading your file...' }}</p>
           <div class="w-full bg-gray-200 rounded-full h-2">
             <div 
               class="bg-blue-600 h-2 rounded-full transition-all duration-300"
@@ -143,6 +143,9 @@
             ></div>
           </div>
           <p class="text-sm text-gray-600">{{ uploadProgress }}% complete</p>
+          <p v-if="selectedFile && selectedFile.size > 80 * 1024 * 1024" class="text-xs text-blue-600">
+            Large file detected - using optimized chunked upload
+          </p>
         </div>
 
         <!-- Success State -->
@@ -214,6 +217,7 @@ import type { UploadOptions } from '../types';
 const selectedFile = ref<File | null>(null);
 const uploading = ref(false);
 const uploadProgress = ref(0);
+const uploadStage = ref<string>('');
 const uploadResult = ref<any>(null);
 const error = ref<string>('');
 const copied = ref(false);
@@ -303,17 +307,10 @@ async function uploadFile() {
     uploadProgress.value = 0;
     error.value = '';
     
-    // Simulate progress for better UX
-    const progressInterval = setInterval(() => {
-      if (uploadProgress.value < 90) {
-        uploadProgress.value += Math.random() * 10;
-      }
-    }, 200);
-    
-    const result = await ApiClient.uploadFile(selectedFile.value, options);
-    
-    clearInterval(progressInterval);
-    uploadProgress.value = 100;
+    const result = await ApiClient.uploadFile(selectedFile.value, options, (progress, stage) => {
+      uploadProgress.value = Math.min(progress, 100);
+      uploadStage.value = stage;
+    });
     
     if (result.success) {
       uploadResult.value = result.data;
@@ -343,6 +340,7 @@ function resetForm() {
   selectedFile.value = null;
   uploadResult.value = null;
   uploadProgress.value = 0;
+  uploadStage.value = '';
   error.value = '';
   copied.value = false;
   options.password = '';
