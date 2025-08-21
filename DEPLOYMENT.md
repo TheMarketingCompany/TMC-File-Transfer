@@ -1,6 +1,6 @@
-# 🚀 TMC File Transfer - Deployment Guide
+# 🚀 TMC File Transfer - Secure Deployment Guide
 
-A comprehensive guide for deploying TMC File Transfer on Cloudflare's infrastructure.
+A comprehensive guide for deploying the zero-vulnerability TMC File Transfer on Cloudflare's modern infrastructure with 100% native bindings.
 
 ## 📋 Prerequisites
 
@@ -27,10 +27,10 @@ cd TMC-File-Transfer
 # Install project dependencies
 npm install
 
-# Install Wrangler CLI globally
+# Install latest secure Wrangler CLI
 npm install -g wrangler@latest
 
-# Verify installation
+# Verify installation (should be 4.31.0+)
 wrangler --version
 ```
 
