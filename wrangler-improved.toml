@@ -1,0 +1,83 @@
+name = "tmc-file-transfer"
+compatibility_date = "2024-08-21"
+
+# Pages configuration
+pages_build_output_dir = "./dist"
+
+# Environment variables
+[env.production.vars]
+ENVIRONMENT = "production"
+MAX_FILE_SIZE = "104857600"  # 100MB in bytes
+ALLOWED_ORIGINS = "https://yourdomain.com"
+
+[env.development.vars]
+ENVIRONMENT = "development"
+MAX_FILE_SIZE = "104857600"
+ALLOWED_ORIGINS = "*"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "transfer"
+database_id = "your-database-id-here"
+
+# R2 Storage binding
+[[r2_buckets]]
+binding = "TRANSFER_BUCKET"
+bucket_name = "tmc-transfers"
+
+# KV namespace for caching (optional)
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-kv-preview-id"
+
+# Analytics Engine for logging
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+dataset = "tmc_file_transfer_logs"
+
+# Queue for background processing (optional)
+[[queues]]
+binding = "CLEANUP_QUEUE"
+queue = "file-cleanup-queue"
+
+# Durable Objects (optional, for advanced features)
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+script_name = "tmc-file-transfer"
+
+# Worker limits and configuration
+[limits]
+cpu_ms = 30000
+memory_mb = 128
+
+# Security headers and policies
+[build]
+command = "npm run build"
+cwd = "."
+watch_dir = "src"
+
+# Custom rules for different routes
+[[rules]]
+type = "ESModule"
+globs = ["**/*.js", "**/*.ts"]
+
+# Headers configuration
+[env.production.headers]
+"/*" = [
+  { name = "X-Frame-Options", value = "DENY" },
+  { name = "X-Content-Type-Options", value = "nosniff" },
+  { name = "X-XSS-Protection", value = "1; mode=block" },
+  { name = "Referrer-Policy", value = "strict-origin-when-cross-origin" },
+  { name = "Strict-Transport-Security", value = "max-age=31536000; includeSubDomains" },
+  { name = "Permissions-Policy", value = "geolocation=(), microphone=(), camera=()" }
+]
+
+# Cache configuration for static assets
+[env.production.caching]
+"/assets/*" = { edge_ttl = 31536000, browser_ttl = 31536000 }
+"/favicon*" = { edge_ttl = 31536000, browser_ttl = 31536000 }
+"*.js" = { edge_ttl = 31536000, browser_ttl = 31536000 }
+"*.css" = { edge_ttl = 31536000, browser_ttl = 31536000 }
