@@ -266,14 +266,14 @@ function handleDrop(e: DragEvent) {
   dragOver.value = false;
   const files = e.dataTransfer?.files;
   if (files && files.length > 0) {
-    handleFile(files[0]);
+    handleFile(files[0]!);
   }
 }
 
 function handleFileSelect(e: Event) {
   const files = (e.target as HTMLInputElement).files;
   if (files && files.length > 0) {
-    handleFile(files[0]);
+    handleFile(files[0]!);
   }
 }
 

@@ -1,15 +1,8 @@
-interface Env {
-  DB: D1Database;
-  TRANSFER_BUCKET: R2Bucket;
-}
+import type { CloudflareEnv, FileUploadRequest, ApiResponse, SecurityValidation, ERROR_CODES } from '../../../src/types/cloudflare';
 
-interface UploadOptions {
-  lifetime: '1' | '7' | '30';
-  passwordEnabled: boolean;
-  password?: string;
-  onetimeDownload: boolean;
-  maxDownloads?: number;
-}
+type Env = CloudflareEnv;
+
+type UploadOptions = FileUploadRequest;
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 const ALLOWED_MIME_TYPES = new Set([
@@ -136,7 +129,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-function validateFile(file: File): { valid: boolean; error?: string } {
+function validateFile(file: File): SecurityValidation {
   if (file.size > MAX_FILE_SIZE) {
     return { valid: false, error: `File size exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit` };
   }
@@ -154,7 +147,7 @@ function validateFile(file: File): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-function validateOptions(options: UploadOptions): { valid: boolean; error?: string } {
+function validateOptions(options: UploadOptions): SecurityValidation {
   if (!['1', '7', '30'].includes(options.lifetime)) {
     return { valid: false, error: 'Invalid lifetime value' };
   }
@@ -239,11 +232,14 @@ async function ensureTablesExist(db: D1Database): Promise<void> {
   `).run();
 }
 
-function errorResponse(code: string, message: string, status: number): Response {
-  return new Response(JSON.stringify({
+function errorResponse(code: keyof typeof ERROR_CODES, message: string, status: number): Response {
+  const response: ApiResponse = {
     success: false,
     error: { code, message },
-  }), {
+    metadata: { timestamp: Date.now() },
+  };
+  
+  return new Response(JSON.stringify(response), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });

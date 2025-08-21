@@ -1,7 +1,7 @@
-interface Env {
-  DB: D1Database;
-  TRANSFER_BUCKET: R2Bucket;
-}
+import type { CloudflareEnv, RateLimitCheck, ApiResponse } from '../src/types/cloudflare';
+import { ERROR_CODES, HTTP_STATUS } from '../src/types/cloudflare';
+
+type Env = CloudflareEnv;
 
 // Rate limiting configuration
 const RATE_LIMITS = {
@@ -12,9 +12,8 @@ const RATE_LIMITS = {
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, next, env } = context;
-  const url = new URL(request.url);
   
-  // Add security headers
+  // Add security headers and rate limiting
   const response = await addSecurityHeaders(request, next, env);
   return response;
 };
@@ -28,25 +27,32 @@ async function addSecurityHeaders(
     // Rate limiting
     const rateLimitResult = await checkRateLimit(request, env);
     if (!rateLimitResult.allowed) {
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: { 
-            code: 'RATE_LIMIT_EXCEEDED', 
-            message: 'Rate limit exceeded. Please try again later.' 
-          }
-        }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'Retry-After': rateLimitResult.retryAfter?.toString() || '3600',
-            'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '10',
-            'X-RateLimit-Remaining': rateLimitResult.remaining?.toString() || '0',
-            'X-RateLimit-Reset': rateLimitResult.resetTime?.toString() || '0'
+        const errorResponse: ApiResponse = {
+        success: false,
+        error: { 
+          code: ERROR_CODES.RATE_LIMIT_EXCEEDED, 
+          message: 'Rate limit exceeded. Please try again later.' 
+        },
+        metadata: {
+          timestamp: Date.now(),
+          rateLimit: {
+            allowed: rateLimitResult.limit || 10,
+            remaining: rateLimitResult.remaining || 0,
+            resetTime: rateLimitResult.resetTime || 0,
           },
-        }
-      );
+        },
+      };
+      
+      return new Response(JSON.stringify(errorResponse), {
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': rateLimitResult.retryAfter?.toString() || '3600',
+          'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '10',
+          'X-RateLimit-Remaining': rateLimitResult.remaining?.toString() || '0',
+          'X-RateLimit-Reset': rateLimitResult.resetTime?.toString() || '0'
+        },
+      });
     }
 
     const response = await next();
@@ -107,13 +113,7 @@ async function addSecurityHeaders(
 async function checkRateLimit(
   request: Request,
   env: Env
-): Promise<{
-  allowed: boolean;
-  remaining?: number;
-  limit?: number;
-  resetTime?: number;
-  retryAfter?: number;
-}> {
+): Promise<RateLimitCheck> {
   try {
     const url = new URL(request.url);
     const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';

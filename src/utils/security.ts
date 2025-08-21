@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+// Web Crypto API used instead of Node.js crypto module
 
 export class SecurityUtils {
   private static readonly ALLOWED_MIME_TYPES = new Set([

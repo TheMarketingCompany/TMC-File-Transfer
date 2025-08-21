@@ -26,7 +26,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     console.error('Migration error:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     }), {
       status: 500,
@@ -121,7 +121,7 @@ async function runMigrations(db: D1Database): Promise<void> {
       // Check if old table exists and has data
       const oldData = await db.prepare(`SELECT COUNT(*) as count FROM uploads`).first().catch(() => ({ count: 0 }));
       
-      if (oldData && oldData.count > 0) {
+      if (oldData && typeof oldData.count === 'number' && oldData.count > 0) {
         console.log(`Migrating ${oldData.count} records from old table...`);
         
         // Migrate data with best-effort conversion
@@ -157,7 +157,7 @@ async function runMigrations(db: D1Database): Promise<void> {
         console.log('Data migration completed');
       }
     } catch (error) {
-      console.log('Old table does not exist or migration failed:', error.message);
+      console.log('Old table does not exist or migration failed:', error instanceof Error ? error.message : 'Unknown error');
     }
     
     await markMigrationComplete(db, 'migration_4_data_migration');

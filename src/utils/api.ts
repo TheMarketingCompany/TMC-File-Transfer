@@ -24,7 +24,7 @@ export class ApiClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as any;
         return {
           success: false,
           error: {
@@ -35,7 +35,7 @@ export class ApiClient {
       }
 
       const data = await response.json();
-      return { success: true, data };
+      return { success: true, data: data as T };
     } catch (error) {
       clearTimeout(timeoutId);
       

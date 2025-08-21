@@ -266,7 +266,7 @@ async function downloadFile() {
     });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch(() => ({})) as any;
       error.value = errorData.error?.message || `Download failed (${response.status})`;
       return;
     }

@@ -1,10 +1,10 @@
-interface Env {
-  DB: D1Database;
-  TRANSFER_BUCKET: R2Bucket;
-}
+import type { CloudflareEnv } from '../../../types';
+import { safeCastToDatabaseRecord } from '../../../types';
+
+type Env = CloudflareEnv;
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const { request, env, params } = context;
+  const { env, params } = context;
   
   try {
     const fileId = params.fileId as string;
@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return errorResponse('INVALID_FILE_ID', 'Invalid file ID format', 400);
     }
     
-    const result = await env.DB.prepare(`
+    const dbResult = await env.DB.prepare(`
       SELECT 
         file_id,
         original_name,
@@ -35,8 +35,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       WHERE file_id = ?
     `).bind(fileId).first();
     
-    if (!result) {
+    if (!dbResult) {
       return errorResponse('FILE_NOT_FOUND', 'File not found', 404);
+    }
+    
+    const result = safeCastToDatabaseRecord(dbResult);
+    if (!result) {
+      return errorResponse('DATABASE_ERROR', 'Invalid database record', 500);
     }
     
     const currentTime = Math.floor(Date.now() / 1000);

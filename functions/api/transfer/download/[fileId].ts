@@ -1,3 +1,5 @@
+import { DatabaseUploadRecord } from '../../../types';
+
 interface Env {
   DB: D1Database;
   TRANSFER_BUCKET: R2Bucket;
@@ -50,7 +52,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         is_one_time
       FROM uploads_v2 
       WHERE file_id = ?
-    `).bind(fileId).first();
+    `).bind(fileId).first() as DatabaseUploadRecord | null;
     
     if (!fileResult) {
       return errorResponse('FILE_NOT_FOUND', 'File not found', 404);
@@ -59,17 +61,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const currentTime = Math.floor(Date.now() / 1000);
     
     // Check if file has expired
-    if (fileResult.expires_at < currentTime) {
+    if (Number(fileResult.expires_at) < currentTime) {
       return errorResponse('FILE_EXPIRED', 'File has expired', 410);
     }
     
     // Check if one-time download has been used
-    if (fileResult.is_one_time && fileResult.download_count > 0) {
+    if (fileResult.is_one_time && Number(fileResult.download_count) > 0) {
       return errorResponse('FILE_CONSUMED', 'File has already been downloaded', 410);
     }
     
     // Check if max downloads reached
-    if (fileResult.download_count >= fileResult.max_downloads) {
+    if (Number(fileResult.download_count) >= Number(fileResult.max_downloads)) {
       return errorResponse('DOWNLOAD_LIMIT_REACHED', 'Download limit reached', 410);
     }
     
@@ -79,7 +81,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         return errorResponse('PASSWORD_REQUIRED', 'Password required', 401);
       }
       
-      const hashedPassword = await hashPassword(requestData.password, fileResult.salt);
+      const hashedPassword = await hashPassword(requestData.password, fileResult.salt || '');
       if (hashedPassword !== fileResult.password_hash) {
         return errorResponse('INVALID_PASSWORD', 'Invalid password', 401);
       }
@@ -103,14 +105,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       WHERE file_id = ? AND download_count < max_downloads
     `).bind(fileId).run();
     
-    if (!updateResult.success || updateResult.changes === 0) {
+    if (!updateResult.success || (updateResult.meta?.changes && updateResult.meta.changes === 0)) {
       return errorResponse('DOWNLOAD_FAILED', 'Failed to update download count', 500);
     }
     
     // Create response with file content
     const headers = new Headers();
     headers.set('Content-Type', fileResult.content_type);
-    headers.set('Content-Length', fileResult.file_size.toString());
+    headers.set('Content-Length', String(fileResult.file_size));
     headers.set('Content-Disposition', `attachment; filename="${sanitizeFilename(fileResult.original_name)}"`);
     headers.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     headers.set('Pragma', 'no-cache');
@@ -130,7 +132,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { request, env, params } = context;
   
   try {
-    const fileId = params.fileId as string;
     const url = new URL(request.url);
     const password = url.searchParams.get('password');
     

@@ -1,3 +1,5 @@
+import { DatabaseUploadRecord } from '../../../types';
+
 interface Env {
   DB: D1Database;
   TRANSFER_BUCKET: R2Bucket;
@@ -50,7 +52,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         upload_timestamp
       FROM uploads_v2 
       WHERE file_id = ?
-    `).bind(fileId).first();
+    `).bind(fileId).first() as DatabaseUploadRecord | null;
     
     if (!result) {
       return errorResponse('FILE_NOT_FOUND', 'File not found', 404);
@@ -59,17 +61,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const currentTime = Math.floor(Date.now() / 1000);
     
     // Check if file has expired
-    if (result.expires_at < currentTime) {
+    if (Number(result.expires_at) < currentTime) {
       return errorResponse('FILE_EXPIRED', 'File has expired', 410);
     }
     
     // Check if one-time download has been used
-    if (result.is_one_time && result.download_count > 0) {
+    if (result.is_one_time && Number(result.download_count) > 0) {
       return errorResponse('FILE_CONSUMED', 'File has already been downloaded', 410);
     }
     
     // Check if max downloads reached
-    if (result.download_count >= result.max_downloads) {
+    if (Number(result.download_count) >= Number(result.max_downloads)) {
       return errorResponse('DOWNLOAD_LIMIT_REACHED', 'Download limit reached', 410);
     }
     
@@ -86,7 +88,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         });
       }
       
-      const hashedPassword = await hashPassword(requestData.password, result.salt);
+      const hashedPassword = await hashPassword(requestData.password, result.salt || '');
       if (hashedPassword !== result.password_hash) {
         return errorResponse('INVALID_PASSWORD', 'Invalid password', 401);
       }
@@ -104,7 +106,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         expiresAt: result.expires_at,
         isOneTime: Boolean(result.is_one_time),
         uploadedAt: result.upload_timestamp,
-        timeRemaining: result.expires_at - currentTime,
+        timeRemaining: Number(result.expires_at) - currentTime,
         downloadUrl: `/api/transfer/download/${fileId}`,
       },
     }), {
