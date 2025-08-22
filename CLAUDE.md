@@ -2,7 +2,35 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Build Commands
+## Initial Setup
+
+### 1. Configuration Setup
+
+**Copy example configuration:**
+```bash
+cp example.wrangler.toml wrangler.toml
+```
+
+**Update wrangler.toml with your values:**
+- Replace `your-project-name` with your project name
+- Replace `your-domain.pages.dev` with your actual domain
+- Replace `your_turnstile_site_key_here` with your Turnstile site key
+- Replace `your_turnstile_secret_key_here` with your Turnstile secret key
+- Replace `your_zone_id_here` with your Cloudflare Zone ID
+- Replace `your-database-id-here` with your D1 database ID
+- Replace `your-bucket-name` with your R2 bucket name
+- Generate secure tokens for `MIGRATION_AUTH_TOKEN` and `CLEANUP_SECRET`
+
+**Generate secure tokens:**
+```bash
+# For MIGRATION_AUTH_TOKEN
+openssl rand -hex 32
+
+# For CLEANUP_SECRET  
+openssl rand -hex 32
+```
+
+### 2. Build Commands
 
 - `npm run dev` - Start development server with Vite
 - `npm run build` - Build for production (fast build without type checking)

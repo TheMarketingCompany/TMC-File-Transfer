@@ -54,11 +54,17 @@ wrangler r2 bucket create tmc-transfers
 ### 3. Configure Environment
 
 ```bash
+# Copy example configuration
+cp example.wrangler.toml wrangler.toml
 
-# Edit wrangler.toml and update:
-# - database_id with your D1 database ID
-# - bucket_name if you used different name
-# - Your domain in ALLOWED_ORIGINS for production
+# Update wrangler.toml with your values:
+# - Replace placeholders with your actual Cloudflare resource IDs
+# - Update domain names and Turnstile keys
+# - Generate secure tokens for MIGRATION_AUTH_TOKEN and CLEANUP_SECRET
+
+# Generate secure tokens
+openssl rand -hex 32  # Use for MIGRATION_AUTH_TOKEN
+openssl rand -hex 32  # Use for CLEANUP_SECRET
 ```
 
 ### 4. Deploy
