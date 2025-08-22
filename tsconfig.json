@@ -52,8 +52,7 @@
     "functions/**/*.d.ts"
   ],
   "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "./CleanupWorker/tsconfig.json" }
+    { "path": "./tsconfig.node.json" }
   ],
   "exclude": [
     "node_modules",

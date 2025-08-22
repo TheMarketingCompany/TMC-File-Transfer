@@ -10,11 +10,13 @@
     "build:check": "vue-tsc && vite build",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist && npm run deploy:waf && npm run deploy:cleanup",
+    "deploy": "npm run build && wrangler pages deploy dist && npm run deploy:waf && npm run deploy:cleanup && npm run migrate:production",
     "deploy:pages": "npm run build && wrangler pages deploy dist",
     "deploy:waf": "node scripts/deploy-waf.js",
     "deploy:cleanup": "cd CleanupWorker && npm run deploy",
-    "deploy:cleanup:preview": "cd CleanupWorker && npm run deploy:preview"
+    "deploy:cleanup:preview": "cd CleanupWorker && npm run deploy:preview",
+    "migrate:production": "node scripts/migrate-db.js production",
+    "migrate:preview": "node scripts/migrate-db.js preview"
   },
   "dependencies": {
     "@material/web": "^2.3.0",

@@ -57,7 +57,8 @@
         <div class="space-y-6">
           <div>
             <md-outlined-text-field 
-              v-model="password"
+              :value="password"
+              @input="password = $event.target.value"
               type="password" 
               label="Password"
               placeholder="Enter the file password"
@@ -76,9 +77,8 @@
           
           <md-filled-button 
             @click="validateAccess"
-            :disabled="!password.trim() || validating"
+            :disabled="!canAccessFile"
             class="w-full h-12 md-expressive-button"
-            :style="!password.trim() || validating ? 'opacity: 0.5; cursor: not-allowed;' : ''"
           >
             <md-icon slot="icon">{{ validating ? 'hourglass_empty' : 'lock_open' }}</md-icon>
             {{ validating ? 'Validating...' : 'Access File' }}
@@ -133,15 +133,42 @@
           </div>
         </div>
 
-        <md-filled-button 
-          @click="downloadFile"
-          :disabled="downloading"
-          class="w-full h-14 text-lg md-expressive-button"
-          :style="downloading ? 'opacity: 0.5; cursor: not-allowed;' : ''"
-        >
-          <md-icon slot="icon">{{ downloading ? 'hourglass_empty' : 'file_download' }}</md-icon>
-          {{ downloading ? 'Downloading...' : 'Download File' }}
-        </md-filled-button>
+        <div v-if="!downloading">
+          <md-filled-button 
+            @click="downloadFile"
+            class="w-full h-14 text-lg md-expressive-button"
+          >
+            <md-icon slot="icon">file_download</md-icon>
+            Download File
+          </md-filled-button>
+        </div>
+        
+        <div v-else class="space-y-4">
+          <div class="text-center">
+            <h4 class="text-lg font-medium mb-2" style="color: var(--md-sys-color-on-surface);">
+              Downloading {{ fileInfo.filename }}...
+            </h4>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+              {{ downloadProgress }}% complete
+            </p>
+          </div>
+          
+          <div class="w-full bg-gray-200 rounded-full h-2" style="background-color: var(--md-sys-color-surface-variant);">
+            <div 
+              class="h-2 rounded-full transition-all duration-300"
+              style="background-color: var(--md-sys-color-primary);"
+              :style="{ width: `${downloadProgress}%` }"
+            ></div>
+          </div>
+          
+          <div class="flex justify-center">
+            <md-circular-progress 
+              indeterminate
+              class="scale-75"
+              style="--md-circular-progress-color: var(--md-sys-color-primary);"
+            ></md-circular-progress>
+          </div>
+        </div>
       </div>
 
       <!-- Error State -->
@@ -164,7 +191,7 @@
       </div>
 
       <!-- Actions -->
-      <div class="text-center space-y-4">
+      <div class="text-center space-y-4 mt-8">
         <md-outlined-button 
           @click="$router.push('/upload')"
           class="md-expressive-button"
@@ -206,6 +233,7 @@ const password = ref('');
 const loading = ref(false);
 const validating = ref(false);
 const downloading = ref(false);
+const downloadProgress = ref(0);
 const fileInfo = ref<FileInfo | null>(null);
 const showPasswordForm = ref(false);
 const error = ref('');
@@ -213,6 +241,10 @@ const passwordError = ref('');
 
 // Computed
 const fileId = computed(() => props.fileId || (route.params.fileId as string) || '');
+
+const canAccessFile = computed(() => {
+  return password.value.trim().length > 0 && !validating.value;
+});
 
 // Methods
 async function loadFile() {
@@ -244,7 +276,7 @@ async function loadFile() {
 }
 
 async function validateAccess() {
-  if (!password.value.trim() || validating.value) return;
+  if (!canAccessFile.value) return;
   
   try {
     validating.value = true;
@@ -252,6 +284,7 @@ async function validateAccess() {
     error.value = '';
     
     const id = inputFileId.value.trim() || fileId.value;
+    
     const result = await ApiClient.validateAccess(id, password.value);
     
     if (result.success) {
@@ -278,6 +311,7 @@ async function downloadFile() {
   
   try {
     downloading.value = true;
+    downloadProgress.value = 0;
     error.value = '';
     
     const id = inputFileId.value.trim() || fileId.value;
@@ -297,8 +331,41 @@ async function downloadFile() {
       return;
     }
     
-    // Create blob and download
-    const blob = await response.blob();
+    // Get content length for progress tracking
+    const contentLength = response.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    
+    if (!response.body) {
+      throw new Error('Response body is null');
+    }
+    
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let receivedLength = 0;
+    
+    // Read the response stream with progress tracking
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) break;
+      
+      chunks.push(value);
+      receivedLength += value.length;
+      
+      // Update progress
+      if (total > 0) {
+        downloadProgress.value = Math.round((receivedLength / total) * 100);
+      } else {
+        // If no content-length, show indeterminate progress
+        downloadProgress.value = Math.min(50 + (receivedLength / 1024 / 1024), 95); // Roughly estimate based on MB
+      }
+    }
+    
+    // Complete progress
+    downloadProgress.value = 100;
+    
+    // Create blob from chunks
+    const blob = new Blob(chunks);
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -327,6 +394,7 @@ async function downloadFile() {
     console.error('Download error:', err);
   } finally {
     downloading.value = false;
+    downloadProgress.value = 0;
   }
 }
 
@@ -340,6 +408,7 @@ function resetForm() {
   loading.value = false;
   validating.value = false;
   downloading.value = false;
+  downloadProgress.value = 0;
 }
 
 function formatFileSize(bytes: number): string {

@@ -3,13 +3,13 @@
     <div class="w-full max-w-2xl">
       <!-- Header -->
       <div class="text-center mb-8 md-expressive-fade-in">
-        <h1 class="md-expressive-headline mb-4">Secure File Transfer</h1>
-        <p class="md-expressive-body">Share files securely with expiration and password protection</p>
+        <h1 class="md-expressive-headline mb-4">File Transfer</h1>
+        <p class="md-expressive-body">Share files quickly and securely</p>
       </div>
 
       <!-- Upload Form -->
       <div class="md-expressive-card md-expressive-slide-up">
-        <div v-if="!uploading" class="space-y-6">
+        <div v-if="!uploading && !uploadResult" class="space-y-6">
           <!-- File Drop Zone -->
           <div 
             @drop.prevent="handleDrop"
@@ -75,7 +75,8 @@
                 File Expiration
               </h4>
               <md-outlined-select 
-                v-model="options.lifetime"
+                :value="options.lifetime"
+                @change="options.lifetime = $event.target.value"
                 class="w-full md-expressive-field"
                 required
               >
@@ -98,7 +99,8 @@
                 Download Limit
               </h4>
               <md-outlined-select 
-                v-model="options.maxDownloads"
+                :value="options.maxDownloads"
+                @change="options.maxDownloads = parseInt($event.target.value)"
                 class="w-full md-expressive-field"
                 required
               >
@@ -182,7 +184,7 @@
         </div>
 
         <!-- Upload Progress -->
-        <div v-else class="text-center space-y-6 py-8">
+        <div v-else-if="uploading && !uploadResult" class="text-center space-y-6 py-8">
           <div class="flex justify-center">
             <md-circular-progress 
               indeterminate

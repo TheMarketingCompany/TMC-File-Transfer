@@ -8,8 +8,8 @@
       </div>
       <div class="text-center md:text-right">
         <nav class="flex flex-wrap gap-4 justify-center md:justify-end">
-          <a class="text-sm hover:underline" style="color: var(--md-sys-color-primary);" target="_blank" :href="imprintUrl">Imprint</a>
-          <a class="text-sm hover:underline" style="color: var(--md-sys-color-primary);" target="_blank" :href="privacyUrl">Privacy</a>
+          <a v-if="imprintUrl" class="text-sm hover:underline" style="color: var(--md-sys-color-primary);" target="_blank" :href="imprintUrl">Imprint</a>
+          <a v-if="privacyUrl" class="text-sm hover:underline" style="color: var(--md-sys-color-primary);" target="_blank" :href="privacyUrl">Privacy</a>
           <a class="text-sm hover:underline cursor-pointer" style="color: var(--md-sys-color-primary);" @click="router.push('/tos')">Terms</a>
         </nav>
       </div>
@@ -26,8 +26,8 @@ const companyName = import.meta.env.VITE_COMPANY_NAME || "TMC The Marketing Comp
 const companyAddress1 = import.meta.env.VITE_COMPANY_ADDRESS_LINE1 || "Münchener Straße 41";
 const companyAddress2 = import.meta.env.VITE_COMPANY_ADDRESS_LINE2 || "60329 Frankfurt am Main";
 const companyPhone = import.meta.env.VITE_COMPANY_PHONE || "T +49 (0) 69 4 27 27 99 0";
-const imprintUrl = import.meta.env.VITE_IMPRINT_URL || "https://tmc.one/impressum";
-const privacyUrl = import.meta.env.VITE_PRIVACY_URL || "https://tmc.one/datenschutz";
+const imprintUrl = import.meta.env.VITE_IMPRINT_URL || "";
+const privacyUrl = import.meta.env.VITE_PRIVACY_URL || "";
 </script>
 
 <style scoped>

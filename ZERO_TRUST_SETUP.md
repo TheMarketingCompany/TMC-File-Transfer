@@ -5,10 +5,10 @@ This guide will help you configure Cloudflare Zero Trust to restrict file upload
 ## Overview
 
 After implementing Zero Trust:
-- ✅ **Uploads**: Only authenticated/authorized users can upload files
-- ✅ **Downloads**: Anyone with the link can download files (remains public)
-- ✅ **Admin Functions**: Database migration and configuration endpoints protected
+- ✅ **Frontend Authentication**: Users authenticate in the frontend before accessing upload features
+- ✅ **Downloads**: Anyone with the link can download files (remains public)  
 - ✅ **Seamless Integration**: Works with existing Turnstile bot protection
+- ✅ **No API Blocking**: Backend APIs remain accessible, authentication is handled in frontend
 
 ## Prerequisites
 
@@ -31,19 +31,19 @@ After implementing Zero Trust:
 
 Choose your preferred authentication method:
 
-**Option A: Email OTP (Simplest)**
-1. Go to **Settings > Authentication**
-2. Click **Add new** identity provider
-3. Select **One-time PIN**
-4. Configure email domains you want to allow
-5. Save configuration
-
-**Option B: Google OAuth (Recommended)**
+**Option A: Google OAuth (Recommended)**
 1. Go to **Settings > Authentication** 
 2. Click **Add new** identity provider
 3. Select **Google**
 4. Follow the OAuth setup instructions
 5. Configure allowed Google domains/users
+
+**Option B: Email OTP**
+1. Go to **Settings > Authentication**
+2. Click **Add new** identity provider
+3. Select **One-time PIN**
+4. Configure email domains you want to allow
+5. Save configuration
 
 **Option C: Microsoft Azure AD**
 1. Go to **Settings > Authentication**
@@ -51,9 +51,9 @@ Choose your preferred authentication method:
 3. Select **Azure AD**
 4. Configure with your Azure tenant information
 
-## Step 2: Create Zero Trust Application
+## Step 2: Create Zero Trust Application for Frontend
 
-### 2.1 Create Application for Upload Protection
+### 2.1 Create Application for Upload Authentication
 
 1. **Go to Access > Applications**
 2. **Click "Add an application"**
@@ -61,36 +61,28 @@ Choose your preferred authentication method:
 4. **Configure Application:**
 
 ```
-Application name: TMC File Transfer - Uploads
+Application name: TMC File Transfer - Upload Auth
 Session Duration: 24 hours
 Application domain: your-domain.pages.dev
 ```
 
-### 2.2 Configure Protected Paths
+### 2.2 Configure Protected Paths (Frontend Only)
 
-**Add these paths to protect upload endpoints:**
+**IMPORTANT:** Only protect frontend authentication paths, NOT API endpoints!
 
+**Protected paths:**
 ```
-Subdomain: your-app-name
-Domain: pages.dev
-Path: /api/transfer/upload*
+Path: /auth/upload
 ```
 
-**Include these paths:**
-- `/api/transfer/upload` - Standard uploads
-- `/api/transfer/upload-multipart*` - Large file uploads  
-- `/api/db/migrate` - Database migrations (admin only)
-- `/api/config` - Configuration endpoint (optional)
-
-**Exclude these paths (keep public):**
-- `/api/transfer/download/*` - File downloads
-- `/api/transfer/info/*` - File information  
-- `/api/transfer/validate/*` - File validation
-- `/` - Frontend application
+**DO NOT protect these paths:**
+- `/api/*` - Keep all APIs public
+- `/` - Keep main app public
+- `/dl/*` - Keep downloads public
 
 ### 2.3 Create Access Policies
 
-**Policy 1: Upload Access for Authorized Users**
+**Policy: Upload Access for Authorized Users**
 
 ```
 Policy name: Authorized Uploaders
@@ -118,155 +110,306 @@ Selector: Google Groups
 Value: file-upload-users@yourcompany.com
 ```
 
-**Policy 2: Admin Access for Database Operations**
+## Step 3: Frontend Integration
 
-```
-Policy name: Admin Only
-Action: Allow
-Include paths: /api/db/migrate
-Session duration: 4 hours
-```
+### 3.1 Create Authentication Check Function
 
-**Rules:**
-```
-Selector: Emails  
-Value: admin@yourcompany.com
-```
-
-## Step 3: Configure Application Integration
-
-### 3.1 Update Frontend for Authentication
-
-The frontend needs to handle authentication redirects. Add this to your upload page:
-
-**Option A: Automatic Redirect (Seamless)**
-
-Add to `src/components/UploadPageNew.vue` in the upload method:
-
-```javascript
-// Check if user is authenticated before upload
-async handleUpload() {
-  try {
-    // Your existing upload code
-    await this.uploadFile();
-  } catch (error) {
-    if (error.status === 401 || error.status === 403) {
-      // Redirect to Cloudflare authentication
-      window.location.href = '/api/transfer/upload';
-      return;
-    }
-    // Handle other errors normally
-    console.error('Upload failed:', error);
-  }
-}
-```
-
-**Option B: Authentication Check Button**
-
-Add an authentication check before showing upload interface:
+Add this to your upload page (`src/components/UploadPageNew.vue`):
 
 ```vue
 <template>
-  <div v-if="!isAuthenticated" class="auth-required">
-    <md-filled-button @click="authenticate">
-      <md-icon slot="icon">login</md-icon>
-      Sign in to Upload Files
-    </md-filled-button>
-  </div>
-  
-  <div v-else class="upload-interface">
-    <!-- Your existing upload UI -->
+  <div class="min-h-screen md-expressive-surface flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl">
+      
+      <!-- Authentication Required State -->
+      <div v-if="!isAuthenticated && !checkingAuth" class="md-expressive-card text-center py-12">
+        <md-icon class="text-6xl mb-6" style="color: var(--md-sys-color-primary); font-size: 4rem;">login</md-icon>
+        <h2 class="text-2xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">
+          Authentication Required
+        </h2>
+        <p class="mb-8" style="color: var(--md-sys-color-on-surface-variant);">
+          You need to sign in to upload files. Downloads remain public for everyone.
+        </p>
+        
+        <md-filled-button 
+          @click="authenticate"
+          class="md-expressive-button"
+        >
+          <md-icon slot="icon">login</md-icon>
+          Sign In to Upload Files
+        </md-filled-button>
+      </div>
+      
+      <!-- Checking Authentication State -->
+      <div v-if="checkingAuth" class="md-expressive-card text-center py-12">
+        <md-circular-progress indeterminate class="mb-4 scale-125"></md-circular-progress>
+        <h3 class="text-lg font-medium" style="color: var(--md-sys-color-on-surface);">
+          Checking authentication...
+        </h3>
+      </div>
+      
+      <!-- Authenticated Upload Interface -->
+      <div v-if="isAuthenticated">
+        <!-- Your existing upload interface goes here -->
+        <div class="text-center mb-6">
+          <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+            ✅ Authenticated as: {{ userEmail }}
+            <md-text-button @click="signOut" class="ml-4">Sign Out</md-text-button>
+          </p>
+        </div>
+        
+        <!-- Your existing upload form... -->
+      </div>
+      
+    </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      isAuthenticated: false
-    };
-  },
-  
-  async mounted() {
-    await this.checkAuthentication();
-  },
-  
-  methods: {
-    async checkAuthentication() {
-      try {
-        // Try accessing a protected endpoint
-        const response = await fetch('/api/config');
-        this.isAuthenticated = response.status === 200;
-      } catch (error) {
-        this.isAuthenticated = false;
-      }
-    },
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+
+// Authentication state
+const isAuthenticated = ref(false);
+const checkingAuth = ref(true);
+const userEmail = ref('');
+
+// Check authentication status
+async function checkAuthentication() {
+  try {
+    checkingAuth.value = true;
     
-    authenticate() {
-      // Redirect to trigger Zero Trust authentication
-      window.location.href = '/api/transfer/upload';
+    // Check if user has valid Zero Trust session
+    const response = await fetch('/auth/upload', {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      // User is authenticated, get user info from headers
+      const userInfo = await getUserInfo();
+      isAuthenticated.value = true;
+      userEmail.value = userInfo.email || 'Unknown';
+    } else {
+      isAuthenticated.value = false;
     }
+  } catch (error) {
+    console.log('Authentication check failed:', error);
+    isAuthenticated.value = false;
+  } finally {
+    checkingAuth.value = false;
   }
-};
+}
+
+// Get user information from Zero Trust
+async function getUserInfo() {
+  try {
+    const response = await fetch('/cdn-cgi/access/get-identity', {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (error) {
+    console.log('Could not get user info:', error);
+  }
+  
+  return { email: 'Unknown' };
+}
+
+// Trigger authentication
+function authenticate() {
+  // Redirect to protected path to trigger Zero Trust authentication
+  window.location.href = '/auth/upload';
+}
+
+// Sign out
+function signOut() {
+  // Redirect to Zero Trust logout
+  window.location.href = '/cdn-cgi/access/logout';
+}
+
+// Check authentication on component mount
+onMounted(() => {
+  checkAuthentication();
+});
 </script>
 ```
 
-### 3.2 Update Environment Variables
+### 3.2 Create Authentication Redirect Page
 
-Add Zero Trust configuration to your `wrangler.toml`:
+Create a new file `public/auth/upload/index.html`:
 
-```toml
-[env.production.vars]
-ZERO_TRUST_ENABLED = "true"
-ZERO_TRUST_TEAM_DOMAIN = "your-team-name.cloudflareaccess.com"
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Successful - TMC File Transfer</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background: #f5f5f5;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .success-icon {
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 16px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+        .redirect-info {
+            background: #f0f8ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Authentication Successful!</h1>
+        <p>You have been successfully authenticated and can now upload files.</p>
+        
+        <div class="redirect-info">
+            Redirecting you back to the upload page in <span id="countdown">3</span> seconds...
+        </div>
+        
+        <button onclick="redirectNow()" style="background: #1976d2; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
+            Go to Upload Page Now
+        </button>
+    </div>
 
-[env.preview.vars]  
-ZERO_TRUST_ENABLED = "false"  # Disable for preview/development
+    <script>
+        let countdown = 3;
+        const countdownEl = document.getElementById('countdown');
+        
+        function updateCountdown() {
+            countdownEl.textContent = countdown;
+            countdown--;
+            
+            if (countdown < 0) {
+                redirectNow();
+            }
+        }
+        
+        function redirectNow() {
+            window.location.href = '/upload';
+        }
+        
+        // Start countdown
+        setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>
 ```
 
-### 3.3 Handle Authentication Headers (Optional)
+### 3.3 Configure Upload Page Routing
 
-If you need user information in your API functions, you can access Cloudflare Access headers:
+Update your Vue router to handle authentication checks. In `src/router.ts`:
 
 ```typescript
-// In your API functions (e.g., functions/api/transfer/upload.ts)
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context;
+import { createRouter, createWebHistory } from 'vue-router'
+import UploadPageNew from './components/UploadPageNew.vue'
+// ... other imports
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/upload',
+      name: 'Upload',
+      component: UploadPageNew,
+      beforeEnter: async (to, from, next) => {
+        // Optional: Pre-check authentication status
+        // This is handled in the component itself
+        next()
+      }
+    },
+    // ... other routes
+  ]
+})
+
+export default router
+```
+
+### 3.4 Optional: User Information in API (Advanced)
+
+If you want to log which user uploaded files, you can pass user info from frontend:
+
+```typescript
+// In your upload function
+async function uploadFile() {
+  // Get user info if authenticated
+  let userInfo = null;
+  if (isAuthenticated.value) {
+    userInfo = await getUserInfo();
+  }
   
-  // Get authenticated user information
-  const userEmail = request.headers.get('CF-Access-Authenticated-User-Email');
-  const userID = request.headers.get('CF-Access-Authenticated-User-ID');
+  const uploadOptions = {
+    ...options,
+    turnstileToken: turnstileToken.value,
+    userEmail: userInfo?.email // Add user email to upload metadata
+  };
   
-  console.log(`Upload by authenticated user: ${userEmail}`);
-  
-  // Your existing upload logic...
-};
+  const result = await ApiClient.uploadFile(selectedFile.value, uploadOptions, onProgress);
+  // ... rest of upload logic
+}
 ```
 
 ## Step 4: Test Zero Trust Configuration
 
-### 4.1 Test Upload Protection
+### 4.1 Test Upload Authentication
 
 1. **Open your site in incognito/private browser**
-2. **Try to upload a file directly** 
-3. **Should redirect to authentication page**
-4. **After authentication, upload should work**
+2. **Go to `/upload`**
+3. **Should show "Authentication Required" message**
+4. **Click "Sign In to Upload Files"**
+5. **Should redirect to Zero Trust authentication**
+6. **After authentication, should return to upload page**
+7. **Upload interface should now be visible**
 
 ### 4.2 Test Download Access (Should Remain Public)
 
 1. **Get a file download link**
 2. **Open in incognito/private browser** 
 3. **Download should work without authentication**
+4. **No authentication prompts should appear**
 
 ### 4.3 Test Different User Types
 
 **Test authorized user:**
-1. Sign in with authorized email
-2. Upload should work normally
+1. Go to upload page
+2. Click "Sign In"
+3. Use authorized email address
+4. Should successfully authenticate and see upload interface
 
 **Test unauthorized user:**
-1. Try signing in with non-authorized email
-2. Should be blocked with access denied message
+1. Go to upload page  
+2. Click "Sign In"
+3. Try using non-authorized email
+4. Should be blocked with "Access Denied" message
 
 ## Step 5: Advanced Configuration
 

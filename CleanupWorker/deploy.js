@@ -5,9 +5,33 @@
  * Uses the main wrangler.toml configuration to deploy the cleanup worker
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from .env file
+function loadEnv() {
+  const envPath = path.join(__dirname, '..', '.env');
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    envContent.split('\n').forEach(line => {
+      line = line.trim();
+      if (line && !line.startsWith('#')) {
+        const [key, ...valueParts] = line.split('=');
+        const value = valueParts.join('=');
+        if (key && value) {
+          process.env[key] = value;
+        }
+      }
+    });
+  }
+}
+
+loadEnv();
 
 const environment = process.argv[2] || 'production';
 const validEnvs = ['production', 'preview'];
@@ -73,7 +97,7 @@ compatibility_date = "2024-08-21"
 
 [vars]
 ENVIRONMENT = "${environment}"
-CLEANUP_SECRET = "${environment === 'production' ? 'your-production-cleanup-secret' : 'your-preview-cleanup-secret'}"
+CLEANUP_SECRET = "${process.env.CLEANUP_SECRET || 'fallback-secret-please-set-in-env'}"
 
 [[d1_databases]]
 binding = "${dbConfig.binding}"
