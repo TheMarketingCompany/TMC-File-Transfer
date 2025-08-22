@@ -10,7 +10,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run typecheck` - Run TypeScript type checking only
 - `npm run preview` - Preview production build locally
 - `npm run deploy:waf` - Deploy WAF rules for upload protection
-- `npm run deploy:full` - Full deployment (build + deploy + WAF rules)
+- `npm run deploy:cleanup` - Deploy cleanup worker (production)
+- `npm run deploy:cleanup:preview` - Deploy cleanup worker (preview)  
+- `npm run deploy:full` - Complete deployment (build + pages + WAF + cleanup worker)
 
 ## Security & Performance Improvements Applied
 
@@ -64,14 +66,14 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **Cloudflare Turnstile** - Bot protection and human verification
 
 ### Cleanup Worker (Enhanced)
-- **CleanupWorker/src/index-improved.js** - Enhanced scheduled worker with environment-based deployment
-- **Environment-aware configuration** - Production and preview environments with different schedules
+- **CleanupWorker/src/index-improved.js** - Enhanced scheduled worker using shared configuration
+- **Unified deployment** - Uses main wrangler.toml configuration with automated deployment script  
 - **R2 + Database cleanup** - Removes both storage files and database records for expired content
 - **Batch processing** - Handles large volumes efficiently with 50-file batches
 - **Comprehensive triggers** - Expiration time, one-time downloads, download limits
 - **Database optimization** - Weekly VACUUM operations for performance
 - **Manual trigger support** - HTTP endpoint with authentication for debugging
-- **Deployment scripts** - npm run deploy/deploy:preview with proper environment isolation
+- **Environment isolation** - Production (midnight) and preview (2 AM) schedules
 
 ### Key Technologies (Modern Secure Stack)
 - Vue 3 with Composition API and TypeScript
@@ -91,7 +93,9 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **WAF_DEPLOYMENT.md** - Comprehensive WAF deployment documentation
 - **.env.example** - Environment configuration template with company info and legal links
 - **CF_WAF_API_TOKEN** / **CF_WAF_ZONE_ID** - WAF-specific environment variables (avoid Wrangler conflicts)
-- **CleanupWorker/** - Cloudflare Worker for automated file cleanup with environment-based deployment
+- **CleanupWorker/** - Cloudflare Worker for automated file cleanup
+- **Single wrangler.toml** - Unified configuration for all Cloudflare services
+- **Automated deployment scripts** - Deploy all components with single commands
 
 ### Environment Configuration
 The application supports environment variables for easy customization:

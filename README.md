@@ -55,7 +55,7 @@ wrangler r2 bucket create tmc-transfers
 
 ```bash
 # Copy improved configuration
-cp wrangler-improved.toml wrangler.toml
+# Configuration is already in wrangler.toml - no copying needed
 
 # Edit wrangler.toml and update:
 # - database_id with your D1 database ID

@@ -53,16 +53,9 @@ bucket_name = "tmc-transfers"
 #binding = "ANALYTICS"
 #dataset = "tmc_file_transfer_logs"
 
-# Queue for background processing (optional)
-#[[queues]]
-#binding = "CLEANUP_QUEUE"
-#queue = "file-cleanup-queue"
-
-# Durable Objects (optional, for advanced features)
-#[[durable_objects.bindings]]
-#name = "RATE_LIMITER"
-#class_name = "RateLimiter"
-#script_name = "tmc-file-transfer"
+# Cleanup Worker Configuration
+# The cleanup worker is deployed separately using the shared configuration below
+# Run: npm run deploy:cleanup or npm run deploy:cleanup:preview
 
 # Note: Pages doesn't support [limits], [build], or [[rules]] sections
 # These are handled automatically by the Pages platform

@@ -5,14 +5,12 @@
   "type": "module",
   "main": "src/index-improved.js",
   "scripts": {
-    "deploy": "wrangler deploy --env production",
-    "deploy:preview": "wrangler deploy --env preview", 
-    "dev": "wrangler dev --env preview",
-    "dev:local": "wrangler dev --local --env preview",
-    "tail": "wrangler tail --env production",
-    "tail:preview": "wrangler tail --env preview",
-    "trigger": "node scripts/trigger-cleanup.js",
-    "test": "node scripts/test-cleanup.js"
+    "deploy": "node deploy.js production",
+    "deploy:preview": "node deploy.js preview", 
+    "dev": "wrangler dev --config wrangler.temp.toml",
+    "tail": "wrangler tail tmc-file-transfer-cleanup",
+    "tail:preview": "wrangler tail tmc-file-transfer-cleanup-preview",
+    "trigger": "node scripts/trigger-cleanup.js"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20240821.1"

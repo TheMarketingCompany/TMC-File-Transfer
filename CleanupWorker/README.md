@@ -21,33 +21,30 @@ Enhanced Cloudflare Worker that handles automated cleanup of expired files and d
 - Access to the same D1 database and R2 bucket as main app
 - Wrangler CLI installed and authenticated
 
-### Environment Configuration
+### Unified Configuration
 
-The worker uses environment-based configuration matching the main app:
+The cleanup worker uses the main application's `wrangler.toml` configuration automatically:
 
 ```bash
-# Deploy to production
+# Deploy to production (from project root)
+npm run deploy:cleanup
+
+# Deploy to preview/staging (from project root)  
+npm run deploy:cleanup:preview
+
+# Or from CleanupWorker directory
+cd CleanupWorker
 npm run deploy
-
-# Deploy to preview/staging
 npm run deploy:preview
-
-# Local development
-npm run dev
 ```
 
 ### Configuration
 
-Update `wrangler.toml` with your specific values:
-
-1. **Database ID**: Replace with your D1 database ID
-2. **Bucket Name**: Replace with your R2 bucket name  
-3. **Cleanup Secret**: Set a secure secret for manual triggering
-
-```toml
-[env.production.vars]
-CLEANUP_SECRET = "your-secure-secret-here"
-```
+The deployment script automatically reads configuration from the main `wrangler.toml`:
+- **Database configuration** - Uses same D1 database as main app
+- **R2 bucket configuration** - Uses same R2 bucket as main app
+- **Environment variables** - Inherits environment-specific settings
+- **Cleanup secrets** - Set via deployment script (update `CleanupWorker/deploy.js`)
 
 ## Usage
 
