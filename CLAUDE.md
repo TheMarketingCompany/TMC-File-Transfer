@@ -9,10 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run build:check` - Build with TypeScript type checking (slower but thorough)
 - `npm run typecheck` - Run TypeScript type checking only
 - `npm run preview` - Preview production build locally
+- `npm run deploy` - Complete deployment (build + pages + WAF + cleanup worker) - **DEFAULT**
+- `npm run deploy:pages` - Deploy only Pages (frontend)
 - `npm run deploy:waf` - Deploy WAF rules for upload protection
 - `npm run deploy:cleanup` - Deploy cleanup worker (production)
-- `npm run deploy:cleanup:preview` - Deploy cleanup worker (preview)  
-- `npm run deploy:full` - Complete deployment (build + pages + WAF + cleanup worker)
+- `npm run deploy:cleanup:preview` - Deploy cleanup worker (preview)
 
 ## Security & Performance Improvements Applied
 

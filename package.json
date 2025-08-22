@@ -10,10 +10,11 @@
     "build:check": "vue-tsc && vite build",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
+    "deploy": "npm run build && wrangler pages deploy dist && npm run deploy:waf && npm run deploy:cleanup",
+    "deploy:pages": "npm run build && wrangler pages deploy dist",
     "deploy:waf": "node scripts/deploy-waf.js",
     "deploy:cleanup": "cd CleanupWorker && npm run deploy",
-    "deploy:cleanup:preview": "cd CleanupWorker && npm run deploy:preview",
-    "deploy:full": "npm run build && wrangler pages deploy dist && npm run deploy:waf && npm run deploy:cleanup"
+    "deploy:cleanup:preview": "cd CleanupWorker && npm run deploy:preview"
   },
   "dependencies": {
     "@material/web": "^2.3.0",

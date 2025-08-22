@@ -54,8 +54,6 @@ wrangler r2 bucket create tmc-transfers
 ### 3. Configure Environment
 
 ```bash
-# Copy improved configuration
-# Configuration is already in wrangler.toml - no copying needed
 
 # Edit wrangler.toml and update:
 # - database_id with your D1 database ID
@@ -69,26 +67,31 @@ wrangler r2 bucket create tmc-transfers
 # Build the application
 npm run build
 
-# Deploy to Cloudflare Pages
-npx wrangler pages deploy dist
+# Deploy complete application (Pages + WAF + Cleanup Worker)
+npm run deploy
+
 # Note the deployment URL from output
 
-# Run database migrations
+# Run database migrations  
 curl -X POST https://your-deployment-url.pages.dev/api/db/migrate \
   -H "Authorization: Bearer your-secret-token"
 ```
 
-### 5. Setup Cleanup Worker (Optional)
+**Why full deployment is essential:**
+- 🛡️ **WAF Rules**: Required for upload protection and DDoS prevention
+- 🧹 **Cleanup Worker**: Essential to prevent expensive R2 storage accumulation
+- 📱 **Pages**: The frontend application itself
 
+**Individual deployment commands (if needed):**
 ```bash
-# Deploy cleanup worker
-cd CleanupWorker
-npm install
-npx wrangler deploy
+# Deploy only Pages (frontend)
+npm run deploy:pages
 
-# Schedule the worker (in Cloudflare Dashboard):
-# Go to Workers > Triggers > Add Cron Trigger
-# Schedule: "0 */6 * * *" (every 6 hours)
+# Deploy only WAF rules 
+npm run deploy:waf
+
+# Deploy only cleanup worker
+npm run deploy:cleanup
 ```
 
 ## 🔧 Modern Secure Stack
