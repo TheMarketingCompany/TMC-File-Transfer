@@ -66,19 +66,20 @@ Session Duration: 24 hours
 Application domain: your-domain.pages.dev
 ```
 
-### 2.2 Configure Protected Paths (Frontend Only)
+### 2.2 Configure Protected Paths
 
-**IMPORTANT:** Only protect frontend authentication paths, NOT API endpoints!
+**IMPORTANT:** Only protect the upload page, keep everything else public!
 
 **Protected paths:**
 ```
-Path: /auth/upload
+Path: /upload*
 ```
 
 **DO NOT protect these paths:**
-- `/api/*` - Keep all APIs public
+- `/api/*` - Keep all APIs public  
 - `/` - Keep main app public
 - `/dl/*` - Keep downloads public
+- All other pages and static assets remain public
 
 ### 2.3 Create Access Policies
 
@@ -112,54 +113,33 @@ Value: file-upload-users@yourcompany.com
 
 ## Step 3: Frontend Integration
 
-### 3.1 Create Authentication Check Function
+### 3.1 Update Upload Page for Zero Trust Integration
 
-Add this to your upload page (`src/components/UploadPageNew.vue`):
+Since `/upload` is now protected by Zero Trust, the authentication happens automatically. Update your upload page (`src/components/UploadPageNew.vue`) to get user info:
 
 ```vue
 <template>
   <div class="min-h-screen md-expressive-surface flex items-center justify-center p-4">
     <div class="w-full max-w-2xl">
-      
-      <!-- Authentication Required State -->
-      <div v-if="!isAuthenticated && !checkingAuth" class="md-expressive-card text-center py-12">
-        <md-icon class="text-6xl mb-6" style="color: var(--md-sys-color-primary); font-size: 4rem;">login</md-icon>
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--md-sys-color-on-surface);">
-          Authentication Required
-        </h2>
-        <p class="mb-8" style="color: var(--md-sys-color-on-surface-variant);">
-          You need to sign in to upload files. Downloads remain public for everyone.
-        </p>
+      <!-- Header -->
+      <div class="text-center mb-8 md-expressive-fade-in">
+        <h1 class="md-expressive-headline mb-4">File Transfer</h1>
+        <p class="md-expressive-body">Share files quickly and securely</p>
         
-        <md-filled-button 
-          @click="authenticate"
-          class="md-expressive-button"
-        >
-          <md-icon slot="icon">login</md-icon>
-          Sign In to Upload Files
-        </md-filled-button>
-      </div>
-      
-      <!-- Checking Authentication State -->
-      <div v-if="checkingAuth" class="md-expressive-card text-center py-12">
-        <md-circular-progress indeterminate class="mb-4 scale-125"></md-circular-progress>
-        <h3 class="text-lg font-medium" style="color: var(--md-sys-color-on-surface);">
-          Checking authentication...
-        </h3>
-      </div>
-      
-      <!-- Authenticated Upload Interface -->
-      <div v-if="isAuthenticated">
-        <!-- Your existing upload interface goes here -->
-        <div class="text-center mb-6">
+        <!-- User info and sign out -->
+        <div v-if="userEmail" class="mt-4 p-4 rounded-2xl" style="background-color: var(--md-sys-color-surface-container-low);">
           <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
-            ✅ Authenticated as: {{ userEmail }}
-            <md-text-button @click="signOut" class="ml-4">Sign Out</md-text-button>
+            ✅ Authenticated as: <strong>{{ userEmail }}</strong>
+            <md-text-button @click="signOut" class="ml-4" style="--md-text-button-label-text-color: var(--md-sys-color-primary);">
+              <md-icon slot="icon">logout</md-icon>
+              Sign Out
+            </md-text-button>
           </p>
         </div>
-        
-        <!-- Your existing upload form... -->
       </div>
+
+      <!-- Your existing upload form goes here -->
+      <!-- ... rest of your upload interface ... -->
       
     </div>
   </div>
@@ -168,37 +148,8 @@ Add this to your upload page (`src/components/UploadPageNew.vue`):
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
-// Authentication state
-const isAuthenticated = ref(false);
-const checkingAuth = ref(true);
+// User information
 const userEmail = ref('');
-
-// Check authentication status
-async function checkAuthentication() {
-  try {
-    checkingAuth.value = true;
-    
-    // Check if user has valid Zero Trust session
-    const response = await fetch('/auth/upload', {
-      method: 'GET',
-      credentials: 'include'
-    });
-    
-    if (response.ok) {
-      // User is authenticated, get user info from headers
-      const userInfo = await getUserInfo();
-      isAuthenticated.value = true;
-      userEmail.value = userInfo.email || 'Unknown';
-    } else {
-      isAuthenticated.value = false;
-    }
-  } catch (error) {
-    console.log('Authentication check failed:', error);
-    isAuthenticated.value = false;
-  } finally {
-    checkingAuth.value = false;
-  }
-}
 
 // Get user information from Zero Trust
 async function getUserInfo() {
@@ -208,19 +159,14 @@ async function getUserInfo() {
     });
     
     if (response.ok) {
-      return await response.json();
+      const userData = await response.json();
+      userEmail.value = userData.email || 'Unknown User';
+      console.log('Authenticated user:', userData.email);
     }
   } catch (error) {
     console.log('Could not get user info:', error);
+    userEmail.value = 'Unknown User';
   }
-  
-  return { email: 'Unknown' };
-}
-
-// Trigger authentication
-function authenticate() {
-  // Redirect to protected path to trigger Zero Trust authentication
-  window.location.href = '/auth/upload';
 }
 
 // Sign out
@@ -229,103 +175,16 @@ function signOut() {
   window.location.href = '/cdn-cgi/access/logout';
 }
 
-// Check authentication on component mount
+// Get user info on component mount
 onMounted(() => {
-  checkAuthentication();
+  getUserInfo();
 });
+
+// Your existing upload logic...
 </script>
 ```
 
-### 3.2 Create Authentication Redirect Page
-
-Create a new file `public/auth/upload/index.html`:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication Successful - TMC File Transfer</title>
-    <style>
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 40px 20px;
-            background: #f5f5f5;
-            text-align: center;
-        }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .success-icon {
-            font-size: 48px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 16px;
-        }
-        p {
-            color: #666;
-            margin-bottom: 24px;
-        }
-        .redirect-info {
-            background: #f0f8ff;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #0066cc;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="success-icon">✅</div>
-        <h1>Authentication Successful!</h1>
-        <p>You have been successfully authenticated and can now upload files.</p>
-        
-        <div class="redirect-info">
-            Redirecting you back to the upload page in <span id="countdown">3</span> seconds...
-        </div>
-        
-        <button onclick="redirectNow()" style="background: #1976d2; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
-            Go to Upload Page Now
-        </button>
-    </div>
-
-    <script>
-        let countdown = 3;
-        const countdownEl = document.getElementById('countdown');
-        
-        function updateCountdown() {
-            countdownEl.textContent = countdown;
-            countdown--;
-            
-            if (countdown < 0) {
-                redirectNow();
-            }
-        }
-        
-        function redirectNow() {
-            window.location.href = '/upload';
-        }
-        
-        // Start countdown
-        setInterval(updateCountdown, 1000);
-    </script>
-</body>
-</html>
-```
-
-### 3.3 Configure Upload Page Routing
+### 3.2 Configure Upload Page Routing
 
 Update your Vue router to handle authentication checks. In `src/router.ts`:
 
@@ -354,7 +213,7 @@ const router = createRouter({
 export default router
 ```
 
-### 3.4 Optional: User Information in API (Advanced)
+### 3.3 Optional: User Information in API (Advanced)
 
 If you want to log which user uploaded files, you can pass user info from frontend:
 
@@ -384,11 +243,10 @@ async function uploadFile() {
 
 1. **Open your site in incognito/private browser**
 2. **Go to `/upload`**
-3. **Should show "Authentication Required" message**
-4. **Click "Sign In to Upload Files"**
-5. **Should redirect to Zero Trust authentication**
-6. **After authentication, should return to upload page**
-7. **Upload interface should now be visible**
+3. **Should automatically redirect to Zero Trust authentication**
+4. **Complete authentication with authorized email**
+5. **Should return to upload page showing your email and upload interface**
+6. **Try uploading a file - should work normally**
 
 ### 4.2 Test Download Access (Should Remain Public)
 
