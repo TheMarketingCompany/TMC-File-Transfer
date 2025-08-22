@@ -197,6 +197,51 @@ body {
   overflow: hidden;
 }
 
+/* Material Web Icons configuration */
+md-icon {
+  --md-icon-font: 'Material Symbols Outlined';
+  --md-icon-size: 24px;
+}
+
+/* Material Icon size utilities */
+md-icon.text-sm { --md-icon-size: 16px; }
+md-icon.text-2xl { --md-icon-size: 32px; }
+md-icon.text-4xl { --md-icon-size: 48px; }
+md-icon.text-6xl { --md-icon-size: 64px; }
+md-icon.text-8xl { --md-icon-size: 80px; }
+
+/* Large icons with proper spacing */
+md-icon.text-6xl, md-icon.text-8xl {
+  margin: 8px;
+  line-height: 1.2;
+}
+
+/* Icon spacing in buttons and slots */
+md-filled-button md-icon[slot="icon"],
+md-outlined-button md-icon[slot="icon"],
+md-text-button md-icon[slot="icon"] {
+  margin-right: 8px;
+}
+
+md-filled-button md-icon[slot="leading-icon"],
+md-outlined-button md-icon[slot="leading-icon"],
+md-text-button md-icon[slot="leading-icon"] {
+  margin-right: 8px;
+}
+
+/* Material Web Components button typography consistency */
+md-filled-button,
+md-outlined-button,
+md-text-button,
+md-fab,
+md-icon-button {
+  --md-sys-typescale-label-large-font: 'Inter', 'Roboto', sans-serif;
+  --md-sys-typescale-label-medium-font: 'Inter', 'Roboto', sans-serif;
+  --md-sys-typescale-label-small-font: 'Inter', 'Roboto', sans-serif;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-weight: 500;
+}
+
 .md-expressive-progress-bar::after {
   content: '';
   position: absolute;

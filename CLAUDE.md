@@ -27,6 +27,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **API Response Fix**: Fixed upload response handling to prevent undefined file IDs
 - **Environment Separation**: Renamed API environment variables to avoid Wrangler conflicts
 - **Timing Fix**: Fixed expiration timing to start countdown after upload completion (not during upload)
+- **Material Web Components Integration**: Fixed Vue.js v-model compatibility with Material Web Components
+- **UI Consistency**: Resolved font inconsistencies across Material Web Components
+- **Form Validation**: Fixed password field visibility and upload button validation logic
 
 ## Architecture Overview
 
@@ -186,9 +189,11 @@ The application supports environment variables for easy customization:
 ### Material 3 Expressive Design Implementation
 - **Complete UI overhaul** with Material 3 Expressive design system
 - **Rich visual hierarchy** using Material Design tokens and components
-- **Modern typography** and spacing based on Material 3 specifications
+- **Modern typography** and spacing based on Material 3 specifications with Inter font family
 - **Enhanced animations** and micro-interactions for better user experience
 - **Responsive design** optimized for mobile and desktop
 - **Accessibility improvements** through Material Web component standards
 - **Dark theme support** with proper color tokens
 - **Consistent branding** with environment variable configuration
+- **Material Icons integration** with proper font loading and sizing
+- **Form component fixes** for proper Vue.js integration with Material Web Components

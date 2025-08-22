@@ -125,7 +125,8 @@
           <div class="md-expressive-surface-container rounded-2xl p-6">
             <label class="flex items-center space-x-4 cursor-pointer">
               <md-checkbox 
-                v-model="options.passwordEnabled"
+                :checked="options.passwordEnabled"
+                @change="options.passwordEnabled = $event.target.checked"
                 class="md-expressive-checkbox"
               ></md-checkbox>
               <div class="flex-1">
@@ -141,7 +142,8 @@
             
             <div v-if="options.passwordEnabled" class="mt-4 md-expressive-scale-in">
               <md-outlined-text-field 
-                v-model="options.password" 
+                :value="options.password"
+                @input="options.password = $event.target.value"
                 type="password"
                 label="Enter password"
                 placeholder="Minimum 8 characters"
@@ -169,9 +171,9 @@
           <div class="text-center">
             <md-filled-button 
               @click="uploadFile" 
-              :disabled="!canUpload || !turnstileToken"
+              :disabled="!canUpload"
               class="md-expressive-button w-full h-14 text-lg"
-              :style="!canUpload || !turnstileToken ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+              :style="!canUpload ? 'opacity: 0.5; cursor: not-allowed;' : ''"
             >
               <md-icon slot="icon">cloud_upload</md-icon>
               Upload File Securely
