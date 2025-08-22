@@ -131,9 +131,8 @@ async function initiateMultipartUpload(
   const uploadId = SecurityUtils.generateSecureId();
   const storageName = `${fileId}_${SecurityUtils.sanitizeFilename(data.fileName)}`;
 
-  // Calculate expiry
+  // Store lifetime for later calculation on completion
   const lifetime = parseInt(data.options?.lifetime || '7');
-  const expiresAt = Math.floor(Date.now() / 1000) + (lifetime * 24 * 60 * 60);
 
   // Handle password if provided
   let passwordHash = '';
@@ -169,7 +168,7 @@ async function initiateMultipartUpload(
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     fileId, storageName, data.fileName, data.fileSize, data.contentType,
-    expiresAt, 0, data.options?.maxDownloads || 10, hasPassword,
+    0, 0, data.options?.maxDownloads || 10, hasPassword, // expires_at = 0 temporarily
     passwordHash, salt, Math.floor(Date.now() / 1000), clientIp,
     multipartUpload.uploadId, 'uploading'
   ).run();
@@ -181,7 +180,7 @@ async function initiateMultipartUpload(
       uploadId: multipartUpload.uploadId,
       chunkSize: CHUNK_SIZE,
       totalChunks: Math.ceil(data.fileSize / CHUNK_SIZE),
-      expiresAt
+      lifetime: lifetime // Return lifetime for client reference
     }
   };
   
@@ -264,8 +263,8 @@ async function completeMultipartUpload(
   env: Env, 
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const data: { uploadId: string; parts: Array<{ partNumber: number; etag: string }> } = await request.json();
-  const { uploadId, parts } = data;
+  const data: { uploadId: string; parts: Array<{ partNumber: number; etag: string }>; lifetime?: string } = await request.json();
+  const { uploadId, parts, lifetime } = data;
 
   if (!uploadId || !Array.isArray(parts)) {
     return new Response(JSON.stringify({ error: 'Missing uploadId or parts' }), {
@@ -292,11 +291,19 @@ async function completeMultipartUpload(
     const multipartUpload = await env.TRANSFER_BUCKET.resumeMultipartUpload(upload.file_name as string, uploadId);
     await multipartUpload.complete(parts);
 
-    // Update database status
+    // Calculate expiration at completion time
+    const completionTime = Math.floor(Date.now() / 1000);
+    const lifetimeSeconds = (parseInt(lifetime || '7')) * 24 * 60 * 60; // days to seconds
+    const expiresAt = completionTime + lifetimeSeconds;
+    
+    // Update database status and set proper expiration
     await env.DB.prepare(`
-      UPDATE uploads_v2 SET upload_status = 'completed' 
+      UPDATE uploads_v2 SET 
+        upload_status = 'completed',
+        expires_at = ?,
+        upload_timestamp = ?
       WHERE multipart_upload_id = ?
-    `).bind(uploadId).run();
+    `).bind(expiresAt, completionTime, uploadId).run();
 
     return new Response(JSON.stringify({
       success: true,

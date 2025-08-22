@@ -80,11 +80,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const fileName = crypto.randomUUID() + '.' + getFileExtension(file.name);
     const salt = crypto.randomUUID();
     
-    // Calculate expiration
-    const currentTime = Math.floor(Date.now() / 1000);
-    const lifetimeSeconds = getLifetimeSeconds(options.lifetime);
-    const expiresAt = currentTime + lifetimeSeconds;
-    
     // Hash password if provided
     let passwordHash = null;
     if (options.passwordEnabled && options.password) {
@@ -101,13 +96,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       customMetadata: {
         originalName: file.name,
         fileId: fileId,
-        uploadTime: currentTime.toString(),
+        uploadTime: Math.floor(Date.now() / 1000).toString(),
       },
     });
     
     if (!uploadResult) {
       return errorResponse('UPLOAD_FAILED', 'Failed to upload file to storage', 500, corsHeaders);
     }
+    
+    // Calculate expiration AFTER successful upload
+    const completionTime = Math.floor(Date.now() / 1000);
+    const lifetimeSeconds = getLifetimeSeconds(options.lifetime);
+    const expiresAt = completionTime + lifetimeSeconds;
     
     // Store metadata in database
     const dbResult = await env.DB.prepare(`
@@ -129,7 +129,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       passwordHash,
       salt,
       options.onetimeDownload,
-      currentTime,
+      completionTime,
       request.headers.get('CF-Connecting-IP') || 'unknown'
     ).run();
     

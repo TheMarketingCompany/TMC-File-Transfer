@@ -1,10 +1,9 @@
 <template>
-  <div class="p-6 bg-gry-200 min-h-screen">
-    <CButton color="info" class="mt-4 flex items-center"  @click="$router.back()">
-      <svg xmlns='http://www.w3.org/2000/svg' class="h-6 w-6 mr-2" fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 19l-7-7m0 0l7-7m-7 7h18' />
-      </svg>
-    </CButton>
+  <div class="p-6 md-expressive-surface min-h-screen">
+    <md-text-button @click="$router.back()" class="mb-4">
+      <md-icon slot="icon">arrow_back</md-icon>
+      Back
+    </md-text-button>
     <div class="prose lg:prose-lg max-w-none">
       <p>TMC The Marketing Company GmbH &amp; Co. KG, dein Web-Speicher f&uuml;r Dateien  TERMS OF SERVICE</p>
 
@@ -37,12 +36,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import {CButton} from '@coreui/vue'
-export default {
-  name: "TOS",
-  components: {CButton}
-}
+<script setup lang="ts">
+// Material 3 components are imported globally
 </script>
 
 <style scoped>

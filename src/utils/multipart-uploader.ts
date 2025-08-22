@@ -157,7 +157,8 @@ export class MultipartUploader {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           uploadId,
-          parts: parts.sort((a, b) => a.partNumber - b.partNumber)
+          parts: parts.sort((a, b) => a.partNumber - b.partNumber),
+          lifetime: options.uploadOptions.lifetime
         })
       });
 

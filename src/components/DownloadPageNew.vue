@@ -1,160 +1,186 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+  <div class="min-h-screen md-expressive-surface flex items-center justify-center p-4">
     <div class="w-full max-w-md">
       <!-- Header -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Download File</h1>
-        <p class="text-gray-600">Enter file ID or use shared link</p>
+      <div class="text-center mb-8 md-expressive-fade-in">
+        <h1 class="md-expressive-headline mb-4">Download File</h1>
+        <p class="md-expressive-body">Enter file ID or use shared link to access your file</p>
       </div>
 
       <!-- File ID Input -->
-      <div v-if="!fileId" class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <div class="space-y-4">
+      <div v-if="!fileId" class="md-expressive-card md-expressive-slide-up mb-6">
+        <div class="space-y-6">
+          <div class="text-center mb-4">
+            <md-icon class="text-4xl mb-2" style="color: var(--md-sys-color-primary); font-size: 3rem;">download</md-icon>
+            <h3 class="text-lg font-medium" style="color: var(--md-sys-color-on-surface);">Access File</h3>
+          </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              File ID
-            </label>
-            <input 
+            <md-outlined-text-field 
               v-model="inputFileId"
               type="text" 
-              placeholder="Enter file ID"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              label="File ID"
+              placeholder="Enter your file ID here"
+              class="w-full md-expressive-field"
               @keyup.enter="loadFile"
-            />
+              supporting-text="File ID is provided when you upload a file"
+            >
+              <md-icon slot="leading-icon">fingerprint</md-icon>
+            </md-outlined-text-field>
           </div>
-          <button 
+          <md-filled-button 
             @click="loadFile"
             :disabled="!inputFileId.trim()"
-            :class="[
-              'w-full py-2 px-4 rounded-lg font-medium text-white transition-colors',
-              inputFileId.trim() 
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-gray-400 cursor-not-allowed'
-            ]"
+            class="w-full h-12 md-expressive-button"
+            :style="!inputFileId.trim() ? 'opacity: 0.5; cursor: not-allowed;' : ''"
           >
-            Load File
-          </button>
+            <md-icon slot="icon">search</md-icon>
+            Load File Information
+          </md-filled-button>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="bg-white rounded-xl shadow-lg p-6 text-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p class="text-gray-600">Loading file information...</p>
+      <div v-if="loading" class="md-expressive-card text-center py-8 md-expressive-scale-in">
+        <md-circular-progress indeterminate class="mb-4 scale-125" style="--md-circular-progress-color: var(--md-sys-color-primary);"></md-circular-progress>
+        <h3 class="text-lg font-medium" style="color: var(--md-sys-color-on-surface);">Loading file information...</h3>
+        <p class="text-sm mt-2" style="color: var(--md-sys-color-on-surface-variant);">Please wait while we fetch your file details</p>
       </div>
 
       <!-- Password Required -->
-      <div v-if="showPasswordForm && !loading" class="bg-white rounded-xl shadow-lg p-6">
+      <div v-if="showPasswordForm && !loading" class="md-expressive-card md-expressive-scale-in">
         <div class="text-center mb-6">
-          <svg class="mx-auto h-12 w-12 text-yellow-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-          </svg>
-          <h3 class="text-lg font-semibold text-gray-900">Password Protected</h3>
-          <p class="text-gray-600 text-sm mt-1">This file requires a password to access</p>
+          <md-icon class="text-6xl mb-4" style="color: var(--md-sys-color-primary); font-size: 4rem;">lock</md-icon>
+          <h3 class="text-xl font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Password Protected</h3>
+          <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">This file requires a password to access</p>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-6">
           <div>
-            <input 
+            <md-outlined-text-field 
               v-model="password"
               type="password" 
-              placeholder="Enter password"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              :class="{ 'border-red-500': passwordError }"
+              label="Password"
+              placeholder="Enter the file password"
+              class="w-full md-expressive-field"
+              :class="{ 'border-error': passwordError }"
               @keyup.enter="validateAccess"
-            />
-            <p v-if="passwordError" class="text-red-500 text-xs mt-1">{{ passwordError }}</p>
+              supporting-text="Enter the password provided by the file owner"
+            >
+              <md-icon slot="leading-icon">key</md-icon>
+            </md-outlined-text-field>
+            <div v-if="passwordError" class="mt-2 text-sm" style="color: var(--md-sys-color-error);">
+              <md-icon class="mr-1 align-middle text-sm">error</md-icon>
+              {{ passwordError }}
+            </div>
           </div>
           
-          <button 
+          <md-filled-button 
             @click="validateAccess"
             :disabled="!password.trim() || validating"
-            :class="[
-              'w-full py-2 px-4 rounded-lg font-medium text-white transition-colors',
-              password.trim() && !validating
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-gray-400 cursor-not-allowed'
-            ]"
+            class="w-full h-12 md-expressive-button"
+            :style="!password.trim() || validating ? 'opacity: 0.5; cursor: not-allowed;' : ''"
           >
+            <md-icon slot="icon">{{ validating ? 'hourglass_empty' : 'lock_open' }}</md-icon>
             {{ validating ? 'Validating...' : 'Access File' }}
-          </button>
+          </md-filled-button>
         </div>
       </div>
 
       <!-- File Information & Download -->
-      <div v-if="fileInfo && !showPasswordForm && !loading" class="bg-white rounded-xl shadow-lg p-6">
+      <div v-if="fileInfo && !showPasswordForm && !loading" class="md-expressive-card md-expressive-fade-in">
         <div class="text-center mb-6">
-          <svg class="mx-auto h-12 w-12 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          <h3 class="text-lg font-semibold text-gray-900">{{ fileInfo.filename }}</h3>
-          <p class="text-gray-600 text-sm">{{ formatFileSize(fileInfo.fileSize) }}</p>
+          <md-icon class="text-6xl mb-4" style="color: var(--md-sys-color-success); font-size: 4rem;">description</md-icon>
+          <h3 class="text-xl font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">{{ fileInfo.filename }}</h3>
+          <p class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">{{ formatFileSize(fileInfo.fileSize) }}</p>
         </div>
 
-        <div class="space-y-3 mb-6">
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Downloads:</span>
-            <span class="text-gray-900">{{ fileInfo.downloadCount }} / {{ fileInfo.maxDownloads === 999999 ? '∞' : fileInfo.maxDownloads }}</span>
+        <!-- File Details Grid -->
+        <div class="grid grid-cols-1 gap-4 mb-6 p-4 rounded-2xl" style="background-color: var(--md-sys-color-surface-container-low);">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <md-icon class="mr-3" style="color: var(--md-sys-color-primary);">download</md-icon>
+              <span class="font-medium" style="color: var(--md-sys-color-on-surface);">Downloads</span>
+            </div>
+            <span class="font-medium" style="color: var(--md-sys-color-on-surface);">
+              {{ fileInfo.downloadCount }} / {{ fileInfo.maxDownloads === 999999 ? '∞' : fileInfo.maxDownloads }}
+            </span>
           </div>
           
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Expires:</span>
-            <span class="text-gray-900">{{ formatDate(fileInfo.expiresAt * 1000) }}</span>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <md-icon class="mr-3" style="color: var(--md-sys-color-primary);">schedule</md-icon>
+              <span class="font-medium" style="color: var(--md-sys-color-on-surface);">Expires</span>
+            </div>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+              {{ formatDate(fileInfo.expiresAt * 1000) }}
+            </span>
           </div>
           
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Time Remaining:</span>
-            <span class="text-gray-900">{{ formatTimeRemaining(fileInfo.timeRemaining) }}</span>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <md-icon class="mr-3" style="color: var(--md-sys-color-primary);">timer</md-icon>
+              <span class="font-medium" style="color: var(--md-sys-color-on-surface);">Time Remaining</span>
+            </div>
+            <span class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+              {{ formatTimeRemaining(fileInfo.timeRemaining) }}
+            </span>
           </div>
           
-          <div v-if="fileInfo.isOneTime" class="flex items-center justify-center space-x-2 text-orange-600 text-sm">
-            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-            </svg>
-            <span>One-time download only</span>
+          <div v-if="fileInfo.isOneTime" class="flex items-center justify-center space-x-2 p-3 rounded-xl mt-2"
+               style="background-color: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
+            <md-icon>warning</md-icon>
+            <span class="font-medium">One-time download only</span>
           </div>
         </div>
 
-        <button 
+        <md-filled-button 
           @click="downloadFile"
           :disabled="downloading"
-          :class="[
-            'w-full py-3 px-4 rounded-lg font-medium text-white transition-colors',
-            downloading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-green-600 hover:bg-green-700'
-          ]"
+          class="w-full h-14 text-lg md-expressive-button"
+          :style="downloading ? 'opacity: 0.5; cursor: not-allowed;' : ''"
         >
+          <md-icon slot="icon">{{ downloading ? 'hourglass_empty' : 'file_download' }}</md-icon>
           {{ downloading ? 'Downloading...' : 'Download File' }}
-        </button>
+        </md-filled-button>
       </div>
 
       <!-- Error State -->
-      <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-        <div class="flex">
-          <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-          </svg>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Error</h3>
-            <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+      <div v-if="error" class="rounded-2xl p-6 mb-6 md-expressive-scale-in" style="background-color: var(--md-sys-color-error-container);">
+        <div class="flex items-start space-x-4">
+          <md-icon class="text-2xl mt-1" style="color: var(--md-sys-color-error);">error</md-icon>
+          <div class="flex-1">
+            <h3 class="text-lg font-medium mb-2" style="color: var(--md-sys-color-on-error-container);">Error</h3>
+            <p style="color: var(--md-sys-color-on-error-container);">{{ error }}</p>
+            <md-text-button 
+              @click="error = ''" 
+              class="mt-3"
+              style="--md-text-button-label-text-color: var(--md-sys-color-error);"
+            >
+              <md-icon slot="icon">close</md-icon>
+              Dismiss
+            </md-text-button>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="text-center space-y-3">
-        <router-link 
-          to="/upload" 
-          class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+      <div class="text-center space-y-4">
+        <md-outlined-button 
+          @click="$router.push('/upload')"
+          class="md-expressive-button"
         >
+          <md-icon slot="icon">cloud_upload</md-icon>
           Upload New File
-        </router-link>
+        </md-outlined-button>
         
-        <div v-if="fileId" class="text-sm text-gray-500">
-          <button @click="resetForm" class="text-blue-600 hover:text-blue-700">
+        <div v-if="fileId" class="text-center">
+          <md-text-button 
+            @click="resetForm"
+            style="--md-text-button-label-text-color: var(--md-sys-color-primary);"
+          >
+            <md-icon slot="icon">refresh</md-icon>
             Load Different File
-          </button>
+          </md-text-button>
         </div>
       </div>
     </div>

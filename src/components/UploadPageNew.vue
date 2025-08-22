@@ -1,24 +1,29 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+  <div class="min-h-screen md-expressive-surface flex items-center justify-center p-4">
     <div class="w-full max-w-2xl">
       <!-- Header -->
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Secure File Transfer</h1>
-        <p class="text-gray-600">Share files securely with expiration and password protection</p>
+      <div class="text-center mb-8 md-expressive-fade-in">
+        <h1 class="md-expressive-headline mb-4">Secure File Transfer</h1>
+        <p class="md-expressive-body">Share files securely with expiration and password protection</p>
       </div>
 
       <!-- Upload Form -->
-      <div class="bg-white rounded-xl shadow-lg p-8">
+      <div class="md-expressive-card md-expressive-slide-up">
         <div v-if="!uploading" class="space-y-6">
           <!-- File Drop Zone -->
           <div 
             @drop.prevent="handleDrop"
-            @dragover.prevent
+            @dragover.prevent="dragOver = true"
+            @dragleave.prevent="dragOver = false"
             @dragenter.prevent
             :class="[
-              'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
-              dragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+              'relative rounded-3xl p-12 text-center transition-all duration-300 border-2 border-dashed',
+              'min-h-[240px] flex flex-col items-center justify-center',
+              dragOver 
+                ? 'border-primary bg-primary/5 scale-105 shadow-lg' 
+                : 'border-outline-variant hover:border-primary hover:bg-surface-container-high'
             ]"
+            style="background-color: var(--md-sys-color-surface-container-low); border-color: var(--md-sys-color-outline-variant);"
           >
             <input 
               ref="fileInput"
@@ -28,34 +33,36 @@
               :accept="allowedTypes"
             />
             
-            <div v-if="!selectedFile">
-              <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <p class="text-lg text-gray-600 mb-2">Drop your file here or</p>
-              <button 
+            <div v-if="!selectedFile" class="md-expressive-scale-in">
+              <md-icon class="text-6xl mb-6" style="color: var(--md-sys-color-primary); font-size: 4rem;">cloud_upload</md-icon>
+              <h3 class="text-xl font-medium mb-2" style="color: var(--md-sys-color-on-surface);">Drop your file here</h3>
+              <p class="mb-6" style="color: var(--md-sys-color-on-surface-variant);">or browse to choose a file</p>
+              <md-filled-button 
                 @click="$refs.fileInput.click()" 
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                class="md-expressive-button mb-4"
               >
+                <md-icon slot="icon">folder_open</md-icon>
                 Browse Files
-              </button>
-              <p class="text-sm text-gray-500 mt-2">Supports files up to 5GB - large files use optimized chunked upload</p>
+              </md-filled-button>
+              <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+                Supports files up to 5GB • Large files use optimized chunked upload
+              </p>
             </div>
             
-            <div v-else class="space-y-3">
-              <svg class="mx-auto h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <div>
-                <p class="text-lg font-medium text-gray-900">{{ selectedFile.name }}</p>
-                <p class="text-sm text-gray-500">{{ formatFileSize(selectedFile.size) }}</p>
+            <div v-else class="md-expressive-scale-in space-y-4">
+              <md-icon class="text-6xl mb-4 text-success" style="color: var(--md-sys-color-success); font-size: 4rem;">check_circle</md-icon>
+              <div class="text-center">
+                <h3 class="text-xl font-medium mb-2" style="color: var(--md-sys-color-on-surface);">{{ selectedFile.name }}</h3>
+                <p class="text-lg" style="color: var(--md-sys-color-on-surface-variant);">{{ formatFileSize(selectedFile.size) }}</p>
               </div>
-              <button 
+              <md-text-button 
                 @click="clearFile" 
-                class="text-red-600 hover:text-red-700 text-sm font-medium"
+                class="mt-4"
+                style="--md-text-button-label-text-color: var(--md-sys-color-error);"
               >
+                <md-icon slot="icon">delete</md-icon>
                 Remove File
-              </button>
+              </md-text-button>
             </div>
           </div>
 
@@ -63,149 +70,240 @@
           <div class="grid md:grid-cols-2 gap-6">
             <!-- Expiration -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <h4 class="text-lg font-medium mb-3" style="color: var(--md-sys-color-on-surface);">
+                <md-icon class="mr-2 align-middle">schedule</md-icon>
                 File Expiration
-              </label>
-              <select 
-                v-model="options.lifetime" 
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              </h4>
+              <md-outlined-select 
+                v-model="options.lifetime"
+                class="w-full md-expressive-field"
+                required
               >
-                <option value="1">1 Day</option>
-                <option value="7">1 Week</option>
-                <option value="30">1 Month</option>
-              </select>
+                <md-select-option value="1">
+                  <div slot="headline">1 Day</div>
+                </md-select-option>
+                <md-select-option value="7" selected>
+                  <div slot="headline">1 Week</div>
+                </md-select-option>
+                <md-select-option value="30">
+                  <div slot="headline">1 Month</div>
+                </md-select-option>
+              </md-outlined-select>
             </div>
 
             <!-- Max Downloads -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <h4 class="text-lg font-medium mb-3" style="color: var(--md-sys-color-on-surface);">
+                <md-icon class="mr-2 align-middle">download</md-icon>
                 Download Limit
-              </label>
-              <select 
-                v-model="options.maxDownloads" 
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              </h4>
+              <md-outlined-select 
+                v-model="options.maxDownloads"
+                class="w-full md-expressive-field"
+                required
               >
-                <option :value="1">1 Download (One-time)</option>
-                <option :value="5">5 Downloads</option>
-                <option :value="10">10 Downloads</option>
-                <option :value="25">25 Downloads</option>
-                <option :value="999999">Unlimited</option>
-              </select>
+                <md-select-option :value="1">
+                  <div slot="headline">1 Download (One-time)</div>
+                </md-select-option>
+                <md-select-option :value="5">
+                  <div slot="headline">5 Downloads</div>
+                </md-select-option>
+                <md-select-option :value="10" selected>
+                  <div slot="headline">10 Downloads</div>
+                </md-select-option>
+                <md-select-option :value="25">
+                  <div slot="headline">25 Downloads</div>
+                </md-select-option>
+                <md-select-option :value="999999">
+                  <div slot="headline">Unlimited</div>
+                </md-select-option>
+              </md-outlined-select>
             </div>
           </div>
 
           <!-- Password Protection -->
-          <div>
-            <label class="flex items-center space-x-3">
-              <input 
-                v-model="options.passwordEnabled" 
-                type="checkbox" 
-                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <span class="text-sm font-medium text-gray-700">Password Protection</span>
+          <div class="md-expressive-surface-container rounded-2xl p-6">
+            <label class="flex items-center space-x-4 cursor-pointer">
+              <md-checkbox 
+                v-model="options.passwordEnabled"
+                class="md-expressive-checkbox"
+              ></md-checkbox>
+              <div class="flex-1">
+                <h4 class="text-lg font-medium" style="color: var(--md-sys-color-on-surface);">
+                  <md-icon class="mr-2 align-middle">lock</md-icon>
+                  Password Protection
+                </h4>
+                <p class="text-sm mt-1" style="color: var(--md-sys-color-on-surface-variant);">
+                  Secure your file with a password
+                </p>
+              </div>
             </label>
             
-            <div v-if="options.passwordEnabled" class="mt-3">
-              <input 
+            <div v-if="options.passwordEnabled" class="mt-4 md-expressive-scale-in">
+              <md-outlined-text-field 
                 v-model="options.password" 
-                type="password" 
-                placeholder="Enter password (min 8 characters)"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                :class="{ 'border-red-500': passwordError }"
-              />
-              <p v-if="passwordError" class="text-red-500 text-xs mt-1">{{ passwordError }}</p>
+                type="password"
+                label="Enter password"
+                placeholder="Minimum 8 characters"
+                class="w-full md-expressive-field"
+                :class="{ 'border-error': passwordError }"
+                supporting-text="Password must be at least 8 characters"
+                maxlength="128"
+                required
+              >
+                <md-icon slot="leading-icon">key</md-icon>
+              </md-outlined-text-field>
+              <div v-if="passwordError" class="mt-2 text-sm" style="color: var(--md-sys-color-error);">
+                <md-icon class="mr-1 align-middle text-sm">error</md-icon>
+                {{ passwordError }}
+              </div>
             </div>
           </div>
 
           <!-- Turnstile Challenge -->
-          <div class="flex justify-center">
+          <div class="flex justify-center p-4 rounded-2xl" style="background-color: var(--md-sys-color-surface-container-low);">
             <div ref="turnstileWidget"></div>
           </div>
 
           <!-- Upload Button -->
-          <button 
-            @click="uploadFile" 
-            :disabled="!canUpload || !turnstileToken"
-            :class="[
-              'w-full py-3 px-4 rounded-lg font-medium text-white transition-colors',
-              canUpload 
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-gray-400 cursor-not-allowed'
-            ]"
-          >
-            Upload File
-          </button>
+          <div class="text-center">
+            <md-filled-button 
+              @click="uploadFile" 
+              :disabled="!canUpload || !turnstileToken"
+              class="md-expressive-button w-full h-14 text-lg"
+              :style="!canUpload || !turnstileToken ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+            >
+              <md-icon slot="icon">cloud_upload</md-icon>
+              Upload File Securely
+            </md-filled-button>
+          </div>
         </div>
 
         <!-- Upload Progress -->
-        <div v-else class="text-center space-y-4">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p class="text-lg font-medium text-gray-900">{{ uploadStage || 'Uploading your file...' }}</p>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              :style="{ width: `${uploadProgress}%` }"
-            ></div>
+        <div v-else class="text-center space-y-6 py-8">
+          <div class="flex justify-center">
+            <md-circular-progress 
+              indeterminate
+              class="scale-150"
+              style="--md-circular-progress-color: var(--md-sys-color-primary);"
+            ></md-circular-progress>
           </div>
-          <p class="text-sm text-gray-600">{{ uploadProgress }}% complete</p>
-          <p v-if="selectedFile && selectedFile.size > 80 * 1024 * 1024" class="text-xs text-blue-600">
+          
+          <div>
+            <h3 class="text-xl font-medium mb-2" style="color: var(--md-sys-color-on-surface);">
+              {{ uploadStage || 'Uploading your file...' }}
+            </h3>
+            <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+              Please wait while we securely process your file
+            </p>
+          </div>
+          
+          <div class="w-full max-w-md mx-auto">
+            <div class="md-expressive-progress h-3 mb-2">
+              <div 
+                class="md-expressive-progress-bar h-3"
+                :style="{ width: `${uploadProgress}%` }"
+              ></div>
+            </div>
+            <div class="flex justify-between text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+              <span>{{ uploadProgress }}% complete</span>
+              <span v-if="selectedFile">{{ formatFileSize(selectedFile.size) }}</span>
+            </div>
+          </div>
+          
+          <div v-if="selectedFile && selectedFile.size > 80 * 1024 * 1024" 
+               class="inline-flex items-center px-4 py-2 rounded-full text-sm"
+               style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+            <md-icon class="mr-2">speed</md-icon>
             Large file detected - using optimized chunked upload
-          </p>
+          </div>
         </div>
 
         <!-- Success State -->
-        <div v-if="uploadResult && !uploading" class="text-center space-y-4">
-          <svg class="mx-auto h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <h3 class="text-xl font-semibold text-gray-900">Upload Successful!</h3>
+        <div v-if="uploadResult && !uploading" class="text-center space-y-6 py-8 md-expressive-fade-in">
+          <div class="flex justify-center">
+            <md-icon class="text-8xl" style="color: var(--md-sys-color-success); font-size: 5rem;">check_circle</md-icon>
+          </div>
           
-          <div class="bg-gray-50 rounded-lg p-4 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Download Link:</span>
-              <button 
+          <div>
+            <h3 class="text-2xl font-semibold mb-2" style="color: var(--md-sys-color-on-surface);">Upload Successful!</h3>
+            <p style="color: var(--md-sys-color-on-surface-variant);">Your file has been securely uploaded and is ready to share</p>
+          </div>
+          
+          <div class="max-w-md mx-auto p-6 rounded-2xl" style="background-color: var(--md-sys-color-surface-container-high);">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-sm font-medium" style="color: var(--md-sys-color-on-surface);">
+                <md-icon class="mr-2 align-middle">link</md-icon>
+                Download Link
+              </h4>
+              <md-text-button 
                 @click="copyToClipboard(shareUrl)" 
-                class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                class="md-expressive-button"
               >
+                <md-icon slot="icon">{{ copied ? 'check' : 'content_copy' }}</md-icon>
                 {{ copied ? 'Copied!' : 'Copy' }}
-              </button>
+              </md-text-button>
             </div>
-            <input 
+            
+            <md-outlined-text-field 
               :value="shareUrl" 
               readonly 
-              class="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm"
-            />
-            <p class="text-xs text-gray-500">
-              Expires: {{ formatDate(uploadResult.expiresAt * 1000) }}
-            </p>
+              class="w-full mb-4"
+              label="Share URL"
+            >
+              <md-icon slot="leading-icon">link</md-icon>
+            </md-outlined-text-field>
+            
+            <div class="flex items-center justify-between text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+              <div class="flex items-center">
+                <md-icon class="mr-1 text-sm">schedule</md-icon>
+                Expires: {{ formatDate(uploadResult.expiresAt * 1000) }}
+              </div>
+              <div class="flex items-center">
+                <md-icon class="mr-1 text-sm">file_download</md-icon>
+                {{ uploadResult.fileSize ? formatFileSize(uploadResult.fileSize) : 'File ready' }}
+              </div>
+            </div>
           </div>
 
-          <button 
+          <md-outlined-button 
             @click="resetForm" 
-            class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+            class="md-expressive-button"
           >
+            <md-icon slot="icon">add</md-icon>
             Upload Another File
-          </button>
+          </md-outlined-button>
         </div>
 
         <!-- Error State -->
-        <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div class="flex">
-            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-            </svg>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">Upload Error</h3>
-              <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+        <div v-if="error" class="rounded-2xl p-6 md-expressive-scale-in" style="background-color: var(--md-sys-color-error-container);">
+          <div class="flex items-start space-x-4">
+            <md-icon class="text-2xl mt-1" style="color: var(--md-sys-color-error);">error</md-icon>
+            <div class="flex-1">
+              <h3 class="text-lg font-medium mb-2" style="color: var(--md-sys-color-on-error-container);">Upload Error</h3>
+              <p style="color: var(--md-sys-color-on-error-container);">{{ error }}</p>
+              <md-text-button 
+                @click="error = ''" 
+                class="mt-3"
+                style="--md-text-button-label-text-color: var(--md-sys-color-error);"
+              >
+                <md-icon slot="icon">close</md-icon>
+                Dismiss
+              </md-text-button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div class="text-center mt-8 text-sm text-gray-500">
-        <p>Files are automatically deleted after expiration. By using this service, you agree to our 
-          <router-link to="/tos" class="text-blue-600 hover:text-blue-700">Terms of Service</router-link>.
+      <div class="text-center mt-8 space-y-2">
+        <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+          <md-icon class="mr-1 align-middle text-sm">security</md-icon>
+          Files are automatically deleted after expiration
+        </p>
+        <p class="text-sm" style="color: var(--md-sys-color-on-surface-variant);">
+          By using this service, you agree to our 
+          <router-link to="/tos" class="underline hover:no-underline" style="color: var(--md-sys-color-primary);">Terms of Service</router-link>
         </p>
       </div>
     </div>

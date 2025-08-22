@@ -19,7 +19,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Legacy Removal**: Eliminated all insecure AWS SDK, axios, and legacy dependencies
 - **Modern Stack**: 100% Cloudflare-native with Web Crypto API
 - **SQL Injection**: Fixed with prepared statements and parameter binding
-- **Rate Limiting**: Implemented per-IP rate limiting (100 uploads/hour, 1000 downloads/hour - testing limits)
 - **File Validation**: Comprehensive security validation (no file type restrictions for user convenience)
 - **Security Headers**: CSP, XSS Protection, HSTS, and other security headers
 - **Password Security**: Proper hashing with SHA-256 and salt using Web Crypto API
@@ -27,6 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Bot Protection**: Cloudflare Turnstile integration for human verification
 - **API Response Fix**: Fixed upload response handling to prevent undefined file IDs
 - **Environment Separation**: Renamed API environment variables to avoid Wrangler conflicts
+- **Timing Fix**: Fixed expiration timing to start countdown after upload completion (not during upload)
 
 ## Architecture Overview
 
@@ -36,11 +36,11 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **Main app**: `src/App.vue` - Simple layout with router-view and footer
 - **Router**: `src/router.ts` - Routes for upload (`/upload`), download (`/dl`), and terms (`/tos`)
 - **Components**: 
-  - `UploadPageNew.vue` - Modern secure file upload with options (password protection, one-time download, lifetime)
-  - `DownloadPageNew.vue` - Modern secure file download with password validation and progress
-  - `TOS.vue` - Terms of service
-  - `Footer.vue` - Footer component
-  - **Note**: Legacy insecure components have been removed for security
+  - `UploadPageNew.vue` - Modern Material 3 Expressive file upload with options (password protection, one-time download, lifetime)
+  - `DownloadPageNew.vue` - Modern Material 3 Expressive file download with password validation and progress
+  - `TOS.vue` - Terms of service with Material 3 design
+  - `Footer.vue` - Material 3 footer component with environment variable support
+  - **Note**: All components redesigned with Material 3 Expressive design system
 
 ### Backend (Cloudflare Functions)
 - **API Routes**: `functions/api/transfer/` directory contains secure TypeScript functions
@@ -70,7 +70,8 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 
 ### Key Technologies (Modern Secure Stack)
 - Vue 3 with Composition API and TypeScript
-- TailwindCSS for styling and responsive design
+- **Material Web Components (@material/web)** - Material 3 Expressive design system
+- TailwindCSS for utility classes and responsive design
 - Cloudflare Pages Functions (serverless backend)
 - **Cloudflare R2** - Native object storage (replaces AWS SDK)
 - **Cloudflare D1** - SQLite database with prepared statements
@@ -83,8 +84,17 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 ### Deployment & Scripts
 - **scripts/deploy-waf.js** - Automated WAF rule deployment script
 - **WAF_DEPLOYMENT.md** - Comprehensive WAF deployment documentation
-- **.env.example** - Environment configuration template with renamed variables
+- **.env.example** - Environment configuration template with company info and legal links
 - **CF_WAF_API_TOKEN** / **CF_WAF_ZONE_ID** - WAF-specific environment variables (avoid Wrangler conflicts)
+
+### Environment Configuration
+The application supports environment variables for easy customization:
+- **VITE_COMPANY_NAME** - Company name displayed in footer
+- **VITE_COMPANY_ADDRESS_LINE1** - First line of company address
+- **VITE_COMPANY_ADDRESS_LINE2** - Second line of company address  
+- **VITE_COMPANY_PHONE** - Company phone number
+- **VITE_IMPRINT_URL** - Link to imprint/impressum page
+- **VITE_PRIVACY_URL** - Link to privacy policy page
 
 ### Database Schema (Updated)
 
@@ -138,7 +148,6 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **100% Cloudflare-native** - Uses only secure, modern Cloudflare services
 
 ### Core Security Controls
-- Rate limiting per IP address (configurable limits, currently 100/1000 req/hour for testing)
 - File validation (comprehensive security checks, no arbitrary type restrictions)
 - Configurable file size limits (5GB default, supports huge files via chunked upload)
 - Secure password hashing with salt using Web Crypto API
@@ -149,14 +158,15 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - SQL injection prevention via prepared statements
 - Input validation and sanitization at all entry points
 - Environment variable separation to avoid deployment conflicts
+- Fixed expiration timing to prevent premature file deletion
 
 ## Performance Optimizations
 
 ### Build Performance
-- **Fast builds**: 1.37s (improved from 2.71s)
+- **Fast builds**: ~2.7s with Material Web components (stable performance)
 - **Fast dev server**: 366ms startup (improved from 10+ seconds)
-- **Reduced bundle size**: 337.40 kB (down from 339.62 kB)
-- **Optimized dependencies**: Removed unused packages
+- **Bundle size**: 605.51 kB with Material 3 components (rich UI features)
+- **Optimized dependencies**: Removed legacy packages, added modern Material Web components
 
 ### Runtime Performance
 - Database indexes for fast queries
@@ -169,3 +179,16 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - Chunked upload with 5MB chunks for reliability and speed
 - Automatic retry logic for failed chunk uploads
 - Proper API response unwrapping for faster frontend processing
+- Material 3 design system with optimized component loading
+
+## UI/UX Improvements
+
+### Material 3 Expressive Design Implementation
+- **Complete UI overhaul** with Material 3 Expressive design system
+- **Rich visual hierarchy** using Material Design tokens and components
+- **Modern typography** and spacing based on Material 3 specifications
+- **Enhanced animations** and micro-interactions for better user experience
+- **Responsive design** optimized for mobile and desktop
+- **Accessibility improvements** through Material Web component standards
+- **Dark theme support** with proper color tokens
+- **Consistent branding** with environment variable configuration

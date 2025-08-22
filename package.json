@@ -14,9 +14,7 @@
     "deploy:full": "npm run build && wrangler pages deploy dist && npm run deploy:waf"
   },
   "dependencies": {
-    "@coreui/coreui": "^5.1.0",
-    "@coreui/vue": "^5.1.0",
-    "@popperjs/core": "^2.11.8",
+    "@material/web": "^2.3.0",
     "@tailwindcss/typography": "^0.5.13",
     "vite-plugin-mkcert": "^1.17.5",
     "vue": "^3.4.32",
