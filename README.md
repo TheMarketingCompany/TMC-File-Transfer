@@ -9,7 +9,7 @@ A secure, zero-vulnerability file transfer solution built on modern Cloudflare i
 - 🔒 **Modern Security Stack** - 100% Cloudflare-native with Web Crypto API
 - ⚡ **Ultra-Fast Performance** - 366ms dev startup, 1.37s builds
 - 📦 **Native R2 Storage** - Direct Cloudflare R2 bindings with multipart upload
-- 🛡️ **Advanced Rate Limiting** - DDoS protection and abuse prevention
+- 🛡️ **Bot Protection** - Cloudflare Turnstile human verification
 - 🚀 **Chunked Upload** - Large files (>80MB) use optimized multipart upload
 - 📱 **Mobile-First Design** - Responsive UI that works everywhere
 - 🎯 **Smart Expiration** - Files automatically deleted after expiration
@@ -144,7 +144,7 @@ npm run deploy:cleanup
 
 ### Modern Security Controls
 - **File Validation**: Comprehensive MIME type and size checking
-- **Rate Limiting**: Advanced per-IP protection (10 uploads/hour)
+- **Bot Protection**: Cloudflare Turnstile verification for uploads
 - **Password Protection**: Web Crypto API SHA-256 with unique salts
 - **Secure Headers**: CSP, HSTS, XSS protection, CSRF prevention
 - **Input Sanitization**: All inputs validated with TypeScript types
@@ -158,6 +158,19 @@ npm run deploy:cleanup
 - **Lazy Loading**: Components loaded on demand
 - **Compression**: Gzip/Brotli compression enabled
 - **CDN Delivery**: Files served from nearest edge
+
+## 🔐 Zero Trust Setup (Optional)
+
+Restrict file uploads to authorized users while keeping downloads public:
+
+📋 **[Complete Zero Trust Setup Guide →](ZERO_TRUST_SETUP.md)**
+
+**Quick Overview:**
+- ✅ Uploads: Only authenticated users
+- ✅ Downloads: Public (anyone with link)
+- ✅ Easy user management via Cloudflare dashboard
+- ✅ Works with existing Turnstile bot protection
+- ✅ Free plan supports up to 50 users
 
 ## 🔧 Configuration
 
@@ -175,42 +188,57 @@ MAX_FILE_SIZE = "5368709120"  # 5GB (configurable)
 ALLOWED_ORIGINS = "*"
 ```
 
-### Rate Limiting (adjustable in `functions/_middleware.ts`)
+### Bot Protection (Cloudflare Turnstile)
 
-```javascript
-const RATE_LIMITS = {
-  upload: { requests: 10, window: 3600 },    // 10 uploads/hour
-  download: { requests: 100, window: 3600 }, // 100 downloads/hour
-  validate: { requests: 50, window: 3600 }   // 50 validations/hour
-};
+Turnstile keys are configured in `wrangler.toml`:
+
+```toml
+# Production keys
+TURNSTILE_SITE_KEY = "REDACTED_TURNSTILE_SITE_KEY"
+TURNSTILE_SECRET_KEY = "REDACTED_TURNSTILE_SECRET_KEY"
+
+# Test keys for preview
+TURNSTILE_SITE_KEY = "1x00000000000000000000AA"
+TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
 ```
 
-### File Type Restrictions (adjustable in `src/utils/security.ts`)
+### File Validation (flexible file support)
 
-```javascript
-const ALLOWED_MIME_TYPES = new Set([
-  'image/jpeg', 'image/png', 'application/pdf',
-  // Add or remove types as needed
-]);
-```
+No file type restrictions - all file types are supported with comprehensive security validation in `src/utils/security.ts`.
 
 ## 📊 Monitoring & Analytics
 
-### Built-in Metrics
+### Built-in Logging
 
-- Upload/download counts
-- Error rates and types
-- Rate limiting effectiveness
-- Storage usage
-- Performance metrics
+- File upload/download activities (console logs)
+- Error tracking and debugging information
+- Bot protection verification results
+- Database operation logs
+- Cleanup worker execution statistics
+- Deployment and configuration logs
 
-### Cloudflare Analytics
+### Cloudflare Analytics (Native)
 
-View detailed analytics in your Cloudflare dashboard:
-- Workers Analytics
-- Pages Analytics  
-- R2 Usage Statistics
-- D1 Query Performance
+**Real-time monitoring available in your Cloudflare dashboard:**
+- **Workers Analytics** - API endpoint performance, error rates, CPU usage
+- **Pages Analytics** - Frontend traffic, visitor statistics, geographic data
+- **R2 Usage Statistics** - Storage usage, bandwidth, request counts
+- **D1 Query Performance** - Database query times, connection statistics
+- **Turnstile Analytics** - Bot protection effectiveness, challenge rates
+- **WAF Analytics** - Security rule triggers, blocked requests
+
+**Access Analytics:**
+1. Go to your Cloudflare dashboard
+2. Select your domain/project
+3. Navigate to Analytics & Logs section
+4. View real-time and historical data
+
+**Key Metrics to Monitor:**
+- Upload/download success rates
+- Average file processing times
+- Bot protection challenge rates
+- Storage usage trends
+- API error rates by endpoint
 
 ## 🛠 Development
 
@@ -259,11 +287,11 @@ npx wrangler d1 execute tmc-file-transfer --command "SELECT * FROM uploads_v2 LI
 **Files not uploading**:
 - Check file size (configurable limit, default 5GB)
 - Verify file type is allowed
-- Check rate limiting (10 uploads/hour per IP)
+- Check Turnstile bot protection is working
 
-**Rate limiting too strict**:
-- Adjust limits in `functions/_middleware.ts`
-- Redeploy after changes
+**Turnstile not working**:
+- Verify site and secret keys in `wrangler.toml`
+- Check domain configuration in Cloudflare dashboard
 
 ### Debug Mode
 
@@ -283,7 +311,7 @@ For technical issues:
 
 ### High Traffic
 
-- **Rate Limiting**: Adjust limits based on usage patterns
+- **Bot Protection**: Configure Turnstile sensitivity in Cloudflare dashboard
 - **Database**: D1 supports horizontal scaling
 - **Storage**: R2 scales automatically
 - **CDN**: Cloudflare edge handles traffic spikes
@@ -367,6 +395,7 @@ This project is licensed under the [GNU General Public License v3.0](https://www
 | [ENVIRONMENT.md](ENVIRONMENT.md) | Environment-specific setup |
 | [SECURITY.md](SECURITY.md) | Security audit and features |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Common issues and solutions |
+| [ZERO_TRUST_SETUP.md](ZERO_TRUST_SETUP.md) | Zero Trust authentication setup |
 | [CLAUDE.md](CLAUDE.md) | Technical architecture overview |
 
 ---

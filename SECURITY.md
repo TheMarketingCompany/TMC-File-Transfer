@@ -123,17 +123,19 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 ## Monitoring & Logging
 
 ### Security Events Logged
-- Failed authentication attempts
-- Rate limit violations
-- File upload attempts
-- Download activities
-- Database errors
+- Turnstile verification attempts and failures
+- File upload attempts and validation results
+- Download activities and access patterns
+- Database errors and connection issues
+- Cleanup worker execution and file removals
 
-### Metrics Tracked
-- Request volumes by endpoint
-- Error rates and types
-- File upload/download statistics
-- Performance metrics
+### Cloudflare Native Analytics
+- Request volumes by endpoint (Workers Analytics)
+- Error rates and response times (Pages Analytics)
+- File upload/download statistics (R2 Analytics)
+- Bot protection effectiveness (Turnstile Analytics)
+- Security rule triggers (WAF Analytics)
+- Database performance metrics (D1 Analytics)
 
 ## Build & Deployment Security
 

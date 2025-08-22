@@ -218,45 +218,35 @@ curl -H "Origin: https://your-domain.com" \
 
 ---
 
-### ❌ Rate Limiting Issues
+### ❌ Turnstile Bot Protection Issues
 
 **Symptoms:**
-- Users getting 429 "Rate limit exceeded" errors
-- Legitimate users blocked
-- Rate limits too strict or too loose
+- Users getting blocked by Turnstile verification
+- Turnstile widget not loading
+- Bot protection too sensitive or not working
 
 **Solutions:**
 
-1. **Check current rate limit data:**
-```sql
--- Query via wrangler d1
-wrangler d1 execute your-db --command "
-  SELECT client_key, COUNT(*) as requests, 
-         MIN(timestamp) as first_request,
-         MAX(timestamp) as last_request
-  FROM rate_limits 
-  WHERE timestamp > (strftime('%s', 'now') - 3600)
-  GROUP BY client_key
-  ORDER BY requests DESC
-  LIMIT 10
-"
+1. **Verify Turnstile configuration:**
+```toml
+# Check wrangler.toml has correct keys
+[env.production.vars]
+TURNSTILE_SITE_KEY = "REDACTED_TURNSTILE_SITE_KEY"
+TURNSTILE_SECRET_KEY = "REDACTED_TURNSTILE_SECRET_KEY"
 ```
 
-2. **Adjust rate limits in middleware:**
-```javascript
-// functions/_middleware.ts
-const RATE_LIMITS = {
-  upload: { requests: 20, window: 3600 },    // Increase from 10 to 20
-  download: { requests: 200, window: 3600 }, // Increase from 100 to 200
-  validate: { requests: 100, window: 3600 }  // Increase from 50 to 100
-};
+2. **Test Turnstile verification:**
+```bash
+# Check if verification endpoint works
+curl -X POST https://your-deployment.pages.dev/api/transfer/upload \
+  -H "Content-Type: application/json" \
+  -d '{"turnstileToken":"test-token"}'
 ```
 
-3. **Clear rate limit data:**
-```sql
--- Clear all rate limiting data (emergency use only)
-wrangler d1 execute your-db --command "DELETE FROM rate_limits"
-```
+3. **Configure sensitivity in Cloudflare dashboard:**
+- Go to Security > Turnstile
+- Adjust challenge sensitivity
+- Review visitor challenges and false positives
 
 ---
 
@@ -269,13 +259,17 @@ wrangler d1 execute your-db --command "DELETE FROM rate_limits"
 
 **Solutions:**
 
-1. **Check file type validation:**
+1. **Check file validation (all types supported):**
 ```typescript
-// src/utils/security.ts - add more MIME types if needed
-private static readonly ALLOWED_MIME_TYPES = new Set([
-  'your/new-mime-type',  // Add missing types here
-  // ... existing types
-]);
+// src/utils/security.ts - no file type restrictions
+// All file types are supported with comprehensive security validation
+static validateFile(file: File, maxFileSize?: number): { valid: boolean; error?: string } {
+  // Only checks file size - no type restrictions
+  if (maxFileSize && file.size > maxFileSize) {
+    return { valid: false, error: `File size exceeds limit` };
+  }
+  return { valid: true };
+}
 ```
 
 2. **Test file validation:**

@@ -22,11 +22,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Legacy Removal**: Eliminated all insecure AWS SDK, axios, and legacy dependencies
 - **Modern Stack**: 100% Cloudflare-native with Web Crypto API
 - **SQL Injection**: Fixed with prepared statements and parameter binding
-- **File Validation**: Comprehensive security validation (no file type restrictions for user convenience)
+- **File Validation**: Comprehensive security validation with flexible file type support
 - **Security Headers**: CSP, XSS Protection, HSTS, and other security headers
 - **Password Security**: Proper hashing with SHA-256 and salt using Web Crypto API
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes
 - **Bot Protection**: Cloudflare Turnstile integration for human verification
+- **Zero Trust Ready**: Optional Cloudflare Zero Trust integration for upload authentication
 - **API Response Fix**: Fixed upload response handling to prevent undefined file IDs
 - **Environment Separation**: Renamed API environment variables to avoid Wrangler conflicts
 - **Timing Fix**: Fixed expiration timing to start countdown after upload completion (not during upload)
@@ -127,11 +128,6 @@ The application supports environment variables for easy customization:
 - `multipart_upload_id` - R2 multipart upload ID (for large files)
 - `upload_status` - Status: 'completed', 'uploading', 'failed'
 
-**rate_limits table**:
-- `client_key` - IP + endpoint identifier
-- `timestamp` - Request timestamp
-- `action_type` - Type of action (upload/download/validate)
-
 ## API Endpoints
 
 ### File Operations
@@ -159,10 +155,11 @@ The application supports environment variables for easy customization:
 - **100% Cloudflare-native** - Uses only secure, modern Cloudflare services
 
 ### Core Security Controls
-- File validation (comprehensive security checks, no arbitrary type restrictions)
+- Comprehensive file validation (security checks with flexible type support)
 - Configurable file size limits (5GB default, supports huge files via chunked upload)
 - Secure password hashing with salt using Web Crypto API
 - Bot protection via Cloudflare Turnstile human verification
+- Optional Zero Trust authentication for upload restriction (see ZERO_TRUST_SETUP.md)
 - CSRF protection via proper headers and same-origin policies
 - XSS and injection attack prevention with CSP headers
 - Secure file storage with randomized names and UUIDs
