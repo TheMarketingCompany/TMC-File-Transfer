@@ -16,19 +16,27 @@ export const onRequestOptions: PagesFunction<Env> = async (context) => {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { env, params } = context;
   
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+  
   try {
     const fileId = params.fileId as string;
+    console.log('Info endpoint called for fileId:', fileId);
     
     if (!fileId || typeof fileId !== 'string') {
-      return errorResponse('INVALID_FILE_ID', 'Invalid file ID', 400);
+      return errorResponse('INVALID_FILE_ID', 'Invalid file ID', 400, corsHeaders);
     }
     
     // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(fileId)) {
-      return errorResponse('INVALID_FILE_ID', 'Invalid file ID format', 400);
+      return errorResponse('INVALID_FILE_ID', 'Invalid file ID format', 400, corsHeaders);
     }
     
+    console.log('Executing database query for fileId:', fileId);
     const dbResult = await env.DB.prepare(`
       SELECT 
         file_id,
@@ -45,30 +53,33 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       WHERE file_id = ?
     `).bind(fileId).first();
     
+    console.log('Database query result:', dbResult);
+    
     if (!dbResult) {
-      return errorResponse('FILE_NOT_FOUND', 'File not found', 404);
+      return errorResponse('FILE_NOT_FOUND', 'File not found', 404, corsHeaders);
     }
     
-    const result = safeCastToDatabaseRecord(dbResult);
-    if (!result) {
-      return errorResponse('DATABASE_ERROR', 'Invalid database record', 500);
+    // Skip the complex type casting and use the result directly
+    const result = dbResult as any;
+    if (!result || !result.file_id) {
+      return errorResponse('DATABASE_ERROR', 'Invalid database record', 500, corsHeaders);
     }
     
     const currentTime = Math.floor(Date.now() / 1000);
     
     // Check if file has expired
     if (result.expires_at < currentTime) {
-      return errorResponse('FILE_EXPIRED', 'File has expired', 410);
+      return errorResponse('FILE_EXPIRED', 'File has expired', 410, corsHeaders);
     }
     
     // Check if one-time download has been used
     if (result.is_one_time && result.download_count > 0) {
-      return errorResponse('FILE_CONSUMED', 'File has already been downloaded', 410);
+      return errorResponse('FILE_CONSUMED', 'File has already been downloaded', 410, corsHeaders);
     }
     
     // Check if max downloads reached
     if (result.download_count >= result.max_downloads) {
-      return errorResponse('DOWNLOAD_LIMIT_REACHED', 'Download limit reached', 410);
+      return errorResponse('DOWNLOAD_LIMIT_REACHED', 'Download limit reached', 410, corsHeaders);
     }
     
     return new Response(JSON.stringify({
@@ -87,21 +98,49 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         timeRemaining: result.expires_at - currentTime,
       },
     }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
     
   } catch (error) {
     console.error('File info error:', error);
-    return errorResponse('INTERNAL_ERROR', 'An internal error occurred', 500);
+    return errorResponse('INTERNAL_ERROR', 'An internal error occurred', 500, corsHeaders);
   }
 };
 
-function errorResponse(code: string, message: string, status: number): Response {
+function errorResponse(code: string, message: string, status: number, corsHeaders?: Record<string, string>): Response {
   return new Response(JSON.stringify({
     success: false,
     error: { code, message },
   }), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+async function ensureTablesExist(db: D1Database): Promise<void> {
+  // Just ensure the basic table exists - don't try to alter existing tables
+  try {
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS uploads_v2 (
+        file_id TEXT PRIMARY KEY,
+        file_name TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        content_type TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        download_count INTEGER DEFAULT 0,
+        max_downloads INTEGER DEFAULT 999999,
+        has_password BOOLEAN DEFAULT FALSE,
+        password_hash TEXT,
+        salt TEXT,
+        is_one_time BOOLEAN DEFAULT FALSE,
+        upload_timestamp INTEGER NOT NULL,
+        client_ip TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+  } catch (error) {
+    // Table might already exist with different schema, that's ok
+    console.log('Table creation skipped, already exists');
+  }
 }

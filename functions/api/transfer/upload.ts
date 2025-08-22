@@ -215,6 +215,7 @@ async function hashPassword(password: string, salt: string): Promise<string> {
 }
 
 async function ensureTablesExist(db: D1Database): Promise<void> {
+  // Create table if not exists
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS uploads_v2 (
       file_id TEXT PRIMARY KEY,
@@ -231,24 +232,27 @@ async function ensureTablesExist(db: D1Database): Promise<void> {
       is_one_time BOOLEAN DEFAULT FALSE,
       upload_timestamp INTEGER NOT NULL,
       client_ip TEXT,
+      multipart_upload_id TEXT,
+      upload_status TEXT DEFAULT 'completed',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
   
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS rate_limits (
-      client_key TEXT NOT NULL,
-      timestamp INTEGER NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
+  // Add missing columns to existing table (if they don't exist)
+  try {
+    await db.prepare(`ALTER TABLE uploads_v2 ADD COLUMN multipart_upload_id TEXT`).run();
+  } catch (error) {
+    // Column already exists, ignore error
+  }
+  
+  try {
+    await db.prepare(`ALTER TABLE uploads_v2 ADD COLUMN upload_status TEXT DEFAULT 'completed'`).run();
+  } catch (error) {
+    // Column already exists, ignore error
+  }
   
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_expires_at ON uploads_v2(expires_at)
-  `).run();
-  
-  await db.prepare(`
-    CREATE INDEX IF NOT EXISTS idx_rate_limits_cleanup ON rate_limits(client_key, timestamp)
   `).run();
 }
 
