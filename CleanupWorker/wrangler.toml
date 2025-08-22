@@ -1,14 +1,43 @@
-name = "tmc-file-transfer-cron"
-main = "src/index.js"
-compatibility_date = "2022-06-27"
+name = "tmc-file-transfer-cleanup"
+main = "src/index-improved.js"
+compatibility_date = "2024-08-21"
 
-d1_databases = [
-    { binding = "DB", name = "transfer", database_id = "REDACTED_DATABASE_ID" }
-]
+# Production environment configuration
+[env.production.vars]
+ENVIRONMENT = "production"
+CLEANUP_SECRET = "your-production-cleanup-secret-here"
 
-[[r2_buckets]]
-binding = 'transferbucket'
-bucket_name = 'transfer'
+# D1 Database binding for production
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "tmc-file-transfer"
+database_id = "REDACTED_DATABASE_ID"
 
-[triggers]
+# R2 Storage binding for production
+[[env.production.r2_buckets]]
+binding = "TRANSFER_BUCKET"
+bucket_name = "tmc-transfers"
+
+# Production cron schedule - daily at midnight
+[env.production.triggers]
 crons = ["0 0 * * *"]
+
+# Preview environment configuration
+[env.preview.vars]
+ENVIRONMENT = "preview"
+CLEANUP_SECRET = "your-preview-cleanup-secret-here"
+
+# D1 Database binding for preview
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "tmc-file-transfer"
+database_id = "REDACTED_DATABASE_ID"
+
+# R2 Storage binding for preview
+[[env.preview.r2_buckets]]
+binding = "TRANSFER_BUCKET"
+bucket_name = "tmc-transfers"
+
+# Preview cron schedule - less frequent for testing
+[env.preview.triggers]
+crons = ["0 2 * * *"]

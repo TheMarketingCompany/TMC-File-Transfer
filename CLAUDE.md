@@ -64,12 +64,14 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **Cloudflare Turnstile** - Bot protection and human verification
 
 ### Cleanup Worker (Enhanced)
-- **CleanupWorker/src/index-improved.js** - Enhanced scheduled worker
-- Batch processing for better performance
-- Comprehensive error handling and logging
-- Database optimization (VACUUM operations)
-- Statistics tracking for monitoring
-- Manual cleanup trigger via HTTP endpoint
+- **CleanupWorker/src/index-improved.js** - Enhanced scheduled worker with environment-based deployment
+- **Environment-aware configuration** - Production and preview environments with different schedules
+- **R2 + Database cleanup** - Removes both storage files and database records for expired content
+- **Batch processing** - Handles large volumes efficiently with 50-file batches
+- **Comprehensive triggers** - Expiration time, one-time downloads, download limits
+- **Database optimization** - Weekly VACUUM operations for performance
+- **Manual trigger support** - HTTP endpoint with authentication for debugging
+- **Deployment scripts** - npm run deploy/deploy:preview with proper environment isolation
 
 ### Key Technologies (Modern Secure Stack)
 - Vue 3 with Composition API and TypeScript
@@ -89,6 +91,7 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **WAF_DEPLOYMENT.md** - Comprehensive WAF deployment documentation
 - **.env.example** - Environment configuration template with company info and legal links
 - **CF_WAF_API_TOKEN** / **CF_WAF_ZONE_ID** - WAF-specific environment variables (avoid Wrangler conflicts)
+- **CleanupWorker/** - Cloudflare Worker for automated file cleanup with environment-based deployment
 
 ### Environment Configuration
 The application supports environment variables for easy customization:

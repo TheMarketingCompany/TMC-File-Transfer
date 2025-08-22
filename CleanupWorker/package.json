@@ -1,16 +1,18 @@
 {
-  "name": "tmc-cleanup-worker",
+  "name": "tmc-file-transfer-cleanup",
   "version": "2.0.0",
-  "description": "Enhanced cleanup worker for TMC File Transfer",
+  "description": "Cleanup worker for TMC File Transfer - handles expired files and database maintenance",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "src/index-improved.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
-    "tail": "wrangler tail",
-    "lint": "eslint src --ext .ts",
-    "type-check": "tsc --noEmit"
+    "deploy": "wrangler deploy --env production",
+    "deploy:preview": "wrangler deploy --env preview", 
+    "dev": "wrangler dev --env preview",
+    "dev:local": "wrangler dev --local --env preview",
+    "tail": "wrangler tail --env production",
+    "tail:preview": "wrangler tail --env preview",
+    "trigger": "node scripts/trigger-cleanup.js",
+    "test": "node scripts/test-cleanup.js"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20240821.1"
