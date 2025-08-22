@@ -3,11 +3,11 @@ import { ERROR_CODES, HTTP_STATUS } from '../src/types/cloudflare';
 
 type Env = CloudflareEnv;
 
-// Rate limiting configuration
+// Rate limiting configuration (temporarily increased for testing)
 const RATE_LIMITS = {
-  upload: { requests: 10, window: 3600 }, // 10 uploads per hour
-  download: { requests: 100, window: 3600 }, // 100 downloads per hour
-  validate: { requests: 50, window: 3600 }, // 50 validations per hour
+  upload: { requests: 100, window: 3600 }, // 100 uploads per hour (testing)
+  download: { requests: 1000, window: 3600 }, // 1000 downloads per hour (testing)
+  validate: { requests: 500, window: 3600 }, // 500 validations per hour (testing)
 };
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -57,24 +57,12 @@ async function addSecurityHeaders(
 
     const response = await next();
     
-    // Add security headers
+    // Add security headers (CSP removed to avoid conflicts with HTML meta CSP)
     const securityHeaders = {
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Content-Security-Policy': `
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval';
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' data: https:;
-        font-src 'self';
-        connect-src 'self';
-        media-src 'self';
-        object-src 'none';
-        base-uri 'self';
-        frame-ancestors 'none';
-      `.replace(/\s+/g, ' ').trim(),
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
       'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
       'Cache-Control': 'no-cache, no-store, must-revalidate',

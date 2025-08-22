@@ -9,6 +9,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run build:check` - Build with TypeScript type checking (slower but thorough)
 - `npm run typecheck` - Run TypeScript type checking only
 - `npm run preview` - Preview production build locally
+- `npm run deploy:waf` - Deploy WAF rules for upload protection
+- `npm run deploy:full` - Full deployment (build + deploy + WAF rules)
 
 ## Security & Performance Improvements Applied
 
@@ -17,11 +19,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Legacy Removal**: Eliminated all insecure AWS SDK, axios, and legacy dependencies
 - **Modern Stack**: 100% Cloudflare-native with Web Crypto API
 - **SQL Injection**: Fixed with prepared statements and parameter binding
-- **Rate Limiting**: Implemented per-IP rate limiting (10 uploads/hour, 100 downloads/hour)
-- **File Validation**: Added comprehensive file type, size, and extension validation
+- **Rate Limiting**: Implemented per-IP rate limiting (100 uploads/hour, 1000 downloads/hour - testing limits)
+- **File Validation**: Comprehensive security validation (no file type restrictions for user convenience)
 - **Security Headers**: CSP, XSS Protection, HSTS, and other security headers
 - **Password Security**: Proper hashing with SHA-256 and salt using Web Crypto API
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes
+- **Bot Protection**: Cloudflare Turnstile integration for human verification
+- **API Response Fix**: Fixed upload response handling to prevent undefined file IDs
+- **Environment Separation**: Renamed API environment variables to avoid Wrangler conflicts
 
 ## Architecture Overview
 
@@ -39,10 +44,12 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 
 ### Backend (Cloudflare Functions)
 - **API Routes**: `functions/api/transfer/` directory contains secure TypeScript functions
-  - `upload.ts` - Handles file upload with D1 database storage and R2 object storage
+  - `upload.ts` - Handles file upload with D1 database storage, R2 object storage, and Turnstile verification
+  - `upload-multipart.ts` - Handles large file uploads (>80MB) with chunked upload and retry logic
   - `download/[fileId].ts` - Secure file retrieval with access control
   - `validate/[fileId].ts` - File validation and password verification
   - `info/[fileId].ts` - File metadata retrieval
+  - `config.ts` - Configuration endpoint for Turnstile site keys
   - **Note**: All legacy JavaScript and insecure endpoints have been removed
 
 ### Infrastructure
@@ -50,6 +57,8 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **Cloudflare D1** - SQLite database for file metadata (uploads table)
 - **Cloudflare R2** - Object storage for actual files (transferbucket)
 - **Cloudflare Workers** - Serverless API functions and cleanup worker
+- **Cloudflare WAF** - Web Application Firewall with custom rules for upload protection
+- **Cloudflare Turnstile** - Bot protection and human verification
 
 ### Cleanup Worker (Enhanced)
 - **CleanupWorker/src/index-improved.js** - Enhanced scheduled worker
@@ -70,6 +79,12 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **Clipboard API** - Native clipboard access (replaces third-party libraries)
 - **Vite 7.1.3** - Latest secure build tooling
 - **Wrangler 4.31.0** - Latest Cloudflare deployment tools
+
+### Deployment & Scripts
+- **scripts/deploy-waf.js** - Automated WAF rule deployment script
+- **WAF_DEPLOYMENT.md** - Comprehensive WAF deployment documentation
+- **.env.example** - Environment configuration template with renamed variables
+- **CF_WAF_API_TOKEN** / **CF_WAF_ZONE_ID** - WAF-specific environment variables (avoid Wrangler conflicts)
 
 ### Database Schema (Updated)
 
@@ -99,15 +114,18 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 ## API Endpoints
 
 ### File Operations
-- `POST /api/transfer/upload` - Standard file upload (files ≤80MB)
+- `POST /api/transfer/upload` - Standard file upload (files ≤80MB) with Turnstile verification
 - `POST /api/transfer/upload-multipart` - Multipart upload for large files (>80MB)
-  - `?action=initiate` - Start multipart upload
-  - `?action=upload-chunk` - Upload individual chunks (50MB max per chunk)
+  - `?action=initiate` - Start multipart upload with Turnstile verification
+  - `?action=upload-chunk` - Upload individual chunks (5MB max per chunk for reliability)
   - `?action=complete` - Finalize upload
   - `?action=abort` - Cancel upload
 - `GET /api/transfer/info/[fileId]` - Get file metadata
 - `POST /api/transfer/validate/[fileId]` - Validate access/password
 - `POST /api/transfer/download/[fileId]` - Download file
+
+### Configuration
+- `GET /api/config` - Get public configuration (Turnstile site key, etc.)
 
 ### Database
 - `POST /api/db/migrate` - Run database migrations
@@ -120,15 +138,17 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - **100% Cloudflare-native** - Uses only secure, modern Cloudflare services
 
 ### Core Security Controls
-- Rate limiting per IP address (configurable limits)
-- File type whitelist validation with MIME type checking
-- Configurable file size limits (5GB default, supports huge files)
+- Rate limiting per IP address (configurable limits, currently 100/1000 req/hour for testing)
+- File validation (comprehensive security checks, no arbitrary type restrictions)
+- Configurable file size limits (5GB default, supports huge files via chunked upload)
 - Secure password hashing with salt using Web Crypto API
+- Bot protection via Cloudflare Turnstile human verification
 - CSRF protection via proper headers and same-origin policies
-- XSS and injection attack prevention
+- XSS and injection attack prevention with CSP headers
 - Secure file storage with randomized names and UUIDs
 - SQL injection prevention via prepared statements
 - Input validation and sanitization at all entry points
+- Environment variable separation to avoid deployment conflicts
 
 ## Performance Optimizations
 
@@ -146,3 +166,6 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 - Native fetch API (lighter than axios)
 - Optimized cleanup worker for expired files
 - Efficient batch processing for large operations
+- Chunked upload with 5MB chunks for reliability and speed
+- Automatic retry logic for failed chunk uploads
+- Proper API response unwrapping for faster frontend processing

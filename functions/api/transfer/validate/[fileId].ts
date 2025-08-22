@@ -9,6 +9,16 @@ interface ValidateRequest {
   password?: string;
 }
 
+export const onRequestOptions: PagesFunction<Env> = async (context) => {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  return new Response(null, { status: 200, headers: corsHeaders });
+};
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env, params } = context;
   

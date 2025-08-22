@@ -9,7 +9,9 @@
     "build": "vite build",
     "build:check": "vue-tsc && vite build",
     "typecheck": "vue-tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:waf": "node scripts/deploy-waf.js",
+    "deploy:full": "npm run build && wrangler pages deploy dist && npm run deploy:waf"
   },
   "dependencies": {
     "@coreui/coreui": "^5.1.0",

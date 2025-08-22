@@ -117,10 +117,15 @@
             </div>
           </div>
 
+          <!-- Turnstile Challenge -->
+          <div class="flex justify-center">
+            <div ref="turnstileWidget"></div>
+          </div>
+
           <!-- Upload Button -->
           <button 
             @click="uploadFile" 
-            :disabled="!canUpload"
+            :disabled="!canUpload || !turnstileToken"
             :class="[
               'w-full py-3 px-4 rounded-lg font-medium text-white transition-colors',
               canUpload 
@@ -208,10 +213,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted, nextTick } from 'vue';
 import { SecurityUtils } from '../utils/security';
 import { ApiClient } from '../utils/api';
 import type { UploadOptions } from '../types';
+
+// Declare Turnstile type
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: any) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
 
 // Reactive state
 const selectedFile = ref<File | null>(null);
@@ -223,6 +239,10 @@ const error = ref<string>('');
 const copied = ref(false);
 const dragOver = ref(false);
 const fileInput = ref<HTMLInputElement>();
+const turnstileWidget = ref<HTMLElement>();
+const turnstileToken = ref<string>('');
+const turnstileWidgetId = ref<string>('');
+const turnstileSiteKey = ref<string>('1x00000000000000000000AA'); // Default test key
 
 // Options
 const options = reactive<UploadOptions>({
@@ -250,6 +270,7 @@ const allowedTypes = computed(() => {
 const canUpload = computed(() => {
   if (!selectedFile.value) return false;
   if (options.passwordEnabled && (!options.password || options.password.length < 8)) return false;
+  if (!turnstileToken.value) return false; // Require Turnstile completion
   return !uploading.value;
 });
 
@@ -307,7 +328,7 @@ async function uploadFile() {
     uploadProgress.value = 0;
     error.value = '';
     
-    const result = await ApiClient.uploadFile(selectedFile.value, options, (progress, stage) => {
+    const result = await ApiClient.uploadFile(selectedFile.value, { ...options, turnstileToken: turnstileToken.value }, (progress, stage) => {
       uploadProgress.value = Math.min(progress, 100);
       uploadStage.value = stage;
     });
@@ -346,8 +367,56 @@ function resetForm() {
   options.password = '';
   options.passwordEnabled = false;
   
+  // Reset Turnstile
+  if (window.turnstile && turnstileWidgetId.value) {
+    window.turnstile.reset(turnstileWidgetId.value);
+  }
+  turnstileToken.value = '';
+  
   if (fileInput.value) {
     fileInput.value.value = '';
+  }
+}
+
+// Turnstile functions
+function initTurnstile() {
+  if (!window.turnstile || !turnstileWidget.value) return;
+  
+  turnstileWidgetId.value = window.turnstile.render(turnstileWidget.value, {
+    sitekey: turnstileSiteKey.value,
+    callback: (token: string) => {
+      turnstileToken.value = token;
+    },
+    'error-callback': () => {
+      turnstileToken.value = '';
+      error.value = 'Verification failed. Please try again.';
+    },
+    'expired-callback': () => {
+      turnstileToken.value = '';
+    }
+  });
+}
+
+function waitForTurnstile() {
+  if (window.turnstile) {
+    nextTick(initTurnstile);
+  } else {
+    // Wait for Turnstile script to load
+    setTimeout(waitForTurnstile, 100);
+  }
+}
+
+async function loadConfig() {
+  try {
+    const response = await fetch('/api/config');
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      turnstileSiteKey.value = result.data.turnstileSiteKey;
+    }
+  } catch (error) {
+    console.error('Failed to load config:', error);
+    // Keep default test key
   }
 }
 
@@ -367,6 +436,12 @@ function formatFileSize(bytes: number): string {
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }
+
+// Initialize config and Turnstile when component mounts
+onMounted(async () => {
+  await loadConfig();
+  waitForTurnstile();
+});
 
 // Event listeners
 document.addEventListener('dragover', (e) => {

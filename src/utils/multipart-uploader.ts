@@ -8,6 +8,7 @@ export interface ChunkedUploadOptions {
     lifetime?: string;
     password?: string;
     maxDownloads?: number;
+    turnstileToken?: string;
   };
 }
 
@@ -24,7 +25,7 @@ interface UploadPart {
 }
 
 export class MultipartUploader {
-  private static readonly DEFAULT_CHUNK_SIZE = 50 * 1024 * 1024; // 50MB
+  private static readonly DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
   private static readonly API_BASE = '/api/transfer/upload-multipart';
 
   static async upload(options: ChunkedUploadOptions): Promise<ChunkedUploadResult> {
@@ -54,6 +55,7 @@ export class MultipartUploader {
       });
 
       const initResult: any = await initResponse.json();
+      console.log('Initiate response:', initResult);
       
       if (!initResult.success) {
         const error = initResult.error || 'Failed to initiate upload';
@@ -62,42 +64,89 @@ export class MultipartUploader {
       }
 
       const { uploadId, totalChunks, expiresAt } = initResult.data;
+      console.log(`Starting upload: uploadId=${uploadId}, totalChunks=${totalChunks}`);
       const parts: UploadPart[] = [];
 
-      // Step 2: Upload chunks
+      // Step 2: Upload chunks with retry logic
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
         const start = chunkIndex * chunkSize;
         const end = Math.min(start + chunkSize, file.size);
         const chunk = file.slice(start, end);
         
-        const progress = Math.round(((chunkIndex + 1) / totalChunks) * 90); // Reserve 10% for completion
-        onProgress?.(progress, `Uploading chunk ${chunkIndex + 1} of ${totalChunks}...`);
+        let chunkUploaded = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (!chunkUploaded && retryCount <= maxRetries) {
+          const progress = Math.round(((chunkIndex + 1) / totalChunks) * 90); // Reserve 10% for completion
+          const retryText = retryCount > 0 ? ` (retry ${retryCount}/${maxRetries})` : '';
+          onProgress?.(progress, `Uploading chunk ${chunkIndex + 1} of ${totalChunks}${retryText}...`);
 
-        const formData = new FormData();
-        formData.append('uploadId', uploadId);
-        formData.append('chunkIndex', chunkIndex.toString());
-        formData.append('chunk', new File([chunk], `chunk_${chunkIndex}`, { type: file.type }));
+          const formData = new FormData();
+          formData.append('uploadId', uploadId);
+          formData.append('chunkIndex', chunkIndex.toString());
+          formData.append('chunk', new File([chunk], `chunk_${chunkIndex}`, { type: file.type }));
 
-        const chunkResponse = await fetch(`${this.API_BASE}?action=upload-chunk`, {
-          method: 'POST',
-          body: formData
-        });
-
-        const chunkResult: any = await chunkResponse.json();
-
-        if (!chunkResult.success) {
-          const error = chunkResult.error || `Failed to upload chunk ${chunkIndex + 1}`;
-          onError?.(error);
+          console.log(`Uploading chunk ${chunkIndex + 1} of ${totalChunks}, size: ${chunk.size} bytes${retryText}`);
           
-          // Attempt to abort the upload
-          await this.abortUpload(uploadId);
-          return { success: false, error };
-        }
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => {
+            console.error(`Chunk ${chunkIndex + 1} timed out after 120 seconds`);
+            controller.abort();
+          }, 120000); // 120 second timeout for better network reliability
+          
+          try {
+            const chunkResponse = await fetch(`${this.API_BASE}?action=upload-chunk`, {
+              method: 'POST',
+              body: formData,
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
 
-        parts.push({
-          partNumber: chunkResult.data.partNumber,
-          etag: chunkResult.data.etag
-        });
+            console.log(`Chunk ${chunkIndex + 1} response status:`, chunkResponse.status);
+            
+            if (!chunkResponse.ok) {
+              const errorText = await chunkResponse.text();
+              console.error(`Chunk ${chunkIndex + 1} failed with status ${chunkResponse.status}:`, errorText);
+              throw new Error(`HTTP ${chunkResponse.status}: ${errorText}`);
+            }
+
+            const chunkResult: any = await chunkResponse.json();
+            console.log(`Chunk ${chunkIndex + 1} result:`, chunkResult);
+
+            if (!chunkResult.success) {
+              const error = chunkResult.error || `Failed to upload chunk ${chunkIndex + 1}`;
+              throw new Error(error);
+            }
+
+            parts.push({
+              partNumber: chunkResult.data.partNumber,
+              etag: chunkResult.data.etag
+            });
+            
+            chunkUploaded = true;
+            console.log(`Chunk ${chunkIndex + 1} uploaded successfully`);
+            
+          } catch (fetchError) {
+            clearTimeout(timeoutId);
+            retryCount++;
+            
+            const errorMessage = fetchError instanceof Error ? fetchError.message : 'Network error';
+            console.error(`Chunk ${chunkIndex + 1} attempt ${retryCount} failed:`, errorMessage);
+            
+            if (retryCount > maxRetries) {
+              onError?.(errorMessage);
+              await this.abortUpload(uploadId);
+              return { success: false, error: `Chunk upload failed after ${maxRetries} retries: ${errorMessage}` };
+            }
+            
+            // Wait before retry with exponential backoff
+            const waitTime = Math.min(1000 * Math.pow(2, retryCount - 1), 5000); // 1s, 2s, 4s, max 5s
+            console.log(`Waiting ${waitTime}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        }
       }
 
       // Step 3: Complete multipart upload
@@ -148,8 +197,8 @@ export class MultipartUploader {
     }
   }
 
-  static shouldUseChunkedUpload(fileSize: number, threshold: number = 80 * 1024 * 1024): boolean {
-    // Use chunked upload for files larger than 80MB (to stay well under Workers limits)
+  static shouldUseChunkedUpload(fileSize: number, threshold: number = 50 * 1024 * 1024): boolean {
+    // Use chunked upload for files larger than 50MB (with 5MB chunks for maximum reliability)
     return fileSize > threshold;
   }
 }

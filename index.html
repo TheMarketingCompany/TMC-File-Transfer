@@ -1,17 +1,21 @@
 <!doctype html>
 <html lang="en">
   <head>
-      <script>
-          // Polyfill for 'global' object
-          if (typeof window !== 'undefined' && typeof window.global === 'undefined') {
-              window.global = window;
-          }
-
-      </script>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://challenges.cloudflare.com; media-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; frame-src https://challenges.cloudflare.com;">
     <link rel="icon" type="image/png" href="/favicon-16x16.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TMC - File Transfer 2025</title>
+    
+    <script>
+        // Polyfill for 'global' object
+        if (typeof window !== 'undefined' && typeof window.global === 'undefined') {
+            window.global = window;
+        }
+    </script>
+    
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   </head>
   <body>
     <div id="app"></div>

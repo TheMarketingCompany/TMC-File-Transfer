@@ -32,6 +32,10 @@ export interface CloudflareEnv {
   // Security Configuration
   PASSWORD_MIN_LENGTH?: string;
   PASSWORD_MAX_LENGTH?: string;
+  
+  // Turnstile Configuration
+  TURNSTILE_SITE_KEY?: string;
+  TURNSTILE_SECRET_KEY?: string;
   SESSION_TIMEOUT?: string;
 }
 

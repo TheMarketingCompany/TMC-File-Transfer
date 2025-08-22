@@ -1,4 +1,5 @@
 import type { CloudflareEnv, FileUploadRequest, ApiResponse, SecurityValidation, ERROR_CODES } from '../../../src/types/cloudflare';
+import { SecurityUtils } from '../../../src/utils/security';
 
 type Env = CloudflareEnv;
 
@@ -6,19 +7,31 @@ type UploadOptions = FileUploadRequest;
 
 // No artificial file size limit - use environment variable or default to 5GB (R2 single upload limit)
 const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB default
-const ALLOWED_MIME_TYPES = new Set([
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-  'application/pdf', 'text/plain', 'text/csv',
-  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
-  'audio/mpeg', 'audio/wav', 'video/mp4', 'video/webm'
-]);
+
+export const onRequestOptions: PagesFunction<Env> = async (context) => {
+  const { env } = context;
+  
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': env.ALLOWED_ORIGINS || '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  return new Response(null, { status: 200, headers: corsHeaders });
+};
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': env.ALLOWED_ORIGINS || '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+  
   try {
+
     await ensureTablesExist(env.DB);
     
     const formData = await request.formData();
@@ -26,7 +39,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const optionsStr = formData.get('options') as string;
     
     if (!file || !optionsStr) {
-      return errorResponse('FILE_MISSING', 'File and options are required', 400);
+      return errorResponse('FILE_MISSING', 'File and options are required', 400, corsHeaders);
     }
     
     // Get max file size from environment or use default
@@ -35,20 +48,31 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Validate file
     const fileValidation = validateFile(file, maxFileSize);
     if (!fileValidation.valid) {
-      return errorResponse('FILE_INVALID', fileValidation.error!, 400);
+      return errorResponse('FILE_INVALID', fileValidation.error!, 400, corsHeaders);
     }
     
-    let options: UploadOptions;
+    let options: UploadOptions & { turnstileToken?: string };
     try {
       options = JSON.parse(optionsStr);
     } catch {
-      return errorResponse('OPTIONS_INVALID', 'Invalid options format', 400);
+      return errorResponse('OPTIONS_INVALID', 'Invalid options format', 400, corsHeaders);
+    }
+    
+    // Verify Turnstile token
+    if (!options.turnstileToken) {
+      return errorResponse('TURNSTILE_MISSING', 'Verification required', 400, corsHeaders);
+    }
+    
+    const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const turnstileValid = await SecurityUtils.verifyTurnstileToken(options.turnstileToken, clientIP, env.TURNSTILE_SECRET_KEY);
+    if (!turnstileValid) {
+      return errorResponse('TURNSTILE_INVALID', 'Verification failed', 400, corsHeaders);
     }
     
     // Validate options
     const optionsValidation = validateOptions(options);
     if (!optionsValidation.valid) {
-      return errorResponse('OPTIONS_INVALID', optionsValidation.error!, 400);
+      return errorResponse('OPTIONS_INVALID', optionsValidation.error!, 400, corsHeaders);
     }
     
     // Generate secure identifiers
@@ -82,7 +106,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     });
     
     if (!uploadResult) {
-      return errorResponse('UPLOAD_FAILED', 'Failed to upload file to storage', 500);
+      return errorResponse('UPLOAD_FAILED', 'Failed to upload file to storage', 500, corsHeaders);
     }
     
     // Store metadata in database
@@ -112,7 +136,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!dbResult.success) {
       // Cleanup uploaded file if database insert fails
       await env.TRANSFER_BUCKET.delete(fileName);
-      return errorResponse('DB_ERROR', 'Failed to save file metadata', 500);
+      return errorResponse('DB_ERROR', 'Failed to save file metadata', 500, corsHeaders);
     }
     
     return new Response(JSON.stringify({
@@ -124,12 +148,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         fileSize: file.size,
       },
     }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
     
   } catch (error) {
     console.error('Upload error:', error);
-    return errorResponse('INTERNAL_ERROR', 'An internal error occurred', 500);
+    return errorResponse('INTERNAL_ERROR', 'An internal error occurred', 500, corsHeaders);
   }
 };
 
@@ -139,16 +163,7 @@ function validateFile(file: File, maxSize: number = DEFAULT_MAX_FILE_SIZE): Secu
     return { valid: false, error: `File size exceeds ${maxSizeGB}GB limit` };
   }
   
-  if (!ALLOWED_MIME_TYPES.has(file.type)) {
-    return { valid: false, error: `File type ${file.type} is not allowed` };
-  }
-  
-  const extension = getFileExtension(file.name);
-  const dangerousExtensions = ['exe', 'bat', 'cmd', 'scr', 'vbs', 'js', 'jar'];
-  if (dangerousExtensions.includes(extension.toLowerCase())) {
-    return { valid: false, error: `File extension .${extension} is not allowed for security reasons` };
-  }
-  
+  // Allow all file types and extensions - no restrictions
   return { valid: true };
 }
 
@@ -237,7 +252,7 @@ async function ensureTablesExist(db: D1Database): Promise<void> {
   `).run();
 }
 
-function errorResponse(code: keyof typeof ERROR_CODES, message: string, status: number): Response {
+function errorResponse(code: keyof typeof ERROR_CODES, message: string, status: number, corsHeaders?: Record<string, string>): Response {
   const response: ApiResponse = {
     success: false,
     error: { code, message },
@@ -246,6 +261,6 @@ function errorResponse(code: keyof typeof ERROR_CODES, message: string, status: 
   
   return new Response(JSON.stringify(response), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }

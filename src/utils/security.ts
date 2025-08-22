@@ -1,26 +1,32 @@
 // Web Crypto API used instead of Node.js crypto module
 
 export class SecurityUtils {
-  private static readonly ALLOWED_MIME_TYPES = new Set([
-    // Images
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-    // Documents
-    'application/pdf', 'text/plain', 'text/csv',
-    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    // Archives
-    'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
-    // Media
-    'audio/mpeg', 'audio/wav', 'audio/ogg', 'video/mp4', 'video/webm', 'video/ogg',
-    // Code
-    'text/javascript', 'text/html', 'text/css', 'application/json'
-  ]);
+  
+  // Verify Turnstile token
+  static async verifyTurnstileToken(token: string, remoteIP: string, secretKey?: string): Promise<boolean> {
+    try {
+      if (!secretKey) {
+        console.error('Turnstile secret key not provided');
+        return false;
+      }
 
-  // No hardcoded file size limit - this will be checked on server side with configurable limits
-  private static readonly DANGEROUS_EXTENSIONS = new Set([
-    'exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'app', 'deb', 'pkg', 'dmg'
-  ]);
+      const formData = new FormData();
+      formData.append('secret', secretKey);
+      formData.append('response', token);
+      formData.append('remoteip', remoteIP);
+
+      const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      return result.success === true;
+    } catch (error) {
+      console.error('Turnstile verification error:', error);
+      return false;
+    }
+  }
 
   static validateFile(file: File, maxFileSize?: number): { valid: boolean; error?: string } {
     // Check file size if limit is provided (server will always validate)
@@ -29,17 +35,7 @@ export class SecurityUtils {
       return { valid: false, error: `File size exceeds ${maxSizeGB.toFixed(1)}GB limit` };
     }
 
-    // Check MIME type
-    if (!this.ALLOWED_MIME_TYPES.has(file.type)) {
-      return { valid: false, error: `File type ${file.type} is not allowed` };
-    }
-
-    // Check file extension
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    if (extension && this.DANGEROUS_EXTENSIONS.has(extension)) {
-      return { valid: false, error: `File extension .${extension} is not allowed for security reasons` };
-    }
-
+    // Allow all file types and extensions - no restrictions
     return { valid: true };
   }
 

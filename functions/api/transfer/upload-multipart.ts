@@ -6,6 +6,7 @@ interface Env {
   TRANSFER_BUCKET: R2Bucket;
   MAX_FILE_SIZE?: string;
   ALLOWED_ORIGINS?: string;
+  TURNSTILE_SECRET_KEY?: string;
 }
 
 interface MultipartUploadRequest {
@@ -17,6 +18,7 @@ interface MultipartUploadRequest {
     lifetime?: string;
     password?: string;
     maxDownloads?: number;
+    turnstileToken?: string;
   };
 }
 
@@ -26,7 +28,19 @@ interface ChunkUploadRequest {
   chunk: ArrayBuffer;
 }
 
-const CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks (well under Workers limit)
+const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks (maximum reliability for all networks)
+
+export const onRequestOptions: PagesFunction<Env> = async (context) => {
+  const { env } = context;
+  
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': env.ALLOWED_ORIGINS || '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  return new Response(null, { status: 200, headers: corsHeaders });
+};
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -89,15 +103,23 @@ async function initiateMultipartUpload(
     });
   }
 
-  // Validate file type (basic validation)
-  const allowedTypes = [
-    'image/', 'application/pdf', 'text/', 'application/msword',
-    'application/vnd.openxml', 'application/zip', 'audio/', 'video/'
-  ];
-  
-  if (!allowedTypes.some(type => data.contentType.startsWith(type))) {
+  // Allow all file types - no restrictions
+
+  // Verify Turnstile token
+  if (!data.options?.turnstileToken) {
     return new Response(JSON.stringify({ 
-      error: `File type ${data.contentType} is not allowed` 
+      error: 'Verification required' 
+    }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+  
+  const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const turnstileValid = await SecurityUtils.verifyTurnstileToken(data.options.turnstileToken, clientIP, env.TURNSTILE_SECRET_KEY);
+  if (!turnstileValid) {
+    return new Response(JSON.stringify({ 
+      error: 'Verification failed' 
     }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -152,7 +174,7 @@ async function initiateMultipartUpload(
     multipartUpload.uploadId, 'uploading'
   ).run();
 
-  return new Response(JSON.stringify({
+  const responseData = {
     success: true,
     data: {
       fileId,
@@ -161,7 +183,11 @@ async function initiateMultipartUpload(
       totalChunks: Math.ceil(data.fileSize / CHUNK_SIZE),
       expiresAt
     }
-  }), {
+  };
+  
+  console.log('Multipart initiate response:', JSON.stringify(responseData));
+  
+  return new Response(JSON.stringify(responseData), {
     status: 200,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   });
@@ -197,25 +223,40 @@ async function uploadChunk(
     });
   }
 
-  // Get the multipart upload object
-  const multipartUpload = await env.TRANSFER_BUCKET.resumeMultipartUpload(upload.file_name as string, uploadId);
+  try {
+    // Get the multipart upload object
+    const multipartUpload = await env.TRANSFER_BUCKET.resumeMultipartUpload(upload.file_name as string, uploadId);
 
-  // Upload chunk to R2
-  const chunkData = await chunk.arrayBuffer();
-  const partNumber = chunkIndex + 1; // R2 part numbers start from 1
-  
-  const uploadedPart = await multipartUpload.uploadPart(partNumber, chunkData);
+    // Upload chunk to R2
+    const chunkData = await chunk.arrayBuffer();
+    const partNumber = chunkIndex + 1; // R2 part numbers start from 1
+    
+    console.log(`Uploading part ${partNumber} for file ${upload.file_name}, size: ${chunkData.byteLength}`);
+    
+    const uploadedPart = await multipartUpload.uploadPart(partNumber, chunkData);
+    
+    console.log(`Part ${partNumber} uploaded successfully, etag: ${uploadedPart.etag}`);
 
-  return new Response(JSON.stringify({
-    success: true,
-    data: {
-      partNumber,
-      etag: uploadedPart.etag
-    }
-  }), {
-    status: 200,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-  });
+    return new Response(JSON.stringify({
+      success: true,
+      data: {
+        partNumber,
+        etag: uploadedPart.etag
+      }
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+    
+  } catch (error) {
+    console.error(`Failed to upload chunk ${chunkIndex}:`, error);
+    return new Response(JSON.stringify({ 
+      error: `Failed to upload chunk: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 }
 
 async function completeMultipartUpload(

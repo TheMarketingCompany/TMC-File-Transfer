@@ -13,11 +13,15 @@ export class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), this.TIMEOUT);
 
     try {
+      const defaultHeaders = options.body instanceof FormData 
+        ? {} // Don't set Content-Type for FormData - let browser set it
+        : { 'Content-Type': 'application/json' };
+
       const response = await fetch(`${this.BASE_URL}${endpoint}`, {
         ...options,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
+          ...defaultHeaders,
           ...options.headers,
         },
       });
@@ -35,8 +39,12 @@ export class ApiClient {
         };
       }
 
-      const data = await response.json();
-      return { success: true, data: data as T };
+      const result = await response.json() as any;
+      // If the response has its own success/data structure, unwrap it
+      if (result.success && result.data !== undefined) {
+        return { success: true, data: result.data as T };
+      }
+      return { success: true, data: result as T };
     } catch (error) {
       clearTimeout(timeoutId);
       
@@ -112,7 +120,6 @@ export class ApiClient {
     const result = await this.makeRequest('/transfer/upload', {
       method: 'POST',
       body: formData,
-      headers: {}, // Don't set Content-Type for FormData
     });
 
     if (result.success) {
