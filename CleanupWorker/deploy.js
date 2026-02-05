@@ -42,24 +42,30 @@ if (!validEnvs.includes(environment)) {
   process.exit(1);
 }
 
+// Escape special regex characters to prevent regex injection
+const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const safeEnvironment = escapeRegExp(environment);
+
 // Read configuration from main wrangler.toml
 const mainWranglerPath = path.join(__dirname, '..', 'wrangler.toml');
 const mainConfig = fs.readFileSync(mainWranglerPath, 'utf8');
 
 // Extract relevant configuration
 const getConfigValue = (section, key) => {
-  const regex = new RegExp(`\\[env\\.${environment}\\.${section}\\]([\\s\\S]*?)(?=\\[|$)`);
+  const safeSection = escapeRegExp(section);
+  const regex = new RegExp(`\\[env\\.${safeEnvironment}\\.${safeSection}\\]([\\s\\S]*?)(?=\\[|$)`);
   const sectionMatch = mainConfig.match(regex);
   if (!sectionMatch) return null;
   
-  const keyRegex = new RegExp(`${key}\\s*=\\s*"([^"]*)"`, 'i');
+  const safeKey = escapeRegExp(key);
+  const keyRegex = new RegExp(`${safeKey}\\s*=\\s*"([^"]*)"`, 'i');
   const keyMatch = sectionMatch[1].match(keyRegex);
   return keyMatch ? keyMatch[1] : null;
 };
 
 // Get database and R2 configuration
 const getDatabaseConfig = () => {
-  const dbRegex = new RegExp(`\\[\\[env\\.${environment}\\.d1_databases\\]\\]([\\s\\S]*?)(?=\\[\\[|\\[env|$)`);
+  const dbRegex = new RegExp(`\\[\\[env\\.${safeEnvironment}\\.d1_databases\\]\\]([\\s\\S]*?)(?=\\[\\[|\\[env|$)`);
   const match = mainConfig.match(dbRegex);
   if (!match) return null;
   
@@ -71,7 +77,7 @@ const getDatabaseConfig = () => {
 };
 
 const getR2Config = () => {
-  const r2Regex = new RegExp(`\\[\\[env\\.${environment}\\.r2_buckets\\]\\]([\\s\\S]*?)(?=\\[\\[|\\[env|$)`);
+  const r2Regex = new RegExp(`\\[\\[env\\.${safeEnvironment}\\.r2_buckets\\]\\]([\\s\\S]*?)(?=\\[\\[|\\[env|$)`);
   const match = mainConfig.match(r2Regex);
   if (!match) return null;
   

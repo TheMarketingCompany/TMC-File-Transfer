@@ -28,7 +28,7 @@ try {
           
           if (key && value) {
             process.env[key] = value;
-            console.log(`   ✅ Loaded ${key}=${value.substring(0, 10)}...`);
+            console.log(`   ✅ Loaded ${key}`);
           }
         }
       }
@@ -45,8 +45,8 @@ const ZONE_ID = process.env.CF_WAF_ZONE_ID || process.env.CLOUDFLARE_ZONE_ID || 
 const DOMAIN = 'upload.frisson.social';
 
 console.log('🔧 Environment Variables:');
-console.log(`   CF_WAF_API_TOKEN: ${CLOUDFLARE_API_TOKEN ? CLOUDFLARE_API_TOKEN.substring(0, 10) + '...' : 'NOT SET'}`);
-console.log(`   CF_WAF_ZONE_ID: ${ZONE_ID}`);
+console.log(`   CF_WAF_API_TOKEN: ${CLOUDFLARE_API_TOKEN ? '[SET]' : 'NOT SET'}`);
+console.log(`   CF_WAF_ZONE_ID: ${ZONE_ID ? '[SET]' : 'NOT SET'}`);
 console.log('');
 
 if (!CLOUDFLARE_API_TOKEN || !ZONE_ID) {
