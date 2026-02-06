@@ -1,0 +1,66 @@
+name = "your-project-name"
+compatibility_date = "2024-08-21"
+
+# Pages configuration
+pages_build_output_dir = "./dist"
+
+# Environment variables
+[env.production.vars]
+ENVIRONMENT = "production"
+MAX_FILE_SIZE = "5368709120"  # 5GB in bytes (supports large files via multipart upload)
+ALLOWED_ORIGINS = "https://your-domain.pages.dev"
+TURNSTILE_SITE_KEY = "your_turnstile_site_key_here"
+TURNSTILE_SECRET_KEY = "your_turnstile_secret_key_here"
+CLOUDFLARE_ZONE_ID = "your_zone_id_here"
+MIGRATION_AUTH_TOKEN = "your_migration_auth_token_here"
+CLEANUP_SECRET = "your_cleanup_secret_here"
+
+# D1 Database binding for production
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "your-database-name"
+database_id = "your-database-id-here"
+
+# R2 Storage binding for production
+[[env.production.r2_buckets]]
+binding = "TRANSFER_BUCKET"
+bucket_name = "your-bucket-name"
+
+[env.preview.vars]
+ENVIRONMENT = "preview"
+MAX_FILE_SIZE = "5368709120"  # 5GB in bytes (supports large files via multipart upload)
+ALLOWED_ORIGINS = "*"
+TURNSTILE_SITE_KEY = "1x00000000000000000000AA"  # Test key for preview
+TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"  # Test key for preview
+MIGRATION_AUTH_TOKEN = "your_migration_auth_token_here"
+CLEANUP_SECRET = "your_cleanup_secret_here"
+
+# D1 Database binding for preview
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "your-database-name"
+database_id = "your-database-id-here"
+
+# R2 Storage binding for preview
+[[env.preview.r2_buckets]]
+binding = "TRANSFER_BUCKET"
+bucket_name = "your-bucket-name"
+
+# KV namespace for caching (optional)
+#[[kv_namespaces]]
+#binding = "CACHE"
+#id = "your-kv-namespace-id"
+#preview_id = "your-kv-preview-id"
+
+# Analytics Engine for logging (commented out - needs setup)
+#[[analytics_engine_datasets]]
+#binding = "ANALYTICS"
+#dataset = "tmc_file_transfer_logs"
+
+# Cleanup Worker Configuration
+# The cleanup worker is deployed separately using the shared configuration below
+# Run: npm run deploy:cleanup or npm run deploy:cleanup:preview
+
+# Note: Pages doesn't support [limits], [build], [[rules]], headers, or caching sections
+# These are handled via _headers and _redirects files in the dist folder
+# See: https://developers.cloudflare.com/pages/configuration/headers/

@@ -1,3 +1,92 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Import utility classes (must be first per CSS spec) */
+@import './styles/utilities.css';
+
+/* ============================================================
+   Global Styles & CSS Reset
+   Replaces TailwindCSS preflight with a minimal, targeted reset
+   that does NOT interfere with Material Web Components.
+   ============================================================ */
+
+/* Minimal CSS Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Material Web Component host element display fixes.
+   Custom elements default to display:inline in HTML.
+   Material Web sets :host { display: inline-flex } in Shadow DOM,
+   but we reinforce it here for reliability. */
+md-filled-button,
+md-outlined-button,
+md-text-button,
+md-filled-tonal-button,
+md-elevated-button {
+  display: inline-flex;
+}
+
+md-outlined-text-field,
+md-filled-text-field,
+md-outlined-select,
+md-filled-select {
+  display: inline-flex;
+}
+
+md-checkbox,
+md-radio,
+md-switch {
+  display: inline-flex;
+}
+
+md-circular-progress,
+md-linear-progress {
+  display: inline-flex;
+}
+
+md-icon {
+  display: inline-flex;
+}

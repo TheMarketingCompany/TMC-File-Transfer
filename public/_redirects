@@ -1,0 +1,10 @@
+# Redirect old file URLs to new format
+/files/:fileid  /dl/:fileid  301
+/file/:fileid   /dl/:fileid  301
+/download/:fileid  /dl/:fileid  301
+
+# API redirects for backward compatibility
+/transfer/*  /api/transfer/:splat  301
+
+# Fallback for client-side routing
+/*  /index.html  200
