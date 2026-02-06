@@ -37,9 +37,9 @@
               <md-icon class="text-6xl mb-6" style="color: var(--md-sys-color-primary); font-size: 4rem;">cloud_upload</md-icon>
               <h3 class="text-xl font-medium mb-2" style="color: var(--md-sys-color-on-surface);">Drop your file here</h3>
               <p class="mb-6" style="color: var(--md-sys-color-on-surface-variant);">or browse to choose a file</p>
-              <md-filled-button 
-                @click="$refs.fileInput.click()" 
-                class="md-expressive-button mb-4"
+              <md-filled-button
+                @click="$refs.fileInput.click()"
+                class="mb-4"
               >
                 <md-icon slot="icon">folder_open</md-icon>
                 Browse Files
@@ -171,10 +171,10 @@
 
           <!-- Upload Button -->
           <div class="text-center">
-            <md-filled-button 
-              @click="uploadFile" 
+            <md-filled-button
+              @click="uploadFile"
               :disabled="!canUpload"
-              class="md-expressive-button w-full h-14 text-lg"
+              class="w-full"
               :style="!canUpload ? 'opacity: 0.5; cursor: not-allowed;' : ''"
             >
               <md-icon slot="icon">cloud_upload</md-icon>
@@ -240,9 +240,8 @@
                 <md-icon class="mr-2 align-middle">link</md-icon>
                 Download Link
               </h4>
-              <md-text-button 
-                @click="copyToClipboard(shareUrl)" 
-                class="md-expressive-button"
+              <md-text-button
+                @click="copyToClipboard(shareUrl)"
               >
                 <md-icon slot="icon">{{ copied ? 'check' : 'content_copy' }}</md-icon>
                 {{ copied ? 'Copied!' : 'Copy' }}
@@ -270,9 +269,8 @@
             </div>
           </div>
 
-          <md-outlined-button 
-            @click="resetForm" 
-            class="md-expressive-button"
+          <md-outlined-button
+            @click="resetForm"
           >
             <md-icon slot="icon">add</md-icon>
             Upload Another File

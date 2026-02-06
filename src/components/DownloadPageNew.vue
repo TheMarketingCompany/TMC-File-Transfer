@@ -27,10 +27,10 @@
               <md-icon slot="leading-icon">fingerprint</md-icon>
             </md-outlined-text-field>
           </div>
-          <md-filled-button 
+          <md-filled-button
             @click="loadFile"
             :disabled="!inputFileId.trim()"
-            class="w-full h-12 md-expressive-button"
+            class="w-full"
             :style="!inputFileId.trim() ? 'opacity: 0.5; cursor: not-allowed;' : ''"
           >
             <md-icon slot="icon">search</md-icon>
@@ -75,10 +75,10 @@
             </div>
           </div>
           
-          <md-filled-button 
+          <md-filled-button
             @click="validateAccess"
             :disabled="!canAccessFile"
-            class="w-full h-12 md-expressive-button"
+            class="w-full"
           >
             <md-icon slot="icon">{{ validating ? 'hourglass_empty' : 'lock_open' }}</md-icon>
             {{ validating ? 'Validating...' : 'Access File' }}
@@ -134,9 +134,9 @@
         </div>
 
         <div v-if="!downloading">
-          <md-filled-button 
+          <md-filled-button
             @click="downloadFile"
-            class="w-full h-14 text-lg md-expressive-button"
+            class="w-full"
           >
             <md-icon slot="icon">file_download</md-icon>
             Download File
@@ -191,24 +191,13 @@
       </div>
 
       <!-- Actions -->
-      <div class="text-center space-y-4 mt-8">
-        <md-outlined-button 
+      <div class="text-center mt-8">
+        <md-outlined-button
           @click="$router.push('/upload')"
-          class="md-expressive-button"
         >
           <md-icon slot="icon">cloud_upload</md-icon>
           Upload New File
         </md-outlined-button>
-        
-        <div v-if="fileId" class="text-center">
-          <md-text-button 
-            @click="resetForm"
-            style="--md-text-button-label-text-color: var(--md-sys-color-primary);"
-          >
-            <md-icon slot="icon">refresh</md-icon>
-            Load Different File
-          </md-text-button>
-        </div>
       </div>
     </div>
   </div>

@@ -23,7 +23,7 @@ function loadEnv() {
       line = line.trim();
       if (line && !line.startsWith('#')) {
         const [key, ...valueParts] = line.split('=');
-        const value = valueParts.join('=');
+        const value = valueParts.join('=').replace(/^["']|["']$/g, '');
         if (key && value) {
           process.env[key] = value;
         }
@@ -32,7 +32,20 @@ function loadEnv() {
   }
 }
 
+// Load MIGRATION_AUTH_TOKEN from wrangler.toml if not in .env
+function loadFromWranglerToml() {
+  const tomlPath = join(projectRoot, 'wrangler.toml');
+  if (fs.existsSync(tomlPath)) {
+    const tomlContent = fs.readFileSync(tomlPath, 'utf8');
+    const match = tomlContent.match(/MIGRATION_AUTH_TOKEN\s*=\s*"([^"]+)"/);
+    if (match && !process.env.MIGRATION_AUTH_TOKEN) {
+      process.env.MIGRATION_AUTH_TOKEN = match[1];
+    }
+  }
+}
+
 loadEnv();
+loadFromWranglerToml();
 
 // Configuration
 const config = {

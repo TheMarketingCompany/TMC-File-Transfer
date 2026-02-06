@@ -7,7 +7,7 @@ A secure, zero-vulnerability file transfer solution built on modern Cloudflare i
 
 - 🛡️ **Zero Vulnerabilities** - 0 npm audit issues, all legacy dependencies removed
 - 🔒 **Modern Security Stack** - 100% Cloudflare-native with Web Crypto API
-- ⚡ **Ultra-Fast Performance** - 366ms dev startup, 1.37s builds
+- ⚡ **Ultra-Fast Performance** - ~400ms dev startup, ~1s builds
 - 📦 **Native R2 Storage** - Direct Cloudflare R2 bindings with multipart upload
 - 🛡️ **Bot Protection** - Cloudflare Turnstile human verification
 - 🚀 **Chunked Upload** - Large files (>80MB) use optimized multipart upload
@@ -54,13 +54,19 @@ wrangler r2 bucket create tmc-transfers
 ### 3. Configure Environment
 
 ```bash
-# Copy example configuration
+# Copy example configurations
 cp example.wrangler.toml wrangler.toml
+cp .env.example .env
 
 # Update wrangler.toml with your values:
 # - Replace placeholders with your actual Cloudflare resource IDs
 # - Update domain names and Turnstile keys
 # - Generate secure tokens for MIGRATION_AUTH_TOKEN and CLEANUP_SECRET
+
+# Update .env with your values:
+# - CF_WAF_API_TOKEN: Your Cloudflare API token (for WAF deployment)
+# - CF_WAF_ZONE_ID: Your Cloudflare Zone ID
+# - VITE_* variables: Your company information for footer
 
 # Generate secure tokens
 openssl rand -hex 32  # Use for MIGRATION_AUTH_TOKEN
@@ -104,8 +110,9 @@ npm run deploy:cleanup
 
 ### Frontend (Zero Legacy Dependencies)
 - **Vue 3.4.32** - Latest Composition API with TypeScript
-- **TailwindCSS 3.4.6** - Modern utility-first CSS
-- **Vite 7.1.3** - Lightning-fast build tool
+- **Material Web 2.3.0** - Material Design 3 web components
+- **Custom utility CSS** - Lightweight utility classes with Material Design tokens
+- **Vite 7.x** - Lightning-fast build tool
 - **TypeScript 5.5.3** - Full type safety
 
 ### Backend (100% Cloudflare Native)
@@ -116,7 +123,7 @@ npm run deploy:cleanup
 - **Fetch API** - Native HTTP requests (no axios)
 
 ### Security & Performance
-- **Wrangler 4.31.0** - Latest deployment tools
+- **Wrangler 4.x** - Latest deployment tools
 - **0 npm vulnerabilities** - All legacy packages removed
 - **Native APIs only** - No third-party crypto or HTTP libraries
 
@@ -261,8 +268,8 @@ npx wrangler pages dev dist
 ### Build Commands
 
 ```bash
-npm run dev          # Development server (366ms startup)
-npm run build        # Fast production build (1.37s)
+npm run dev          # Development server (~400ms startup)
+npm run build        # Fast production build (~1s)
 npm run build:check  # Build with TypeScript checking
 npm run typecheck    # TypeScript validation only
 npm run preview      # Preview build locally
@@ -337,7 +344,7 @@ For technical issues:
 2. **Dependency Updates**: `npm update` with security focus
 3. **Cleanup Monitoring**: Verify expired files are deleted
 4. **Performance Review**: Check analytics monthly
-5. **Build Performance**: Monitor 1.37s build times
+5. **Build Performance**: Monitor ~1s build times
 
 ### Backup Strategy
 

@@ -6,9 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 1. Configuration Setup
 
-**Copy example configuration:**
+**Copy example configurations:**
 ```bash
 cp example.wrangler.toml wrangler.toml
+cp .env.example .env
 ```
 
 **Update wrangler.toml with your values:**
@@ -26,9 +27,14 @@ cp example.wrangler.toml wrangler.toml
 # For MIGRATION_AUTH_TOKEN
 openssl rand -hex 32
 
-# For CLEANUP_SECRET  
+# For CLEANUP_SECRET
 openssl rand -hex 32
 ```
+
+**Update .env with your values:**
+- `CF_WAF_API_TOKEN` - Cloudflare API token for WAF deployment (Cloudflare Dashboard → My Profile → API Tokens)
+- `CF_WAF_ZONE_ID` - Your Cloudflare Zone ID (for WAF rules)
+- `VITE_*` variables - Company information displayed in footer
 
 ### 2. Build Commands
 
@@ -107,20 +113,19 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 
 ### Key Technologies (Modern Secure Stack)
 - Vue 3 with Composition API and TypeScript
-- **Material Web Components (@material/web)** - Material 3 Expressive design system
-- TailwindCSS for utility classes and responsive design
+- **Material Web Components (@material/web 2.x)** - Material 3 Expressive design system
+- **Custom utility CSS** - Lightweight utility classes (TailwindCSS removed to fix Material Web conflicts)
 - Cloudflare Pages Functions (serverless backend)
 - **Cloudflare R2** - Native object storage (replaces AWS SDK)
 - **Cloudflare D1** - SQLite database with prepared statements
 - **Web Crypto API** - Native browser crypto (replaces legacy crypto libraries)
 - **Fetch API** - Native HTTP requests (replaces axios)
 - **Clipboard API** - Native clipboard access (replaces third-party libraries)
-- **Vite 7.1.3** - Latest secure build tooling
-- **Wrangler 4.31.0** - Latest Cloudflare deployment tools
+- **Vite 7.x** - Latest secure build tooling
+- **Wrangler 4.x** - Latest Cloudflare deployment tools
 
 ### Deployment & Scripts
 - **scripts/deploy-waf.js** - Automated WAF rule deployment script
-- **WAF_DEPLOYMENT.md** - Comprehensive WAF deployment documentation
 - **.env.example** - Environment configuration template with company info and legal links
 - **CF_WAF_API_TOKEN** / **CF_WAF_ZONE_ID** - WAF-specific environment variables (avoid Wrangler conflicts)
 - **CleanupWorker/** - Cloudflare Worker for automated file cleanup
@@ -199,10 +204,10 @@ The application supports environment variables for easy customization:
 ## Performance Optimizations
 
 ### Build Performance
-- **Fast builds**: ~2.7s with Material Web components (stable performance)
+- **Fast builds**: ~1.1s without TailwindCSS overhead (improved from ~2.7s)
 - **Fast dev server**: 366ms startup (improved from 10+ seconds)
-- **Bundle size**: 605.51 kB with Material 3 components (rich UI features)
-- **Optimized dependencies**: Removed legacy packages, added modern Material Web components
+- **Bundle size**: ~616 kB with Material 3 components (rich UI features)
+- **Optimized dependencies**: Removed TailwindCSS, legacy packages; using lightweight custom utilities
 
 ### Runtime Performance
 - Database indexes for fast queries

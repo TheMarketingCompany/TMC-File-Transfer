@@ -4,6 +4,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
+  /* Reference Typeface Tokens (recommended by Material Web docs) */
+  --md-ref-typeface-brand: 'Inter', 'Roboto', sans-serif;
+  --md-ref-typeface-plain: 'Inter', 'Roboto', sans-serif;
+
   /* Primary Color Palette - Blue Theme */
   --md-sys-color-primary: #1565C0;
   --md-sys-color-on-primary: #FFFFFF;
@@ -126,42 +130,13 @@
 }
 
 /* Global base styles with Material 3 Expressive enhancements */
-* {
-  box-sizing: border-box;
-}
-
 body {
   font-family: var(--md-sys-typescale-body-large-font);
   font-size: var(--md-sys-typescale-body-large-size);
   line-height: var(--md-sys-typescale-body-large-line-height);
   color: var(--md-sys-color-on-background);
   background-color: var(--md-sys-color-background);
-  margin: 0;
-  padding: 0;
   transition: background-color var(--md-expressive-motion-duration-medium) var(--md-expressive-motion-easing-standard);
-}
-
-/* Enhanced Material 3 button styles */
-.md-expressive-button {
-  --md-filled-button-container-shape: var(--md-sys-shape-corner-medium);
-  --md-filled-button-container-color: var(--md-sys-color-primary);
-  --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
-  --md-filled-button-hover-container-color: color-mix(in srgb, var(--md-sys-color-primary) 92%, transparent);
-  --md-filled-button-pressed-container-color: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
-  
-  transition: all var(--md-expressive-motion-duration-medium) var(--md-expressive-motion-easing-emphasized);
-  transform: scale(1);
-  box-shadow: var(--md-expressive-elevation-2);
-}
-
-.md-expressive-button:hover {
-  transform: scale(1.02);
-  box-shadow: var(--md-expressive-elevation-3);
-}
-
-.md-expressive-button:active {
-  transform: scale(0.98);
-  box-shadow: var(--md-expressive-elevation-1);
 }
 
 /* Enhanced Material 3 card styles */
@@ -216,31 +191,7 @@ md-icon.text-6xl, md-icon.text-8xl {
   line-height: 1.2;
 }
 
-/* Icon spacing in buttons and slots */
-md-filled-button md-icon[slot="icon"],
-md-outlined-button md-icon[slot="icon"],
-md-text-button md-icon[slot="icon"] {
-  margin-right: 8px;
-}
-
-md-filled-button md-icon[slot="leading-icon"],
-md-outlined-button md-icon[slot="leading-icon"],
-md-text-button md-icon[slot="leading-icon"] {
-  margin-right: 8px;
-}
-
-/* Material Web Components button typography consistency */
-md-filled-button,
-md-outlined-button,
-md-text-button,
-md-fab,
-md-icon-button {
-  --md-sys-typescale-label-large-font: 'Inter', 'Roboto', sans-serif;
-  --md-sys-typescale-label-medium-font: 'Inter', 'Roboto', sans-serif;
-  --md-sys-typescale-label-small-font: 'Inter', 'Roboto', sans-serif;
-  font-family: 'Inter', 'Roboto', sans-serif;
-  font-weight: 500;
-}
+/* Material Web handles button icon spacing and typography internally */
 
 .md-expressive-progress-bar::after {
   content: '';

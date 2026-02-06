@@ -40,8 +40,23 @@ try {
   console.error('⚠️  Error loading .env:', error.message);
 }
 
+// Try to load Zone ID from wrangler.toml if not in .env
+try {
+  const tomlPath = path.join(process.cwd(), 'wrangler.toml');
+  if (fs.existsSync(tomlPath)) {
+    const tomlContent = fs.readFileSync(tomlPath, 'utf8');
+    const zoneMatch = tomlContent.match(/CLOUDFLARE_ZONE_ID\s*=\s*"([^"]+)"/);
+    if (zoneMatch && !process.env.CF_WAF_ZONE_ID) {
+      process.env.CF_WAF_ZONE_ID = zoneMatch[1];
+      console.log('📁 Loaded ZONE_ID from wrangler.toml');
+    }
+  }
+} catch (error) {
+  // Ignore errors reading wrangler.toml
+}
+
 const CLOUDFLARE_API_TOKEN = process.env.CF_WAF_API_TOKEN || process.env.CLOUDFLARE_API_TOKEN;
-const ZONE_ID = process.env.CF_WAF_ZONE_ID || process.env.CLOUDFLARE_ZONE_ID || 'REDACTED_ZONE_ID';
+const ZONE_ID = process.env.CF_WAF_ZONE_ID || process.env.CLOUDFLARE_ZONE_ID;
 const DOMAIN = 'upload.frisson.social';
 
 console.log('🔧 Environment Variables:');
