@@ -28,3 +28,10 @@ dist-ssr
 *.sln
 *.sw?
 wrangler.toml
+
+# Wrangler temp files
+.wrangler/
+*.temp.toml
+
+# Claude Code local settings
+.claude/settings.local.json
