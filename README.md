@@ -207,8 +207,8 @@ Turnstile keys are configured in `wrangler.toml`:
 
 ```toml
 # Production keys
-TURNSTILE_SITE_KEY = "REDACTED_TURNSTILE_SITE_KEY"
-TURNSTILE_SECRET_KEY = "REDACTED_TURNSTILE_SECRET_KEY"
+TURNSTILE_SITE_KEY = "your_turnstile_site_key_here"
+TURNSTILE_SECRET_KEY = "your_turnstile_secret_key_here"
 
 # Test keys for preview
 TURNSTILE_SITE_KEY = "1x00000000000000000000AA"
