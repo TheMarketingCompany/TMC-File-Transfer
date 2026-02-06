@@ -316,9 +316,8 @@ console.log('Debug info:', debugData);
 ### Support
 
 For technical issues:
-1. Check the [troubleshooting guide](SECURITY.md)
-2. Review Cloudflare Workers logs
-3. Open an issue with detailed error information
+1. Review Cloudflare Workers logs
+2. Open an issue with detailed error information
 
 ## 📈 Scaling Considerations
 
@@ -394,7 +393,7 @@ This project is licensed under the [GNU General Public License v3.0](https://www
 ## 📞 Contact & Support
 
 - **Issues**: [GitHub Issues](https://github.com/TheMarketingCompany/TMC-File-Transfer/issues)
-- **Security**: See [SECURITY.md](SECURITY.md) for responsible disclosure
+- **Security**: Contact through [GitHub Issues](https://github.com/TheMarketingCompany/TMC-File-Transfer/issues) for responsible disclosure
 - **General**: Contact through [GitHub](https://github.com/TheMarketingCompany)
 
 ---
@@ -403,10 +402,6 @@ This project is licensed under the [GNU General Public License v3.0](https://www
 
 | Document | Description |
 |----------|-------------|
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Step-by-step deployment guide |
-| [CONFIGURATION.md](CONFIGURATION.md) | Complete configuration reference |
-| [ENVIRONMENT.md](ENVIRONMENT.md) | Environment-specific setup |
-| [SECURITY.md](SECURITY.md) | Security audit and features |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Common issues and solutions |
 | [ZERO_TRUST_SETUP.md](ZERO_TRUST_SETUP.md) | Zero Trust authentication setup |
 | [CLAUDE.md](CLAUDE.md) | Technical architecture overview |
