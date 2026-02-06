@@ -34,7 +34,10 @@ openssl rand -hex 32
 **Update .env with your values:**
 - `CF_WAF_API_TOKEN` - Cloudflare API token for WAF deployment (Cloudflare Dashboard → My Profile → API Tokens)
 - `CF_WAF_ZONE_ID` - Your Cloudflare Zone ID (for WAF rules)
+- `CLEANUP_SECRET` - Must match the value in `wrangler.toml` (used by cleanup worker deploy script and manual HTTP trigger)
 - `VITE_*` variables - Company information displayed in footer
+
+**Important:** The `CLEANUP_SECRET` must be set in **both** `wrangler.toml` and `.env`. The `wrangler.toml` value is used by the Pages runtime, while the `.env` value is read by `CleanupWorker/deploy.js` when deploying the cleanup worker. If `.env` is missing the secret, the deploy script falls back to an insecure default.
 
 ### 2. Build Commands
 
@@ -103,13 +106,18 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 
 ### Cleanup Worker (Enhanced)
 - **CleanupWorker/src/index-improved.js** - Enhanced scheduled worker using shared configuration
-- **Unified deployment** - Uses main wrangler.toml configuration with automated deployment script  
+- **Unified deployment** - Uses main wrangler.toml configuration with automated deployment script
 - **R2 + Database cleanup** - Removes both storage files and database records for expired content
 - **Batch processing** - Handles large volumes efficiently with 50-file batches
 - **Comprehensive triggers** - Expiration time, one-time downloads, download limits
 - **Database optimization** - Weekly VACUUM operations for performance
-- **Manual trigger support** - HTTP endpoint with authentication for debugging
-- **Environment isolation** - Production (midnight) and preview (2 AM) schedules
+- **Environment isolation** - Production (midnight UTC) and preview (2 AM UTC) schedules
+- **Manual trigger** - POST request with `Authorization: Bearer <CLEANUP_SECRET>` to the worker URL
+  ```bash
+  curl -X POST https://<worker-name>.<subdomain>.workers.dev \
+    -H "Authorization: Bearer <CLEANUP_SECRET>"
+  ```
+  Returns JSON with cleanup stats (files processed, deleted, storage freed, errors)
 
 ### Key Technologies (Modern Secure Stack)
 - Vue 3 with Composition API and TypeScript

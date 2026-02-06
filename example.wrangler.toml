@@ -61,23 +61,6 @@ bucket_name = "your-bucket-name"
 # The cleanup worker is deployed separately using the shared configuration below
 # Run: npm run deploy:cleanup or npm run deploy:cleanup:preview
 
-# Note: Pages doesn't support [limits], [build], or [[rules]] sections
-# These are handled automatically by the Pages platform
-
-# Headers configuration
-[env.production.headers]
-"/*" = [
-  { name = "X-Frame-Options", value = "DENY" },
-  { name = "X-Content-Type-Options", value = "nosniff" },
-  { name = "X-XSS-Protection", value = "1; mode=block" },
-  { name = "Referrer-Policy", value = "strict-origin-when-cross-origin" },
-  { name = "Strict-Transport-Security", value = "max-age=31536000; includeSubDomains" },
-  { name = "Permissions-Policy", value = "geolocation=(), microphone=(), camera=()" }
-]
-
-# Cache configuration for static assets
-[env.production.caching]
-"/assets/*" = { edge_ttl = 31536000, browser_ttl = 31536000 }
-"/favicon*" = { edge_ttl = 31536000, browser_ttl = 31536000 }
-"*.js" = { edge_ttl = 31536000, browser_ttl = 31536000 }
-"*.css" = { edge_ttl = 31536000, browser_ttl = 31536000 }
+# Note: Pages doesn't support [limits], [build], [[rules]], headers, or caching sections
+# These are handled via _headers and _redirects files in the dist folder
+# See: https://developers.cloudflare.com/pages/configuration/headers/
