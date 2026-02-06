@@ -27,6 +27,7 @@ export interface FileInfo {
   hasPassword: boolean;
   isOneTime: boolean;
   uploadedAt: number;
+  timeRemaining: number;
 }
 
 export interface ApiResponse<T = any> {

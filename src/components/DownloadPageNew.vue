@@ -329,7 +329,7 @@ async function downloadFile() {
     }
     
     const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
+    const chunks: BlobPart[] = [];
     let receivedLength = 0;
     
     // Read the response stream with progress tracking

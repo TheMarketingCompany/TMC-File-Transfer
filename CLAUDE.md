@@ -61,7 +61,7 @@ openssl rand -hex 32
 - **SQL Injection**: Fixed with prepared statements and parameter binding
 - **File Validation**: Comprehensive security validation with flexible file type support
 - **Security Headers**: CSP, XSS Protection, HSTS, and other security headers
-- **Password Security**: Proper hashing with SHA-256 and salt using Web Crypto API
+- **Password Security**: PBKDF2 with 100,000 iterations and salt using Web Crypto API
 - **Error Handling**: Comprehensive error handling with proper HTTP status codes
 - **Bot Protection**: Cloudflare Turnstile integration for human verification
 - **Zero Trust Ready**: Optional Cloudflare Zero Trust integration for upload authentication
@@ -89,7 +89,7 @@ This is a Vue 3 + TypeScript file transfer application deployed on Cloudflare in
 ### Backend (Cloudflare Functions)
 - **API Routes**: `functions/api/transfer/` directory contains secure TypeScript functions
   - `upload.ts` - Handles file upload with D1 database storage, R2 object storage, and Turnstile verification
-  - `upload-multipart.ts` - Handles large file uploads (>80MB) with chunked upload and retry logic
+  - `upload-multipart.ts` - Handles large file uploads (>50MB) with chunked upload and retry logic
   - `download/[fileId].ts` - Secure file retrieval with access control
   - `validate/[fileId].ts` - File validation and password verification
   - `info/[fileId].ts` - File metadata retrieval
@@ -161,7 +161,7 @@ The application supports environment variables for easy customization:
 - `download_count` - Current download count
 - `max_downloads` - Maximum allowed downloads
 - `has_password` - Boolean flag for password protection
-- `password_hash` - SHA-256 hashed password
+- `password_hash` - PBKDF2-hashed password (prefixed with `pbkdf2$`)
 - `salt` - Unique salt for password hashing
 - `is_one_time` - Boolean for one-time download
 - `upload_timestamp` - Unix timestamp of upload
@@ -172,8 +172,8 @@ The application supports environment variables for easy customization:
 ## API Endpoints
 
 ### File Operations
-- `POST /api/transfer/upload` - Standard file upload (files ≤80MB) with Turnstile verification
-- `POST /api/transfer/upload-multipart` - Multipart upload for large files (>80MB)
+- `POST /api/transfer/upload` - Standard file upload (files ≤50MB) with Turnstile verification
+- `POST /api/transfer/upload-multipart` - Multipart upload for large files (>50MB)
   - `?action=initiate` - Start multipart upload with Turnstile verification
   - `?action=upload-chunk` - Upload individual chunks (5MB max per chunk for reliability)
   - `?action=complete` - Finalize upload
@@ -196,9 +196,9 @@ The application supports environment variables for easy customization:
 - **100% Cloudflare-native** - Uses only secure, modern Cloudflare services
 
 ### Core Security Controls
-- Comprehensive file validation (security checks with flexible type support)
+- File size validation (no file type restrictions - all types allowed)
 - Configurable file size limits (5GB default, supports huge files via chunked upload)
-- Secure password hashing with salt using Web Crypto API
+- PBKDF2 password hashing (100,000 iterations) with salt using Web Crypto API
 - Bot protection via Cloudflare Turnstile human verification
 - Optional Zero Trust authentication for upload restriction (see ZERO_TRUST_SETUP.md)
 - CSRF protection via proper headers and same-origin policies

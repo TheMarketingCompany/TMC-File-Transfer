@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:check": "vue-tsc && vite build",
-    "typecheck": "vue-tsc --noEmit",
+    "build:check": "vue-tsc --noEmit && tsc -p tsconfig.worker.json --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit && tsc -p tsconfig.worker.json --noEmit",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler pages deploy dist && npm run deploy:waf && npm run deploy:cleanup && npm run migrate:production",
     "deploy:pages": "npm run build && wrangler pages deploy dist",

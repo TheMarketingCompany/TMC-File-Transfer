@@ -51,7 +51,7 @@ npx wrangler pages deploy dist
 
 # Run migration (replace with your deployment URL)
 curl -X POST https://your-deployment.pages.dev/api/db/migrate \
-  -H "Authorization: Bearer your-cleanup-secret" \
+  -H "Authorization: Bearer your-migration-auth-token" \
   -H "Content-Type: application/json"
 ```
 
@@ -162,12 +162,19 @@ npx wrangler pages deployment tail --deployment-id=xyz
 ```
 functions/
 ├── _middleware.ts
+├── types.ts
 ├── api/
+│   ├── config.ts
+│   ├── db/
+│   │   └── migrate.ts
 │   └── transfer/
 │       ├── upload.ts
+│       ├── upload-multipart.ts
 │       ├── download/
 │       │   └── [fileId].ts
-│       └── validate/
+│       ├── validate/
+│       │   └── [fileId].ts
+│       └── info/
 │           └── [fileId].ts
 ```
 
@@ -231,8 +238,8 @@ curl -H "Origin: https://your-domain.com" \
 ```toml
 # Check wrangler.toml has correct keys
 [env.production.vars]
-TURNSTILE_SITE_KEY = "REDACTED_TURNSTILE_SITE_KEY"
-TURNSTILE_SECRET_KEY = "REDACTED_TURNSTILE_SECRET_KEY"
+TURNSTILE_SITE_KEY = "your_turnstile_site_key_here"
+TURNSTILE_SECRET_KEY = "your_turnstile_secret_key_here"
 ```
 
 2. **Test Turnstile verification:**
@@ -285,7 +292,7 @@ console.log('File name:', file.name);
 ```toml
 # wrangler.toml
 [env.production.vars]
-MAX_FILE_SIZE = "209715200"  # 200MB (doubled from 100MB)
+MAX_FILE_SIZE = "5368709120"  # 5GB default (supports large files via multipart upload)
 ```
 
 ---
@@ -551,7 +558,7 @@ wrangler d1 execute your-db --command "
 npm run build
 npx wrangler pages deploy dist
 curl -X POST https://your-deployment.pages.dev/api/db/migrate \
-  -H "Authorization: Bearer your-cleanup-secret"
+  -H "Authorization: Bearer your-migration-auth-token"
 ```
 
 ### Rollback Deployment

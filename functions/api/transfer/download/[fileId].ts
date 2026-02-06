@@ -138,36 +138,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 };
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const { request, env, params } = context;
-  
-  try {
-    const url = new URL(request.url);
-    const password = url.searchParams.get('password');
-    
-    // Create a POST request internally for consistency
-    const postRequest = new Request(request.url, {
-      method: 'POST',
-      headers: request.headers,
-      body: JSON.stringify({ password }),
-    });
-    
-    return onRequestPost({ request: postRequest, env, params } as any);
-    
-  } catch (error) {
-    console.error('Download GET error:', error);
-    return errorResponse('INTERNAL_ERROR', 'An internal error occurred', 500);
-  }
-};
 
 async function hashPassword(password: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(password + salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hashBuffer))
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const hashBuffer = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, 256
+  );
+  const hex = Array.from(new Uint8Array(hashBuffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+  return 'pbkdf2$' + hex;
 }
+
 
 function sanitizeFilename(filename: string): string {
   return filename.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 100);

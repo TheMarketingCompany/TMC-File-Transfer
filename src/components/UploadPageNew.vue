@@ -38,7 +38,7 @@
               <h3 class="text-xl font-medium mb-2" style="color: var(--md-sys-color-on-surface);">Drop your file here</h3>
               <p class="mb-6" style="color: var(--md-sys-color-on-surface-variant);">or browse to choose a file</p>
               <md-filled-button
-                @click="$refs.fileInput.click()"
+                @click="fileInput?.click()"
                 class="mb-4"
               >
                 <md-icon slot="icon">folder_open</md-icon>
@@ -509,10 +509,10 @@ function waitForTurnstile() {
 async function loadConfig() {
   try {
     const response = await fetch('/api/config');
-    const result = await response.json();
-    
+    const result: { success?: boolean; data?: { turnstileSiteKey?: string } } = await response.json();
+
     if (result.success && result.data) {
-      turnstileSiteKey.value = result.data.turnstileSiteKey;
+      turnstileSiteKey.value = result.data.turnstileSiteKey ?? '';
     }
   } catch (error) {
     console.error('Failed to load config:', error);

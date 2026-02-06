@@ -1,4 +1,3 @@
-import type { PagesFunction, EventContext } from '@cloudflare/workers-types';
 import { SecurityUtils } from '../../../src/utils/security';
 
 interface Env {
@@ -85,8 +84,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 };
 
 async function initiateMultipartUpload(
-  request: Request, 
-  env: Env, 
+  request: any,
+  env: Env,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   const data: MultipartUploadRequest = await request.json();
@@ -131,8 +130,15 @@ async function initiateMultipartUpload(
   const uploadId = SecurityUtils.generateSecureId();
   const storageName = `${fileId}_${SecurityUtils.sanitizeFilename(data.fileName)}`;
 
-  // Store lifetime for later calculation on completion
-  const lifetime = parseInt(data.options?.lifetime || '7');
+  // Validate lifetime against allowed values
+  const lifetimeStr = data.options?.lifetime || '7';
+  if (!['1', '7', '30'].includes(lifetimeStr)) {
+    return new Response(JSON.stringify({ error: 'Invalid lifetime value' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+  const lifetime = parseInt(lifetimeStr);
 
   // Handle password if provided
   let passwordHash = '';
@@ -193,8 +199,8 @@ async function initiateMultipartUpload(
 }
 
 async function uploadChunk(
-  request: Request, 
-  env: Env, 
+  request: any,
+  env: Env,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   const formData = await request.formData();
@@ -259,8 +265,8 @@ async function uploadChunk(
 }
 
 async function completeMultipartUpload(
-  request: Request, 
-  env: Env, 
+  request: any,
+  env: Env,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   const data: { uploadId: string; parts: Array<{ partNumber: number; etag: string }>; lifetime?: string } = await request.json();
@@ -268,6 +274,15 @@ async function completeMultipartUpload(
 
   if (!uploadId || !Array.isArray(parts)) {
     return new Response(JSON.stringify({ error: 'Missing uploadId or parts' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Validate lifetime against allowed values
+  const lifetimeValue = lifetime || '7';
+  if (!['1', '7', '30'].includes(lifetimeValue)) {
+    return new Response(JSON.stringify({ error: 'Invalid lifetime value' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -293,7 +308,7 @@ async function completeMultipartUpload(
 
     // Calculate expiration at completion time
     const completionTime = Math.floor(Date.now() / 1000);
-    const lifetimeSeconds = (parseInt(lifetime || '7')) * 24 * 60 * 60; // days to seconds
+    const lifetimeSeconds = parseInt(lifetimeValue) * 24 * 60 * 60; // days to seconds
     const expiresAt = completionTime + lifetimeSeconds;
     
     // Update database status and set proper expiration
@@ -333,8 +348,8 @@ async function completeMultipartUpload(
 }
 
 async function abortMultipartUpload(
-  request: Request, 
-  env: Env, 
+  request: any,
+  env: Env,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   const data: { uploadId: string } = await request.json();

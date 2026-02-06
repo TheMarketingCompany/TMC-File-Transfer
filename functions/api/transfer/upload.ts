@@ -35,8 +35,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     await ensureTablesExist(env.DB);
     
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const optionsStr = formData.get('options') as string;
+    const file = formData.get('file') as unknown as File;
+    const optionsStr = formData.get('options') as unknown as string;
     
     if (!file || !optionsStr) {
       return errorResponse('FILE_MISSING', 'File and options are required', 400, corsHeaders);
@@ -207,11 +207,17 @@ function sanitizeFilename(filename: string): string {
 
 async function hashPassword(password: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(password + salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hashBuffer))
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const hashBuffer = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, 256
+  );
+  const hex = Array.from(new Uint8Array(hashBuffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+  return 'pbkdf2$' + hex;
 }
 
 async function ensureTablesExist(db: D1Database): Promise<void> {

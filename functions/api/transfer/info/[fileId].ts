@@ -116,31 +116,3 @@ function errorResponse(code: string, message: string, status: number, corsHeader
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
-
-async function ensureTablesExist(db: D1Database): Promise<void> {
-  // Just ensure the basic table exists - don't try to alter existing tables
-  try {
-    await db.prepare(`
-      CREATE TABLE IF NOT EXISTS uploads_v2 (
-        file_id TEXT PRIMARY KEY,
-        file_name TEXT NOT NULL,
-        original_name TEXT NOT NULL,
-        file_size INTEGER NOT NULL,
-        content_type TEXT NOT NULL,
-        expires_at INTEGER NOT NULL,
-        download_count INTEGER DEFAULT 0,
-        max_downloads INTEGER DEFAULT 999999,
-        has_password BOOLEAN DEFAULT FALSE,
-        password_hash TEXT,
-        salt TEXT,
-        is_one_time BOOLEAN DEFAULT FALSE,
-        upload_timestamp INTEGER NOT NULL,
-        client_ip TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `).run();
-  } catch (error) {
-    // Table might already exist with different schema, that's ok
-    console.log('Table creation skipped, already exists');
-  }
-}

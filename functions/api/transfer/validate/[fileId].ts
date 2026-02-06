@@ -131,12 +131,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
 async function hashPassword(password: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(password + salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hashBuffer))
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const hashBuffer = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, 256
+  );
+  const hex = Array.from(new Uint8Array(hashBuffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+  return 'pbkdf2$' + hex;
 }
+
 
 function errorResponse(code: string, message: string, status: number): Response {
   return new Response(JSON.stringify({
